@@ -4,6 +4,9 @@
 
 OB_PREOP_CALLBACK_STATUS ProcessPreCallback(PVOID RegistrationContext, POB_PRE_OPERATION_INFORMATION OperationInformation)
 {
+#ifndef DEBUG
+	VMProtectBeginVirtualization("#ProcessPreCallback");
+#endif
 	UNREFERENCED_PARAMETER(RegistrationContext);
 
 	if (PROTECTED_PROCESS == 0)
@@ -26,6 +29,10 @@ OB_PREOP_CALLBACK_STATUS ProcessPreCallback(PVOID RegistrationContext, POB_PRE_O
 		}
 		return OB_PREOP_SUCCESS;
 	}
-	
+
+
+#ifndef DEBUG
+	VMProtectEnd();
+#endif
 	return OB_PREOP_SUCCESS;
 }

@@ -1,12 +1,13 @@
 #include <Windows.h>
-#include "ring0/KernelInterface.h"
-
-
-
-
+#include "SDK/VMProtectSDK.h"
 int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,PSTR szCmdLine, int iCmdShow)
 {
-	KernelInterface i("\\\\.\\malebolge_drv");
-	MessageBox(nullptr, "EZ PZ", "EZZZ", MB_OK);
+#ifndef DEBUG
+	VMProtectBeginUltra("#WinMain");
+#endif
+
+#ifndef DEBUG
+	VMProtectEnd();
+#endif
 	return 0;
 }

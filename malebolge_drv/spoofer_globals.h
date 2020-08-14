@@ -12,6 +12,7 @@
 #include <classpnp.h>
 #include <ntimage.h>
 #include "spoofer_utils.h"
+#include "VMProtectDDK.h"
 
 extern CHAR SERIAL[];
 

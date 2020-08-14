@@ -32,16 +32,18 @@ void DisplayError(NTSTATUS result)
 			PRINTF("An attempt to allocate memory failed!");
 			break;
 		default:
-			PRINTF("ObRegisterCallbacks error! [0x%X]", result);
+			DbgPrintEx(0, 0, "ObRegisterCallbacks error! [0x%X]", result);
 			break;
 		}
 	}
-	PRINTF("OB_HANDLE=0x%X", OB_HANDLE);
 #endif
 }
 
 void EnableCallback()
 {
+#ifndef NDEBUG
+	VMProtectBeginUltra("#EnableCallback");
+#endif
 	NTSTATUS result;
 
 	OB_OPERATION_REGISTRATION OBOperationRegistration[2];
@@ -51,7 +53,7 @@ void EnableCallback()
 	memset(&OBOCallbackRegistration, 0, sizeof(OB_CALLBACK_REGISTRATION));
 	RtlInitUnicodeString(&usAltitude, L"1000");
 
-	if((USHORT)ObGetFilterVersion() == OB_FLT_REGISTRATION_VERSION)
+	if ((USHORT)ObGetFilterVersion() == OB_FLT_REGISTRATION_VERSION)
 	{
 		OBOperationRegistration[1].ObjectType = PsProcessType;
 		OBOperationRegistration[1].Operations = OB_OPERATION_HANDLE_CREATE | OB_OPERATION_HANDLE_DUPLICATE;
@@ -70,11 +72,15 @@ void EnableCallback()
 		OBOCallbackRegistration.OperationRegistration = (OB_OPERATION_REGISTRATION*)&OBOperationRegistration;
 
 		result = ObRegisterCallbacks(&OBOCallbackRegistration, &OB_HANDLE);
-		if(!NT_SUCCESS(result))
+		if (!NT_SUCCESS(result))
 		{
 			DisplayError(result);
 		}
 	}
+
+#ifndef DEBUG
+	VMProtectEnd();
+#endif
 }
 
 void DisableCallback()

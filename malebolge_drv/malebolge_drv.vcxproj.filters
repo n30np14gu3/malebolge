@@ -61,9 +61,6 @@
     <Filter Include="SDK\spoofer\init">
       <UniqueIdentifier>{8c0d361d-1686-40e5-b37e-452785c558f6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SDK\spoofer\wmi_hook">
-      <UniqueIdentifier>{32c3d8fc-6655-4414-b984-370d3d89bce8}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="driver_defs.h">
@@ -95,6 +92,9 @@
     </ClInclude>
     <ClInclude Include="spoofer_init.h">
       <Filter>SDK\spoofer\init</Filter>
+    </ClInclude>
+    <ClInclude Include="VMProtectDDK.h">
+      <Filter>SDK</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
