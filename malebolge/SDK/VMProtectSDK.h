@@ -1,5 +1,5 @@
 #pragma once
-#ifndef DEBUG
+#ifndef _DEBUG
 #if defined(__APPLE__) || defined(__unix__)
 #define VMP_IMPORT 
 #define VMP_API

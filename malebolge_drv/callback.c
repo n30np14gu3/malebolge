@@ -41,7 +41,7 @@ void DisplayError(NTSTATUS result)
 
 void EnableCallback()
 {
-#ifndef NDEBUG
+#ifndef DEBUG
 	VMProtectBeginUltra("#EnableCallback");
 #endif
 	NTSTATUS result;

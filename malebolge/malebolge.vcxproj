@@ -138,26 +138,33 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="malebolge.cpp" />
     <ClCompile Include="ring0\KernelInterface.cpp" />
+    <ClCompile Include="SDK\http_request\http_request.cpp" />
     <ClCompile Include="SDK\imgui\imgui.cpp" />
     <ClCompile Include="SDK\imgui\imgui_draw.cpp" />
     <ClCompile Include="SDK\imgui\imgui_impl_dx9.cpp" />
     <ClCompile Include="SDK\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="SDK\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="SDK\local_proto\local_proto.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ring0\KernelInterface.h" />
     <ClInclude Include="ring0\driver_io.h" />
+    <ClInclude Include="SDK\globals.h" />
+    <ClInclude Include="SDK\http_request\http_request.h" />
     <ClInclude Include="SDK\imgui\imconfig.h" />
     <ClInclude Include="SDK\imgui\imgui.h" />
     <ClInclude Include="SDK\imgui\imgui_impl_dx9.h" />
@@ -166,6 +173,7 @@
     <ClInclude Include="SDK\imgui\imstb_rectpack.h" />
     <ClInclude Include="SDK\imgui\imstb_textedit.h" />
     <ClInclude Include="SDK\imgui\imstb_truetype.h" />
+    <ClInclude Include="SDK\local_proto\local_proto.h" />
     <ClInclude Include="SDK\VMProtectSDK.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
