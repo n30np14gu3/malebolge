@@ -15,9 +15,9 @@ class KernelInterface
 {
 public:
 	BOOLEAN NoErrors;
-	CSGoModules Modules;
+	CSGoModules* Modules;
 	KernelInterface();
-
+	
 	template <typename T>
 	_inline void Read(DWORD64 address, T* result)
 	{

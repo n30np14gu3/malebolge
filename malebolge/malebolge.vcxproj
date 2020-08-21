@@ -124,6 +124,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -140,6 +142,7 @@
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -151,6 +154,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="malebolge.cpp" />
+    <ClCompile Include="ring0\DriverLoader.cpp" />
     <ClCompile Include="ring0\KernelInterface.cpp" />
     <ClCompile Include="SDK\http_request\http_request.cpp" />
     <ClCompile Include="SDK\imgui\imgui.cpp" />
@@ -161,6 +165,7 @@
     <ClCompile Include="SDK\local_proto\local_proto.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ring0\DriverLoader.h" />
     <ClInclude Include="ring0\KernelInterface.h" />
     <ClInclude Include="ring0\driver_io.h" />
     <ClInclude Include="SDK\globals.h" />

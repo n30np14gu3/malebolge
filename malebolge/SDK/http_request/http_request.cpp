@@ -43,7 +43,7 @@ namespace http_request
 				const HINTERNET hRequest = HttpOpenRequest(hConnect, POST, route.c_str(), nullptr, nullptr, nullptr, ssl ? (INTERNET_FLAG_SECURE | INTERNET_FLAG_KEEP_CONNECTION) : INTERNET_SERVICE_HTTP, 0);
 				if (hRequest != nullptr)
 				{
-					if (HttpSendRequest(hRequest, HEADER, strlen(HEADER), LPVOID(TEXT(params.c_str())), params.length()))
+					if (HttpSendRequest(hRequest, HEADER, static_cast<DWORD>(strlen(HEADER)), LPVOID(TEXT(params.c_str())), static_cast<DWORD>(params.length())))
 					{
 						unsigned char c = 0;
 						string response;

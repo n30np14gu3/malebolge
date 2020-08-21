@@ -12,7 +12,7 @@ KernelInterface::KernelInterface()
 	m_dwErrorCode = 0;
 	m_dwProcessId = 0;
 	m_hProcess = INVALID_HANDLE_VALUE;
-	Modules = CSGoModules{ 0, 0, 0 };
+	Modules = new CSGoModules();
 	if (m_hDriver == INVALID_HANDLE_VALUE)
 	{
 		m_dwErrorCode = GetLastError();
@@ -40,7 +40,7 @@ bool KernelInterface::Attach(bool update)
 	if (m_hDriver == INVALID_HANDLE_VALUE)
 		return false;
 
-	BOOL result = DeviceIoControl(m_hDriver, !update ? IO_INIT_CHEAT_DATA : IO_UPDATE_CHEAT_DATA, &req, sizeof(req), &req, sizeof(req), nullptr, nullptr);
+	const BOOL result = DeviceIoControl(m_hDriver, !update ? IO_INIT_CHEAT_DATA : IO_UPDATE_CHEAT_DATA, &req, sizeof(req), &req, sizeof(req), nullptr, nullptr);
 	if (!result)
 	{
 		m_dwErrorCode = GetLastError();
@@ -74,9 +74,9 @@ bool KernelInterface::GetModules()
 	if (!NT_SUCCESS(req.result))
 		return false;
 
-	Modules.bServer = req.bServer;
-	Modules.bClient = req.bClient;
-	Modules.bEngine = req.bEngine;
+	Modules->bServer = req.bServer;
+	Modules->bClient = req.bClient;
+	Modules->bEngine = req.bEngine;
 	return true;
 }
 
@@ -84,6 +84,7 @@ KernelInterface::~KernelInterface()
 {
 	CloseHandle(m_hDriver);
 	CloseHandle(m_hProcess);
+	delete Modules;
 }
 
 DWORD KernelInterface::GetErrorCode() const
@@ -97,5 +98,3 @@ void KernelInterface::WaitForProcessClose()
 	while (!Attach(true)) {}
 	while (!GetModules()) {}
 }
-
-
