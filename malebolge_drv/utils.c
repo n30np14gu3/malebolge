@@ -2,6 +2,9 @@
 #include "globals.h"
 #include "utils.h"
 
+
+UCHAR* PsGetProcessImageFileName(IN PEPROCESS Process);
+
 NTSTATUS TerminatingProcess(HANDLE targetPid)
 {
 	if (targetPid == PROTECTED_PROCESS)
@@ -25,4 +28,14 @@ NTSTATUS TerminatingProcess(HANDLE targetPid)
 	ZwTerminateProcess(ProcessHandle, 0);
 	ZwClose(ProcessHandle);
 	return NtRet;
+}
+
+UCHAR* GetProcessNameFromPid(HANDLE pid)
+{
+	PEPROCESS process;
+	if(!NT_SUCCESS(PsLookupProcessByProcessId(pid, &process)))
+	{
+		return NULL;
+	}
+	return 	PsGetProcessImageFileName(process);
 }

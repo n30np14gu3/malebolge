@@ -14,17 +14,8 @@
     <ClCompile Include="IoControl.c">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="callback.c">
-      <Filter>Core\Callback</Filter>
-    </ClCompile>
     <ClCompile Include="utils.c">
       <Filter>SDK\utils</Filter>
-    </ClCompile>
-    <ClCompile Include="ProcessPreCallback.c">
-      <Filter>Core\Callback</Filter>
-    </ClCompile>
-    <ClCompile Include="ThreadPreCallback.c">
-      <Filter>Core\Callback</Filter>
     </ClCompile>
     <ClCompile Include="hwid_spoofer.c">
       <Filter>SDK\spoofer\hwid</Filter>
@@ -35,6 +26,24 @@
     <ClCompile Include="spoofer_init.c">
       <Filter>SDK\spoofer\init</Filter>
     </ClCompile>
+    <ClCompile Include="ProcessPreCallback.c">
+      <Filter>Core\Callback Routines\PreCallback</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadPreCallback.c">
+      <Filter>Core\Callback Routines\PreCallback</Filter>
+    </ClCompile>
+    <ClCompile Include="callback.c">
+      <Filter>Core\Callback Routines\Object callback</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageLoadCallback.c">
+      <Filter>Core\Callback Routines\ImageLoadCallback</Filter>
+    </ClCompile>
+    <ClCompile Include="Inject.c">
+      <Filter>SDK\inject</Filter>
+    </ClCompile>
+    <ClCompile Include="CreateProcessCallback.c">
+      <Filter>Core\Callback Routines\CreateProcessCallback</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="SDK">
@@ -42,9 +51,6 @@
     </Filter>
     <Filter Include="Core">
       <UniqueIdentifier>{ae71b2d6-6d9c-415d-bde1-f8c2e8dcbdb8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Core\Callback">
-      <UniqueIdentifier>{e78539f7-79cb-4c03-b4b2-192657da92e7}</UniqueIdentifier>
     </Filter>
     <Filter Include="SDK\utils">
       <UniqueIdentifier>{a3eada48-f010-4085-ae62-029194a7f709}</UniqueIdentifier>
@@ -61,6 +67,24 @@
     <Filter Include="SDK\spoofer\init">
       <UniqueIdentifier>{8c0d361d-1686-40e5-b37e-452785c558f6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core\Callback Routines">
+      <UniqueIdentifier>{e78539f7-79cb-4c03-b4b2-192657da92e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Callback Routines\PreCallback">
+      <UniqueIdentifier>{05405e2c-e0d0-493b-944b-9351986915f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Callback Routines\Object callback">
+      <UniqueIdentifier>{29295150-8580-4957-814b-fc437b80a980}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Callback Routines\ImageLoadCallback">
+      <UniqueIdentifier>{193ffdb2-a6f0-4d6e-82fa-90673b70efd4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SDK\inject">
+      <UniqueIdentifier>{50be524c-6ae3-4d29-a1c7-3f1e6e49bb07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Callback Routines\CreateProcessCallback">
+      <UniqueIdentifier>{30c25023-5e55-4347-831a-517e523e1062}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="driver_defs.h">
@@ -71,9 +95,6 @@
     </ClInclude>
     <ClInclude Include="functions.h">
       <Filter>SDK</Filter>
-    </ClInclude>
-    <ClInclude Include="callback.h">
-      <Filter>Core\Callback</Filter>
     </ClInclude>
     <ClInclude Include="utils.h">
       <Filter>SDK\utils</Filter>
@@ -95,6 +116,18 @@
     </ClInclude>
     <ClInclude Include="VMProtectDDK.h">
       <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="callback.h">
+      <Filter>Core\Callback Routines\Object callback</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageLoadCallback.h">
+      <Filter>Core\Callback Routines\ImageLoadCallback</Filter>
+    </ClInclude>
+    <ClInclude Include="Inject.h">
+      <Filter>SDK\inject</Filter>
+    </ClInclude>
+    <ClInclude Include="CreateProcessCallback.h">
+      <Filter>Core\Callback Routines\CreateProcessCallback</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

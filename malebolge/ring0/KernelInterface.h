@@ -3,17 +3,19 @@
 
 #define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
 
-struct PModule
+
+struct CSGoModules
 {
-	DWORD32 dwSize;
-	DWORD32 dwBase;
+	DWORD32 bClient;
+	DWORD32 bEngine;
+	DWORD32 bServer;
 };
 
 class KernelInterface
 {
 public:
 	BOOLEAN NoErrors;
-	
+	CSGoModules Modules;
 	KernelInterface();
 
 	template <typename T>
@@ -138,14 +140,16 @@ public:
 	}
 
 
-	bool Attach();
+	bool Attach(bool update = false);
 	bool GetModules();
+	void WaitForProcessClose();
 	DWORD GetErrorCode() const;
 	~KernelInterface();
 private:
 	HANDLE m_hDriver;
 	DWORD32 m_dwProcessId;
 	DWORD m_dwErrorCode;
+	HANDLE m_hProcess;
 	
 };
 

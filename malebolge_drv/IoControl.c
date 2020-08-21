@@ -1,6 +1,5 @@
 #include "globals.h"
 #include "functions.h"
-#include "driver_io.h"
 
 NTSTATUS KeReadVirtualMemory(PEPROCESS Process, DWORD64 SourceAddress, DWORD64 TargetAddress, SIZE_T Size, PSIZE_T ReadedBytes);
 NTSTATUS KeWriteVirtualMemory(PEPROCESS Process, DWORD64 SourceAddress, DWORD64 TargetAddress, SIZE_T Size, PSIZE_T WritedBytes);
@@ -42,6 +41,7 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 	PKERNEL_READ_REQUEST pReadRequest;
 	PKERNEL_WRITE_REQUEST32 pWriteRequest32;
 	PKERNEL_READ_REQUEST32 pReadRequest32;
+	PKERNEL_GET_CSGO_MODULES pModules;
 	SIZE_T rwBytes = 0;
 
 	switch(controlCode)
@@ -80,6 +80,9 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 		if (!DRIVER_INITED)
 			break;
 
+		if(!NT_SUCCESS(PsLookupProcessByProcessId(GAME_PROCESS, &PEGAME_PROCESS)) || !NT_SUCCESS(PsLookupProcessByProcessId(PROTECTED_PROCESS, &PEPROTECTED_PROCESS)))
+			break;
+		
 		pReadRequest = (PKERNEL_READ_REQUEST)Irp->AssociatedIrp.SystemBuffer;
 		if(pReadRequest != NULL)
 		{
@@ -90,6 +93,9 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 
 	case IO_WRITE_PROCESS_MEMORY:
 		if (!DRIVER_INITED)
+			break;
+		
+		if (!NT_SUCCESS(PsLookupProcessByProcessId(GAME_PROCESS, &PEGAME_PROCESS)) || !NT_SUCCESS(PsLookupProcessByProcessId(PROTECTED_PROCESS, &PEPROTECTED_PROCESS)))
 			break;
 		
 		pWriteRequest = (PKERNEL_WRITE_REQUEST)Irp->AssociatedIrp.SystemBuffer;
@@ -104,6 +110,9 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 		if (!DRIVER_INITED)
 			break;
 
+		if (!NT_SUCCESS(PsLookupProcessByProcessId(GAME_PROCESS, &PEGAME_PROCESS)) || !NT_SUCCESS(PsLookupProcessByProcessId(PROTECTED_PROCESS, &PEPROTECTED_PROCESS)))
+			break;
+
 		pReadRequest32 = (PKERNEL_READ_REQUEST32)Irp->AssociatedIrp.SystemBuffer;
 		if (pReadRequest32 != NULL)
 		{
@@ -115,6 +124,9 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 	case IO_WRITE_PROCESS_MEMORY_32:
 		if (!DRIVER_INITED)
 			break;
+
+		if (!NT_SUCCESS(PsLookupProcessByProcessId(GAME_PROCESS, &PEGAME_PROCESS)) || !NT_SUCCESS(PsLookupProcessByProcessId(PROTECTED_PROCESS, &PEPROTECTED_PROCESS)))
+			break;
 		
 		pWriteRequest32 = (PKERNEL_WRITE_REQUEST32)Irp->AssociatedIrp.SystemBuffer;
 		if (pWriteRequest32 != NULL)
@@ -124,6 +136,28 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 		bytesIO = sizeof(KERNEL_WRITE_REQUEST);
 		break;
 
+	case IO_GET_ALL_MODULES:
+		if (!DRIVER_INITED)
+			break;
+
+		if (!NT_SUCCESS(PsLookupProcessByProcessId(GAME_PROCESS, &PEGAME_PROCESS)) || !NT_SUCCESS(PsLookupProcessByProcessId(PROTECTED_PROCESS, &PEPROTECTED_PROCESS)))
+			break;
+
+		pModules = (PKERNEL_GET_CSGO_MODULES)Irp->AssociatedIrp.SystemBuffer;
+		if(pModules != NULL)
+		{
+			if (CLIENT_DLL_BASE == 0 || ENGINE_DLL_BASE == 0 || SERVER_DLL_BASE == 0)
+				pModules->result = STATUS_ACCESS_DENIED;
+			else
+			{
+				pModules->bClient = CLIENT_DLL_BASE;
+				pModules->bEngine = ENGINE_DLL_BASE;
+				pModules->bServer = SERVER_DLL_BASE;
+				pModules->result = STATUS_SUCCESS;
+			}
+		}
+		bytesIO = sizeof(KERNEL_GET_CSGO_MODULES);
+		break;
 		default:break;
 	}	
 	Irp->IoStatus.Status = STATUS_SUCCESS;

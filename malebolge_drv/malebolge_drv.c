@@ -1,8 +1,11 @@
 #include "globals.h"
 #include "driver_defs.h"
 #include "functions.h"
-#include "callback.h"
 
+//Callbacks
+#include "callback.h"
+#include "ImageLoadCallback.h"
+#include "CreateProcessCallback.h"
 
 ULONG RANDOM_SEED;
 
@@ -16,6 +19,12 @@ PEPROCESS PEPROTECTED_PROCESS;
 
 HANDLE GAME_PROCESS;
 PEPROCESS PEGAME_PROCESS;
+
+//CS GO MODULES
+DWORD32 CLIENT_DLL_BASE;
+DWORD32 SERVER_DLL_BASE;
+DWORD32 ENGINE_DLL_BASE;
+//------------
 
 BOOLEAN DRIVER_INITED;
 
@@ -32,8 +41,8 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath
 #endif
 	NTSTATUS result;
 
-	RtlIsZeroMemory(&DeviceName, sizeof(DeviceName));
-	RtlIsZeroMemory(&DosName, sizeof(DosName));
+	RtlSecureZeroMemory(&DeviceName, sizeof(DeviceName));
+	RtlSecureZeroMemory(&DosName, sizeof(DosName));
 	
 	RtlInitUnicodeString(&DeviceName, DRIVER_NAME);
 	RtlInitUnicodeString(&DosName, SYMBOL_NAME);
@@ -60,7 +69,9 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath
 		pDeviceObj->Flags |= DO_DIRECT_IO;
 		pDeviceObj->Flags &= ~DO_DEVICE_INITIALIZING;
 	}
-	
+
+	PsSetLoadImageNotifyRoutine(ImageLoadCallback);
+	PsSetCreateProcessNotifyRoutine(CreateProcessCallback, FALSE);
 #ifndef DEBUG
 	VMProtectEnd();
 	EnableCallback();
