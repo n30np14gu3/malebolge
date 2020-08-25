@@ -264,9 +264,6 @@ UINT64 FindPattern(UINT64 dwAddress, UINT64 dwLen, BYTE* bMask, const char* szMa
 
 extern "C" BOOLEAN CleanUnloadedDrivers()
 {
-#ifndef DEBUG
-	VMProtectBeginMutation("#CleanUnloadedDrivers");
-#endif
 	ULONG bytes = 0;
 	NTSTATUS status = ZwQuerySystemInformation(SystemModuleInformation, 0, bytes, &bytes);
 
@@ -333,18 +330,11 @@ extern "C" BOOLEAN CleanUnloadedDrivers()
 
 	// NOTE: clean the old buffer
 	ExFreePoolWithTag(reinterpret_cast<PVOID>(bufferPtr), POOLTAG);
-
-#ifndef DEBUG
-	VMProtectEnd();
-#endif
 	return TRUE;
 }
 
 extern "C" void clean_piddb_cache()
 {
-#ifndef DEBUG
-	VMProtectBeginMutation("#clean_piddb_cache");
-#endif
 	ULONG bytes = 0;
 	NTSTATUS status = ZwQuerySystemInformation(SystemModuleInformation, 0, bytes, &bytes);
 
@@ -428,9 +418,6 @@ extern "C" void clean_piddb_cache()
 			//DbgPrint("cache_entry count: %lu name: %wZ \t\t stamp: %x\n", count, cache_entry->DriverName, cache_entry->TimeDateStamp);
 		}
 	}
-#ifndef DEBUG
-	VMProtectEnd();
-#endif
 }
 
 typedef struct _INQUIRYDATA

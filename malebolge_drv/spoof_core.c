@@ -265,6 +265,9 @@ extern BOOLEAN CleanUnloadedDrivers();
 
 void spoof()
 {
+#ifndef DEBUG
+	VMProtectBeginUltra("#spoof");
+#endif
 	ULONG64 time = 0;
 	KeQuerySystemTime(&time);
 	SEED = (DWORD)time;
@@ -276,7 +279,9 @@ void spoof()
 	}
 	CleanUnloadedDrivers();
 	clean_piddb_cache();
-
+#ifndef DEBUG
+	VMProtectEnd();
+#endif
 	spoof_drives();
 	SpoofNIC();
 	SpoofSMBIOS();
