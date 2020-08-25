@@ -3,4 +3,15 @@
   <ItemGroup>
     <ClCompile Include="malebolge_cheat.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Filter Include="SDK">
+      <UniqueIdentifier>{b6b46c1e-b94b-40d5-bec6-b4f82dd7bd10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hacks">
+      <UniqueIdentifier>{eaf5d495-75be-40b1-874d-47b6d9ce6609}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hooks">
+      <UniqueIdentifier>{0e0b8743-0021-4223-b2b9-89e1f66a8fc7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
 </Project>
