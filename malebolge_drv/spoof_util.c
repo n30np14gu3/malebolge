@@ -1,4 +1,16 @@
-#include "spoofer_globals.h"
+#include <ntifs.h>
+#include <ntddk.h>
+#include <windef.h>
+#include <ntdddisk.h>
+#include <ntddscsi.h>
+#include <ata.h>
+#include <scsi.h>
+#include <ntddndis.h>
+#include <mountmgr.h>
+#include <mountdev.h>
+#include <classpnp.h>
+#include <ntimage.h>
+#include "spoof_util.h"
 
 PCHAR LowerStr(PCHAR str) {
 	for (PCHAR s = str; *s; ++s) {
@@ -7,9 +19,86 @@ PCHAR LowerStr(PCHAR str) {
 	return str;
 }
 
+DWORD Random(PDWORD seed) {
+	DWORD s = *seed * 1103515245 + 12345;
+	*seed = s;
+	return (s / 65536) % 32768;
+}
+
+DWORD Hash(PBYTE buffer, DWORD length) {
+	if (!length) {
+		return 0;
+	}
+
+	DWORD h = (*buffer ^ 0x4B9ACE2F) * 0x1000193;
+	for (DWORD i = 1; i < length; ++i) {
+		h = (buffer[i] ^ h) * 0x1000193;
+	}
+	return h;
+}
+
+typedef struct _MM_COPY_ADDRESS {
+	union {
+		PVOID            VirtualAddress;
+		PHYSICAL_ADDRESS PhysicalAddress;
+	};
+} MM_COPY_ADDRESS, * PMMCOPY_ADDRESS;
+
+#define MM_COPY_MEMORY_VIRTUAL              0x2
+
+NTKERNELAPI
+NTSTATUS
+MmCopyMemory(
+	_In_ PVOID TargetAddress,
+	_In_ MM_COPY_ADDRESS SourceAddress,
+	_In_ SIZE_T NumberOfBytes,
+	_In_ ULONG Flags,
+	_Out_ PSIZE_T NumberOfBytesTransferred
+);
+
+PVOID SafeCopy(PVOID src, DWORD size) {
+	PCHAR buffer = (PCHAR)ExAllocatePool(NonPagedPool, size);
+	if (buffer) {
+		MM_COPY_ADDRESS addr = { 0 };
+		addr.VirtualAddress = src;
+
+		SIZE_T read = 0;
+		if (NT_SUCCESS(MmCopyMemory(buffer, addr, size, MM_COPY_MEMORY_VIRTUAL, &read)) && read == size) {
+			return buffer;
+		}
+
+		ExFreePool(buffer);
+	}
+	else {
+
+	}
+
+	return 0;
+}
+
+VOID SpoofBuffer(DWORD seed, PBYTE buffer, DWORD length) {
+	seed ^= Hash(buffer, length);
+	for (DWORD i = 0; i < length; ++i) {
+		buffer[i] ^= (BYTE)Random(&seed);
+	}
+}
+
+PWCHAR TrimGUID(PWCHAR guid, DWORD max) {
+	DWORD i = 0;
+	PWCHAR start = guid;
+
+	--max;
+	for (; i < max && *start != L'{'; ++i, ++start);
+	for (; i < max && guid[i++] != L'}';);
+
+	guid[i] = 0;
+	return start;
+}
+
 VOID ChangeIoc(PIO_STACK_LOCATION ioc, PIRP irp, PIO_COMPLETION_ROUTINE routine) {
 	PIOC_REQUEST request = (PIOC_REQUEST)ExAllocatePool(NonPagedPool, sizeof(IOC_REQUEST));
 	if (!request) {
+
 		return;
 	}
 
@@ -76,15 +165,18 @@ PVOID GetBaseAddress(PCHAR name, PULONG out_size) {
 	ULONG size = 0;
 	NTSTATUS status = ZwQuerySystemInformation(SystemModuleInformation, 0, 0, &size);
 	if (STATUS_INFO_LENGTH_MISMATCH != status) {
+
 		return addr;
 	}
 
 	PSYSTEM_MODULE_INFORMATION modules = ExAllocatePool(NonPagedPool, size);
 	if (!modules) {
+
 		return addr;
 	}
 
 	if (!NT_SUCCESS(status = ZwQuerySystemInformation(SystemModuleInformation, modules, size, 0))) {
+
 		return addr;
 	}
 

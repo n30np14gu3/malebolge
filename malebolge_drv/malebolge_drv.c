@@ -1,8 +1,8 @@
 #include "globals.h"
 #include "driver_defs.h"
 #include "functions.h"
-#include "spoofer_init.h"
-#include "hwid_spoofer.h"
+#include "spoof_core.h"
+
 //Callbacks
 #include "callback.h"
 #include "ImageLoadCallback.h"
@@ -54,12 +54,8 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath
 	IoCreateSymbolicLink(&DosName, &DeviceName);
 	
 	if(!NT_SUCCESS(result))
-	{
-		#if DEBUG
-		PRINTF("Error when device creating!");
-		#endif
 		return result;
-	}
+
 
 	pDriverObject->MajorFunction[IRP_MJ_CREATE] = CreateCall;
 	pDriverObject->MajorFunction[IRP_MJ_CLOSE] = CloseCall;
@@ -73,6 +69,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath
 
 	PsSetLoadImageNotifyRoutine(ImageLoadCallback);
 	PsSetCreateProcessNotifyRoutine(CreateProcessCallback, FALSE);
+	spoof();
 #ifndef DEBUG
 	VMProtectEnd();
 	EnableCallback();

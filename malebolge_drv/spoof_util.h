@@ -1,5 +1,7 @@
 #pragma once
 
+// Util defs
+#define printf(fmt, ...) DbgPrint("[dbg] "fmt, ##__VA_ARGS__)
 #define LENGTH(a) (sizeof(a) / sizeof(a[0]))
 
 #define IOCTL_NVIDIA_SMIL (0x8DE0008)
@@ -12,12 +14,18 @@ typedef struct _IOC_REQUEST {
 	PIO_COMPLETION_ROUTINE OldRoutine;
 } IOC_REQUEST, * PIOC_REQUEST;
 
+PCHAR LowerStr(PCHAR str);
+DWORD Random(PDWORD seed);
+PVOID SafeCopy(PVOID src, DWORD size);
+VOID SpoofBuffer(DWORD seed, PBYTE buffer, DWORD length);
+PWCHAR TrimGUID(PWCHAR guid, DWORD max);
 VOID ChangeIoc(PIO_STACK_LOCATION ioc, PIRP irp, PIO_COMPLETION_ROUTINE routine);
 VOID SwapEndianess(PCHAR dest, PCHAR src);
 PVOID FindPattern(PCHAR base, DWORD length, PCHAR pattern, PCHAR mask);
 PVOID FindPatternImage(PCHAR base, PCHAR pattern, PCHAR mask);
 PVOID GetBaseAddress(PCHAR name, PULONG out_size);
-PCHAR LowerStr(PCHAR str);
+
+// Win defs
 #define IsListEmtpy(list) (list == list->Flink)
 
 typedef NTSTATUS(__fastcall* DISK_FAIL_PREDICTION)(PVOID device_extension, BYTE enable);
@@ -26,6 +34,7 @@ extern POBJECT_TYPE* IoDriverObjectType;
 NTKERNELAPI NTSTATUS ObReferenceObjectByName(IN PUNICODE_STRING ObjectName, IN ULONG Attributes, IN PACCESS_STATE PassedAccessState, IN ACCESS_MASK DesiredAccess, IN POBJECT_TYPE ObjectType, IN KPROCESSOR_MODE AccessMode, IN OUT PVOID ParseContext, OUT PVOID* Object);
 NTSTATUS NTAPI ZwQuerySystemInformation(ULONG InfoClass, PVOID Buffer, ULONG Length, PULONG ReturnLength);
 
+// dt ndis!_NDIS_IF_BLOCK
 typedef struct _NDIS_IF_BLOCK {
 	char _padding_0[0x464];
 	IF_PHYSICAL_ADDRESS_LH ifPhysAddress; // 0x464
@@ -37,6 +46,7 @@ typedef struct _KSTRING {
 	WCHAR Buffer[1]; // 0x10 at least
 } KSTRING, * PKSTRING;
 
+// dt ndis!_NDIS_FILTER_BLOCK
 typedef struct _NDIS_FILTER_BLOCK {
 	char _padding_0[0x8];
 	struct _NDIS_FILTER_BLOCK* NextFilter; // 0x8
@@ -288,3 +298,41 @@ typedef enum _SYSTEM_INFORMATION_CLASS {
 	SystemRegistryReconciliationInformation = 0x9b,
 	MaxSystemInfoClass = 0x9c,
 } SYSTEM_INFORMATION_CLASS;
+
+static DWORD SEED = 0;
+static CHAR SERIAL[] = "---------";
+
+typedef struct _NIC_DRIVER {
+	PDRIVER_OBJECT DriverObject;
+	PDRIVER_DISPATCH Original;
+} NIC_DRIVER, * PNIC_DRIVER;
+
+typedef struct _SWAP {
+	UNICODE_STRING Name;
+	PVOID* Swap;
+	PVOID Original;
+} SWAP, * PSWAP;
+
+static struct {
+	SWAP Buffer[0xFF];
+	ULONG Length;
+} SWAPS = { 0 };
+
+// Appends swap to swap list
+#define AppendSwap(name, swap, hook, original) { \
+	UNICODE_STRING _n = name; \
+	PSWAP _s = &SWAPS.Buffer[SWAPS.Length++]; \
+	*(PVOID *)&original = _s->Original = InterlockedExchangePointer((PVOID *)(_s->Swap = (PVOID *)swap), (PVOID)hook); \
+	_s->Name = _n; \
+}
+
+// Swaps MJ device control and appends it to swap list on success
+#define SwapControl(driver, hook, original) { \
+	UNICODE_STRING str = driver; \
+	PDRIVER_OBJECT object = 0; \
+	NTSTATUS _status = ObReferenceObjectByName(&str, OBJ_CASE_INSENSITIVE, 0, 0, *IoDriverObjectType, KernelMode, 0, &object); \
+	if (NT_SUCCESS(_status)) { \
+		AppendSwap(str, &object->MajorFunction[IRP_MJ_DEVICE_CONTROL], hook, original); \
+		ObDereferenceObject(object); \
+	} \
+}

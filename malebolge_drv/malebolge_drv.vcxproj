@@ -171,7 +171,6 @@
     <ClCompile Include="callback.c" />
     <ClCompile Include="CreateProcessCallback.c" />
     <ClCompile Include="DriverUnload.c" />
-    <ClCompile Include="hwid_spoofer.c" />
     <ClCompile Include="ImageLoadCallback.c" />
     <ClCompile Include="Inject.c" />
     <ClCompile Include="IoCloseCall.c" />
@@ -179,8 +178,9 @@
     <ClCompile Include="IoCreateCall.c" />
     <ClCompile Include="malebolge_drv.c" />
     <ClCompile Include="ProcessPreCallback.c" />
-    <ClCompile Include="spoofer_init.c" />
-    <ClCompile Include="spoofer_utils.c" />
+    <ClCompile Include="spoof_clear.cpp" />
+    <ClCompile Include="spoof_core.c" />
+    <ClCompile Include="spoof_util.c" />
     <ClCompile Include="ThreadPreCallback.c" />
     <ClCompile Include="utils.c" />
   </ItemGroup>
@@ -191,12 +191,11 @@
     <ClInclude Include="driver_io.h" />
     <ClInclude Include="functions.h" />
     <ClInclude Include="globals.h" />
-    <ClInclude Include="hwid_spoofer.h" />
     <ClInclude Include="ImageLoadCallback.h" />
     <ClInclude Include="Inject.h" />
-    <ClInclude Include="spoofer_globals.h" />
-    <ClInclude Include="spoofer_init.h" />
-    <ClInclude Include="spoofer_utils.h" />
+    <ClInclude Include="spoof_clear.h" />
+    <ClInclude Include="spoof_core.h" />
+    <ClInclude Include="spoof_util.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="VMProtectDDK.h" />
   </ItemGroup>

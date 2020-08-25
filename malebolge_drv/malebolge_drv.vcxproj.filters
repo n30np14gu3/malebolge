@@ -17,15 +17,6 @@
     <ClCompile Include="utils.c">
       <Filter>SDK\utils</Filter>
     </ClCompile>
-    <ClCompile Include="hwid_spoofer.c">
-      <Filter>SDK\spoofer\hwid</Filter>
-    </ClCompile>
-    <ClCompile Include="spoofer_utils.c">
-      <Filter>SDK\spoofer\utils</Filter>
-    </ClCompile>
-    <ClCompile Include="spoofer_init.c">
-      <Filter>SDK\spoofer\init</Filter>
-    </ClCompile>
     <ClCompile Include="ProcessPreCallback.c">
       <Filter>Core\Callback Routines\PreCallback</Filter>
     </ClCompile>
@@ -44,6 +35,15 @@
     <ClCompile Include="CreateProcessCallback.c">
       <Filter>Core\Callback Routines\CreateProcessCallback</Filter>
     </ClCompile>
+    <ClCompile Include="spoof_clear.cpp">
+      <Filter>SDK\spoofer\clear</Filter>
+    </ClCompile>
+    <ClCompile Include="spoof_util.c">
+      <Filter>SDK\spoofer\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="spoof_core.c">
+      <Filter>SDK\spoofer\core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="SDK">
@@ -57,15 +57,6 @@
     </Filter>
     <Filter Include="SDK\spoofer">
       <UniqueIdentifier>{8567f840-4c53-46fa-aa67-6c00ecfc28f8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SDK\spoofer\hwid">
-      <UniqueIdentifier>{2b63efa0-dedd-4527-928b-afef6e85365c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SDK\spoofer\utils">
-      <UniqueIdentifier>{ccd3fa0d-ddb7-4af8-bd2b-60bf35b31d10}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SDK\spoofer\init">
-      <UniqueIdentifier>{8c0d361d-1686-40e5-b37e-452785c558f6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Core\Callback Routines">
       <UniqueIdentifier>{e78539f7-79cb-4c03-b4b2-192657da92e7}</UniqueIdentifier>
@@ -85,6 +76,15 @@
     <Filter Include="Core\Callback Routines\CreateProcessCallback">
       <UniqueIdentifier>{30c25023-5e55-4347-831a-517e523e1062}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SDK\spoofer\clear">
+      <UniqueIdentifier>{45df5c80-2029-424d-96eb-4bbb53d3e36a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SDK\spoofer\core">
+      <UniqueIdentifier>{2106dbfc-49a3-412e-93de-15355471465c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SDK\spoofer\utils">
+      <UniqueIdentifier>{d30891f3-4942-47d7-8aff-47d66d175792}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="driver_defs.h">
@@ -102,18 +102,6 @@
     <ClInclude Include="driver_io.h">
       <Filter>SDK</Filter>
     </ClInclude>
-    <ClInclude Include="spoofer_globals.h">
-      <Filter>SDK\spoofer</Filter>
-    </ClInclude>
-    <ClInclude Include="hwid_spoofer.h">
-      <Filter>SDK\spoofer\hwid</Filter>
-    </ClInclude>
-    <ClInclude Include="spoofer_utils.h">
-      <Filter>SDK\spoofer\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="spoofer_init.h">
-      <Filter>SDK\spoofer\init</Filter>
-    </ClInclude>
     <ClInclude Include="VMProtectDDK.h">
       <Filter>SDK</Filter>
     </ClInclude>
@@ -128,6 +116,15 @@
     </ClInclude>
     <ClInclude Include="CreateProcessCallback.h">
       <Filter>Core\Callback Routines\CreateProcessCallback</Filter>
+    </ClInclude>
+    <ClInclude Include="spoof_clear.h">
+      <Filter>SDK\spoofer\clear</Filter>
+    </ClInclude>
+    <ClInclude Include="spoof_util.h">
+      <Filter>SDK\spoofer\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="spoof_core.h">
+      <Filter>SDK\spoofer\core</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

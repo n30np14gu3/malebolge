@@ -1,5 +1,6 @@
 #include "globals.h"
 #include "functions.h"
+#include "spoof_core.h"
 
 #include "callback.h"
 #include "ImageLoadCallback.h"
@@ -15,6 +16,7 @@ NTSTATUS UnloadDriver(PDRIVER_OBJECT pDriverObject)
 	VMProtectBeginUltra("#UnloadDriver");
 #endif
 
+	spoof_unload();
 	DisableCallback();
 	PsRemoveLoadImageNotifyRoutine(ImageLoadCallback);
 	PsSetCreateProcessNotifyRoutine(CreateProcessCallback, TRUE);
