@@ -51,7 +51,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;$(SolutionDir)\vmp_sdk;$(LibraryPath)</LibraryPath>
     <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -108,7 +108,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Hooks\Hooks.cpp" />
     <ClCompile Include="malebolge_cheat.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Hooks\Hooks.h" />
+    <ClInclude Include="SDK\fnv.hpp" />
+    <ClInclude Include="SDK\global_defs.h" />
+    <ClInclude Include="SDK\Netvars.hpp" />
+    <ClInclude Include="SDK\source_sdk\IClientEntity.hpp" />
+    <ClInclude Include="SDK\source_sdk\IClientEntityList.hpp" />
+    <ClInclude Include="SDK\source_sdk\IVEngineClient.hpp" />
+    <ClInclude Include="SDK\Vector.hpp" />
+    <ClInclude Include="SDK\VirtualMethod.hpp" />
+    <ClInclude Include="SDK\VMProtectSDK.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

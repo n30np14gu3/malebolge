@@ -2,6 +2,9 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="malebolge_cheat.cpp" />
+    <ClCompile Include="Hooks\Hooks.cpp">
+      <Filter>Hooks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="SDK">
@@ -13,5 +16,38 @@
     <Filter Include="Hooks">
       <UniqueIdentifier>{0e0b8743-0021-4223-b2b9-89e1f66a8fc7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SDK\source_sdk">
+      <UniqueIdentifier>{6d900c52-d26f-4831-b665-89161dbcbb2c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Hooks\Hooks.h">
+      <Filter>Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\source_sdk\IClientEntityList.hpp">
+      <Filter>SDK\source_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\source_sdk\IClientEntity.hpp">
+      <Filter>SDK\source_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\VirtualMethod.hpp">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\Vector.hpp">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\fnv.hpp">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\Netvars.hpp">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\source_sdk\IVEngineClient.hpp">
+      <Filter>SDK\source_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\VMProtectSDK.h" />
+    <ClInclude Include="SDK\global_defs.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
