@@ -1,6 +1,6 @@
 #include "spoofer_globals.h"
 #include "hwid_spoofer.h"
-
+#include <Ntstrsafe.h>
 struct {
 	DWORD Length;
 	NIC_DRIVER Drivers[0xFF];
@@ -194,6 +194,7 @@ VOID SpoofRaidUnits(RU_REGISTER_INTERFACES RaidUnitRegisterInterfaces, BYTE Raid
 	}
 }
 
+
 void SpoofHWID()
 {
 	SwapControl(RTL_CONSTANT_STRING(L"\\Driver\\partmgr"), PartControl, PartControlOriginal);
@@ -206,7 +207,7 @@ void SpoofHWID()
 		return;
 	}
 
-	AppendSwap(disk_str, &disk_object->MajorFunction[IRP_MJ_DEVICE_CONTROL], DiskControl, DiskControlOriginal);
+	//AppendSwap(disk_str, &disk_object->MajorFunction[IRP_MJ_DEVICE_CONTROL], DiskControl, DiskControlOriginal);
 
 	DISK_FAIL_PREDICTION DiskEnableDisableFailurePrediction = (DISK_FAIL_PREDICTION)FindPatternImage(disk_object->DriverStart, "\x48\x89\x00\x24\x10\x48\x89\x74\x24\x18\x57\x48\x81\xEC\x90\x00", "xx?xxxxxxxxxxxxx");
 	if (DiskEnableDisableFailurePrediction) {

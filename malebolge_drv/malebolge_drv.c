@@ -1,7 +1,8 @@
 #include "globals.h"
 #include "driver_defs.h"
 #include "functions.h"
-
+#include "spoofer_init.h"
+#include "hwid_spoofer.h"
 //Callbacks
 #include "callback.h"
 #include "ImageLoadCallback.h"

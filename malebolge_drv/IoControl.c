@@ -23,14 +23,6 @@ NTSTATUS NTAPI ExRaiseHardError(LONG ErrorStatus, ULONG NumberOfParameters, ULON
 
 NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 {
-#ifndef DEBUG
-	VMProtectBeginMutation("#IoControl");
-	if(VMProtectIsDebuggerPresent(TRUE) || VMProtectIsVirtualMachinePresent())
-	{
-		ULONG rsp = 0;
-		ExRaiseHardError(STATUS_ASSERTION_FAILURE, 0, 0, NULL, 6, &rsp);
-	}
-#endif
 	ULONG bytesIO = 0;
 	PIO_STACK_LOCATION stack = IoGetCurrentIrpStackLocation(Irp);
 
@@ -58,8 +50,6 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 			pInitData->Result |= PsLookupProcessByProcessId(PROTECTED_PROCESS, &PEPROTECTED_PROCESS);
 			bytesIO = sizeof(KERNEL_INIT_DATA_REQUEST);
 			DRIVER_INITED = NT_SUCCESS(pInitData->Result);
-			if (DRIVER_INITED)
-				DbgPrintEx(0, 0, "IO_INIT_CHEAT_DATA");
 		}
 		break;
 
@@ -73,8 +63,6 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 		pInitData->Result |= PsLookupProcessByProcessId(PROTECTED_PROCESS, &PEPROTECTED_PROCESS);
 		bytesIO = sizeof(KERNEL_INIT_DATA_REQUEST);
 		DRIVER_INITED = NT_SUCCESS(pInitData->Result);
-		if(DRIVER_INITED)
-			DbgPrintEx(0, 0, "IO_UPDATE_CHEAT_DATA");
 		break;
 	case IO_READ_PROCESS_MEMORY:
 		if (!DRIVER_INITED)
@@ -163,10 +151,6 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 	Irp->IoStatus.Status = STATUS_SUCCESS;
 	Irp->IoStatus.Information = bytesIO;
 	IoCompleteRequest(Irp, IO_NO_INCREMENT);
-
-#ifndef DEBUG
-	VMProtectEnd();
-#endif
 	return STATUS_SUCCESS;
 }
 
