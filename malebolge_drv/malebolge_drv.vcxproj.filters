@@ -29,9 +29,6 @@
     <ClCompile Include="ImageLoadCallback.c">
       <Filter>Core\Callback Routines\ImageLoadCallback</Filter>
     </ClCompile>
-    <ClCompile Include="Inject.c">
-      <Filter>SDK\inject</Filter>
-    </ClCompile>
     <ClCompile Include="CreateProcessCallback.c">
       <Filter>Core\Callback Routines\CreateProcessCallback</Filter>
     </ClCompile>
@@ -43,6 +40,33 @@
     </ClCompile>
     <ClCompile Include="spoof_core.c">
       <Filter>SDK\spoofer\core</Filter>
+    </ClCompile>
+    <ClCompile Include="Loader.c">
+      <Filter>SDK\inject\Loader</Filter>
+    </ClCompile>
+    <ClCompile Include="Private.c">
+      <Filter>SDK\inject\Private</Filter>
+    </ClCompile>
+    <ClCompile Include="MMap.c">
+      <Filter>SDK\inject</Filter>
+    </ClCompile>
+    <ClCompile Include="vadhelpers.c">
+      <Filter>SDK\inject\Routines\VAD</Filter>
+    </ClCompile>
+    <ClCompile Include="vadroutines.c">
+      <Filter>SDK\inject\Routines\VAD</Filter>
+    </ClCompile>
+    <ClCompile Include="routines.c">
+      <Filter>SDK\inject\Routines</Filter>
+    </ClCompile>
+    <ClCompile Include="remap.c">
+      <Filter>SDK\inject\Remap</Filter>
+    </ClCompile>
+    <ClCompile Include="ldrreloc.c">
+      <Filter>SDK\inject\Native</Filter>
+    </ClCompile>
+    <ClCompile Include="Inject.c">
+      <Filter>SDK\inject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -85,6 +109,27 @@
     <Filter Include="SDK\spoofer\utils">
       <UniqueIdentifier>{d30891f3-4942-47d7-8aff-47d66d175792}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SDK\inject\Loader">
+      <UniqueIdentifier>{df743c98-ddd2-4123-a160-3855d72f8546}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SDK\inject\Private">
+      <UniqueIdentifier>{ece91deb-582d-4950-9c8c-cd1a21ad5fa1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SDK\inject\Native">
+      <UniqueIdentifier>{9d25c29c-278e-4942-baa4-845a9010cabe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SDK\inject\Utils">
+      <UniqueIdentifier>{780842dc-7923-44aa-a474-b2f80cf8b196}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SDK\inject\Routines">
+      <UniqueIdentifier>{cf680df2-0c1e-4be2-aa0c-20e75c2c01c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SDK\inject\Routines\VAD">
+      <UniqueIdentifier>{d756fe6b-07b3-4c3b-b46f-11c0a48b98fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SDK\inject\Remap">
+      <UniqueIdentifier>{015e5a34-0ac8-4b9b-a99b-71facb6da0df}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="driver_defs.h">
@@ -111,9 +156,6 @@
     <ClInclude Include="ImageLoadCallback.h">
       <Filter>Core\Callback Routines\ImageLoadCallback</Filter>
     </ClInclude>
-    <ClInclude Include="Inject.h">
-      <Filter>SDK\inject</Filter>
-    </ClInclude>
     <ClInclude Include="CreateProcessCallback.h">
       <Filter>Core\Callback Routines\CreateProcessCallback</Filter>
     </ClInclude>
@@ -125,6 +167,42 @@
     </ClInclude>
     <ClInclude Include="spoof_core.h">
       <Filter>SDK\spoofer\core</Filter>
+    </ClInclude>
+    <ClInclude Include="Loader.h">
+      <Filter>SDK\inject\Loader</Filter>
+    </ClInclude>
+    <ClInclude Include="NativeEnums.h">
+      <Filter>SDK\inject\Native</Filter>
+    </ClInclude>
+    <ClInclude Include="NativeStructs.h">
+      <Filter>SDK\inject\Native</Filter>
+    </ClInclude>
+    <ClInclude Include="NativeStructs10.h">
+      <Filter>SDK\inject\Native</Filter>
+    </ClInclude>
+    <ClInclude Include="PEStructs.h">
+      <Filter>SDK\inject\Native</Filter>
+    </ClInclude>
+    <ClInclude Include="Imports.h">
+      <Filter>SDK\inject\Native</Filter>
+    </ClInclude>
+    <ClInclude Include="Private.h">
+      <Filter>SDK\inject\Private</Filter>
+    </ClInclude>
+    <ClInclude Include="apiset.h">
+      <Filter>SDK\inject\Native</Filter>
+    </ClInclude>
+    <ClInclude Include="routines.h">
+      <Filter>SDK\inject\Routines</Filter>
+    </ClInclude>
+    <ClInclude Include="vadroutines.h">
+      <Filter>SDK\inject\Routines\VAD</Filter>
+    </ClInclude>
+    <ClInclude Include="vadhelpers.h">
+      <Filter>SDK\inject\Routines\VAD</Filter>
+    </ClInclude>
+    <ClInclude Include="remap.h">
+      <Filter>SDK\inject\Remap</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

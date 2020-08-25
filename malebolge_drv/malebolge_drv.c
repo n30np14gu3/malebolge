@@ -7,6 +7,9 @@
 #include "callback.h"
 #include "ImageLoadCallback.h"
 #include "CreateProcessCallback.h"
+#include "Private.h"
+
+DYNAMIC_DATA dynData;
 
 ULONG RANDOM_SEED;
 

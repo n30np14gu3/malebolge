@@ -1,22 +1,12 @@
 #include "globals.h"
 #include "functions.h"
+#include "routines.h"
 
 NTSTATUS KeReadVirtualMemory(PEPROCESS Process, DWORD64 SourceAddress, DWORD64 TargetAddress, SIZE_T Size, PSIZE_T ReadedBytes);
 NTSTATUS KeWriteVirtualMemory(PEPROCESS Process, DWORD64 SourceAddress, DWORD64 TargetAddress, SIZE_T Size, PSIZE_T WritedBytes);
 
 NTSTATUS KeReadVirtualMemory32(PEPROCESS Process, DWORD32 SourceAddress, DWORD64 TargetAddress, SIZE_T Size, PSIZE_T ReadedBytes);
 NTSTATUS KeWriteVirtualMemory32(PEPROCESS Process, DWORD32 SourceAddress, DWORD64 TargetAddress, SIZE_T Size, PSIZE_T WritedBytes);
-
-NTSTATUS NTAPI MmCopyVirtualMemory
-(
-	PEPROCESS SourceProcess,
-	PVOID SourceAddress,
-	PEPROCESS TargetProcess,
-	PVOID TargetAddress,
-	SIZE_T BufferSize,
-	KPROCESSOR_MODE PreviousMode,
-	PSIZE_T ReturnSize
-);
 
 NTSTATUS NTAPI ExRaiseHardError(LONG ErrorStatus, ULONG NumberOfParameters, ULONG UnicodeStringParameterMask,
 	PULONG_PTR Parameters, ULONG ValidResponseOptions, PULONG Response);
@@ -34,8 +24,12 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 	PKERNEL_WRITE_REQUEST32 pWriteRequest32;
 	PKERNEL_READ_REQUEST32 pReadRequest32;
 	PKERNEL_GET_CSGO_MODULES pModules;
+	ULONG inputBufferLength = 0;
+	PINJECT_DLL pInject;
 	SIZE_T rwBytes = 0;
 
+	inputBufferLength = stack->Parameters.DeviceIoControl.InputBufferLength;
+	
 	switch(controlCode)
 	{
 	case IO_INIT_CHEAT_DATA:
@@ -145,6 +139,17 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 			}
 		}
 		bytesIO = sizeof(KERNEL_GET_CSGO_MODULES);
+		break;
+
+	case IO_INJECT_DLL:
+		if(inputBufferLength >= sizeof(INJECT_DLL))
+		{
+			Irp->IoStatus.Status = BBInjectDll((PINJECT_DLL)Irp->AssociatedIrp.SystemBuffer);
+		}
+		else
+		{
+			Irp->IoStatus.Status = STATUS_INFO_LENGTH_MISMATCH;
+		}
 		break;
 		default:break;
 	}	
