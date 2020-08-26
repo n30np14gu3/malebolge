@@ -24,7 +24,8 @@
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
     <DriverType>KMDF</DriverType>
-    <TargetVersion>Windows7</TargetVersion>
+    <TargetVersion>
+    </TargetVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Driver</ConfigurationType>
@@ -34,7 +35,8 @@
     <CharacterSet>MultiByte</CharacterSet>
     <DriverType>KMDF</DriverType>
     <Driver_SpectreMitigation>Spectre</Driver_SpectreMitigation>
-    <TargetVersion>Windows7</TargetVersion>
+    <TargetVersion>
+    </TargetVersion>
     <DriverTargetPlatform>
     </DriverTargetPlatform>
   </PropertyGroup>
