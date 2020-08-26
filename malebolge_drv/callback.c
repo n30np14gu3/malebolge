@@ -17,19 +17,19 @@ void DisplayError(NTSTATUS result)
 		switch (result)
 		{
 		case STATUS_FLT_INSTANCE_ALTITUDE_COLLISION:
-			PRINTF("Altitude is already exist!");
+			//PRINTF("Altitude is already exist!");
 			break;
 
 		case STATUS_INVALID_PARAMETER:
-			PRINTF("Parameter is error!");
+			//PRINTF("Parameter is error!");
 			break;
 
 		case STATUS_ACCESS_DENIED:
-			PRINTF("The callback routines do not reside in a signed kernel binary image!");
+			//PRINTF("The callback routines do not reside in a signed kernel binary image!");
 			break;
 
 		case STATUS_INSUFFICIENT_RESOURCES:
-			PRINTF("An attempt to allocate memory failed!");
+			//PRINTF("An attempt to allocate memory failed!");
 			break;
 		default:
 			DbgPrintEx(0, 0, "ObRegisterCallbacks error! [0x%X]", result);

@@ -139,7 +139,7 @@ public:
 		NoErrors = true;
 	}
 
-
+	void Inject(const wchar_t* szDll);
 	bool Attach(bool update = false);
 	bool GetModules();
 	void WaitForProcessClose();

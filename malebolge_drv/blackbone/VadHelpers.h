@@ -1,4 +1,5 @@
 #pragma once
+
 #define SANITIZE_PARENT_NODE(Parent) ((PMMADDRESS_NODE)(((ULONG_PTR)(Parent)) & ~0x3))
 
 //
@@ -58,7 +59,7 @@
 #define COUNT_BALANCE_MAX(a)
 
 
-TABLE_SEARCH_RESULT MiFindNodeOrParent(IN PMM_AVL_TABLE Table, IN ULONG_PTR StartingVpn, OUT PMMADDRESS_NODE* NodeOrParent);
-VOID MiPromoteNode(IN PMMADDRESS_NODE C);
-ULONG MiRebalanceNode(IN PMMADDRESS_NODE S);
-VOID MiRemoveNode(IN PMMADDRESS_NODE NodeToDelete, IN PMM_AVL_TABLE Table);
+TABLE_SEARCH_RESULT MiFindNodeOrParent( IN PMM_AVL_TABLE Table, IN ULONG_PTR StartingVpn, OUT PMMADDRESS_NODE *NodeOrParent );
+VOID MiPromoteNode( IN PMMADDRESS_NODE C );
+ULONG MiRebalanceNode( IN PMMADDRESS_NODE S );
+VOID MiRemoveNode( IN PMMADDRESS_NODE NodeToDelete, IN PMM_AVL_TABLE Table );

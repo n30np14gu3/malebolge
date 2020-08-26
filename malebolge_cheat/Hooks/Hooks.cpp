@@ -41,7 +41,7 @@ Hooks::Hooks(HMODULE module)
 #ifdef NDEBUG
     VMProtectBeginUltra("#Hooks::Hooks");
 #endif
-
+	
 #ifdef NDEBUG
     VMProtectEnd();
 #endif

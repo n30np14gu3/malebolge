@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Imports.h"
 #include "NativeStructs.h"
 
@@ -15,8 +16,8 @@ typedef enum _ModType
 typedef enum _ResolveFlags
 {
     KApiShemaOnly = 1,
-    KSkipSxS = 2,
-    KFullPath = 4,
+    KSkipSxS      = 2,
+    KFullPath     = 4,
 } ResolveFlags;
 
 /// <summary>
@@ -34,7 +35,7 @@ typedef struct _MODULE_DATA
     enum KMmapFlags flags;      // Flags
     BOOLEAN manual;             // Image is manually mapped
     BOOLEAN initialized;        // DllMain was already called
-} MODULE_DATA, * PMODULE_DATA;
+} MODULE_DATA, *PMODULE_DATA;
 
 
 /// <summary>
@@ -43,7 +44,7 @@ typedef struct _MODULE_DATA
 typedef struct _USER_CONTEXT
 {
     UCHAR code[0x1000];             // Code buffer
-    union
+    union 
     {
         UNICODE_STRING ustr;
         UNICODE_STRING32 ustr32;
@@ -57,7 +58,7 @@ typedef struct _USER_CONTEXT
         ACTCTXW actx;
         ACTCTXW32 actx32;
     };
-    HANDLE hCTX;
+    HANDLE hCTX;                    
     ULONG hCookie;
 
     PVOID ptr;                      // Tmp data
@@ -69,7 +70,7 @@ typedef struct _USER_CONTEXT
     };
 
     //UCHAR tlsBuf[0x100];
-} USER_CONTEXT, * PUSER_CONTEXT;
+} USER_CONTEXT, *PUSER_CONTEXT;
 
 /// <summary>
 /// Manual map context
@@ -88,14 +89,14 @@ typedef struct _MMAP_CONTEXT
     PVOID pLoadImage;       // LdrLoadDll address
     BOOLEAN tlsInitialized; // Static TLS was initialized
     BOOLEAN noThreads;      // No threads should be created
-} MMAP_CONTEXT, * PMMAP_CONTEXT;
+} MMAP_CONTEXT, *PMMAP_CONTEXT;
 
 /// <summary>
 /// Initialize loader stuff
 /// </summary>
 /// <param name="pThisModule">Any valid system module</param>
 /// <returns>Status code</returns>
-NTSTATUS BBInitLdrData(IN PKLDR_DATA_TABLE_ENTRY pThisModule);
+NTSTATUS BBInitLdrData( IN PKLDR_DATA_TABLE_ENTRY pThisModule );
 
 /// <summary>
 /// Get address of a system module
@@ -104,7 +105,7 @@ NTSTATUS BBInitLdrData(IN PKLDR_DATA_TABLE_ENTRY pThisModule);
 /// <param name="pName">Base name of the image (e.g. hal.dll)</param>
 /// <param name="pAddress">Address inside module</param>
 /// <returns>Found loader entry. NULL if nothing found</returns>
-PKLDR_DATA_TABLE_ENTRY BBGetSystemModule(IN PUNICODE_STRING pName, IN PVOID pAddress);
+PKLDR_DATA_TABLE_ENTRY BBGetSystemModule( IN PUNICODE_STRING pName, IN PVOID pAddress );
 
 /// <summary>
 /// Get module base address by name
@@ -113,7 +114,7 @@ PKLDR_DATA_TABLE_ENTRY BBGetSystemModule(IN PUNICODE_STRING pName, IN PVOID pAdd
 /// <param name="ModuleName">Nodule name to search for</param>
 /// <param name="isWow64">If TRUE - search in 32-bit PEB</param>
 /// <returns>Found address, NULL if not found</returns>
-PVOID BBGetUserModule(IN PEPROCESS pProcess, IN PUNICODE_STRING ModuleName, IN BOOLEAN isWow64);
+PVOID BBGetUserModule( IN PEPROCESS pProcess, IN PUNICODE_STRING ModuleName, IN BOOLEAN isWow64 );
 
 /// <summary>
 /// Unlink user-mode module from Loader lists
@@ -122,7 +123,7 @@ PVOID BBGetUserModule(IN PEPROCESS pProcess, IN PUNICODE_STRING ModuleName, IN B
 /// <param name="pBase">Module base</param>
 /// <param name="isWow64">If TRUE - unlink from PEB32 Loader, otherwise use PEB64</param>
 /// <returns>Status code</returns>
-NTSTATUS BBUnlinkFromLoader(IN PEPROCESS pProcess, IN PVOID pBase, IN BOOLEAN isWow64);
+NTSTATUS BBUnlinkFromLoader( IN PEPROCESS pProcess, IN PVOID pBase, IN BOOLEAN isWow64 );
 
 /// <summary>
 /// Get exported function address
@@ -131,7 +132,7 @@ NTSTATUS BBUnlinkFromLoader(IN PEPROCESS pProcess, IN PVOID pBase, IN BOOLEAN is
 /// <param name="name_ord">Function name or ordinal</param>
 /// <param name="pProcess">Target process for user module</param>
 /// <returns>Found address, NULL if not found</returns>
-PVOID BBGetModuleExport(IN PVOID pBase, IN PCCHAR name_ord, IN PEPROCESS pProcess, IN PUNICODE_STRING modName);
+PVOID BBGetModuleExport( IN PVOID pBase, IN PCCHAR name_ord, IN PEPROCESS pProcess, IN PUNICODE_STRING modName );
 
 /// <summary>
 /// Map new user module
@@ -155,7 +156,7 @@ NTSTATUS BBMapUserImage(
     IN ULONG initRVA,
     IN PWCH initArg,
     OUT PMODULE_DATA pImage
-);
+    );
 
 /// <summary>
 /// Resolve import table and load missing dependencies
@@ -173,7 +174,7 @@ NTSTATUS BBResolveImageRefs(
     IN BOOLEAN wow64Image,
     IN PMMAP_CONTEXT pContext,
     IN enum KMmapFlags flags
-);
+    );
 
 /// <summary>
 /// Resolve image name to fully qualified path
@@ -192,7 +193,7 @@ NTSTATUS BBResolveImagePath(
     IN PUNICODE_STRING path,
     IN PUNICODE_STRING baseImage,
     OUT PUNICODE_STRING resolved
-);
+    );
 
 /// <summary>
 /// Find first thread of the target process
@@ -200,7 +201,7 @@ NTSTATUS BBResolveImagePath(
 /// <param name="pProcess">Target process.</param>
 /// <param name="ppThread">Found thread. Thread object reference count is increased by 1</param>
 /// <returns>Status code</returns>
-NTSTATUS BBLookupProcessThread(IN PEPROCESS pProcess, OUT PETHREAD* ppThread);
+NTSTATUS BBLookupProcessThread( IN PEPROCESS pProcess, OUT PETHREAD* ppThread );
 
 /// <summary>
 /// Create new thread in the target process
@@ -217,7 +218,7 @@ NTSTATUS BBExecuteInNewThread(
     IN ULONG flags,
     IN BOOLEAN wait,
     OUT PNTSTATUS pExitStatus
-);
+    );
 
 /// <summary>
 /// Queue user-mode APC to the target thread
@@ -236,7 +237,7 @@ NTSTATUS BBQueueUserApc(
     IN PVOID Arg2,
     IN PVOID Arg3,
     BOOLEAN bForce
-);
+    );
 
 
 /// <summary>
@@ -244,7 +245,7 @@ NTSTATUS BBQueueUserApc(
 /// </summary>
 /// <param name="pPath">Fully qualified native path to the driver</param>
 /// <returns>Status code</returns>
-NTSTATUS BBMMapDriver(IN PUNICODE_STRING pPath);
+NTSTATUS BBMMapDriver( IN PUNICODE_STRING pPath );
 
 PIMAGE_BASE_RELOCATION
 LdrProcessRelocationBlockLongLong(
@@ -252,15 +253,15 @@ LdrProcessRelocationBlockLongLong(
     IN ULONG SizeOfBlock,
     IN PUSHORT NextOffset,
     IN LONGLONG Diff
-);
+    );
 
 NTSTATUS
-LdrRelocateImage(
+LdrRelocateImage (
     IN PVOID NewBase,
     IN NTSTATUS Success,
     IN NTSTATUS Conflict,
     IN NTSTATUS Invalid
-);
+    );
 
 NTSTATUS
 LdrRelocateImageWithBias(
@@ -269,7 +270,7 @@ LdrRelocateImageWithBias(
     IN NTSTATUS Success,
     IN NTSTATUS Conflict,
     IN NTSTATUS Invalid
-);
+    );
 
 PIMAGE_BASE_RELOCATION
 LdrProcessRelocationBlock(
@@ -277,7 +278,7 @@ LdrProcessRelocationBlock(
     IN ULONG SizeOfBlock,
     IN PUSHORT NextOffset,
     IN LONG_PTR Diff
-);
+    );
 
 PIMAGE_BASE_RELOCATION
 LdrProcessRelocationBlockLongLong(
@@ -285,4 +286,4 @@ LdrProcessRelocationBlockLongLong(
     IN ULONG SizeOfBlock,
     IN PUSHORT NextOffset,
     IN LONGLONG Diff
-);
+    );

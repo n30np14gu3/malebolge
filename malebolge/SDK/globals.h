@@ -2,7 +2,7 @@
 #include <Windows.h>
 #include "VMProtectSDK.h"
 
-#define DRIVER_NAME_S		"\\\\.\\malebolge_drv"
+#define DRIVER_NAME_S		"\\\\.\\sdifjdsifds99"
 #define GAME_NAME_S			"csgo.exe"
 #define SERVICE_NAME_S		"6rycgvhbjpoiougiyvuhkbljb"
 

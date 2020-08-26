@@ -65,7 +65,7 @@
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>
       </SDLCheck>
-      <PreprocessorDefinitions>DEBUG;_WIN64;_AMD64_;AMD64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WIN10_;DEBUG;_WIN64;_AMD64_;AMD64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <TreatWarningAsError>false</TreatWarningAsError>
     </ClCompile>
@@ -83,7 +83,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>
       </SDLCheck>
-      <PreprocessorDefinitions>_WIN64;_AMD64_;AMD64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WIN10_;_WIN64;_AMD64_;AMD64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <TreatWarningAsError>false</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -102,32 +102,51 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="blackbone\BlackBoneDrv.c" />
+    <ClCompile Include="blackbone\Inject.c" />
+    <ClCompile Include="blackbone\ldrreloc.c" />
+    <ClCompile Include="blackbone\Loader.c" />
+    <ClCompile Include="blackbone\MMap.c" />
+    <ClCompile Include="blackbone\NotifyRoutine.c" />
+    <ClCompile Include="blackbone\Private.c" />
+    <ClCompile Include="blackbone\Remap.c" />
+    <ClCompile Include="blackbone\Routines.c" />
+    <ClCompile Include="blackbone\Utils.c" />
+    <ClCompile Include="blackbone\VadHelpers.c" />
+    <ClCompile Include="blackbone\VadRoutines.c" />
     <ClCompile Include="callback.c" />
     <ClCompile Include="CreateProcessCallback.c" />
     <ClCompile Include="DriverUnload.c" />
     <ClCompile Include="ImageLoadCallback.c" />
-    <ClCompile Include="Inject.c" />
     <ClCompile Include="IoCloseCall.c" />
     <ClCompile Include="IoControl.c" />
     <ClCompile Include="IoCreateCall.c" />
-    <ClCompile Include="ldrreloc.c" />
-    <ClCompile Include="Loader.c" />
     <ClCompile Include="malebolge_drv.c" />
-    <ClCompile Include="MMap.c" />
-    <ClCompile Include="Private.c" />
     <ClCompile Include="ProcessPreCallback.c" />
-    <ClCompile Include="remap.c" />
-    <ClCompile Include="routines.c" />
     <ClCompile Include="spoof_clear.cpp" />
     <ClCompile Include="spoof_core.c" />
     <ClCompile Include="spoof_util.c" />
     <ClCompile Include="ThreadPreCallback.c" />
-    <ClCompile Include="utils.c" />
-    <ClCompile Include="vadhelpers.c" />
-    <ClCompile Include="vadroutines.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="apiset.h" />
+    <ClInclude Include="blackbone\apiset.h" />
+    <ClInclude Include="blackbone\BlackBoneDef.h" />
+    <ClInclude Include="blackbone\BlackBoneDrv.h" />
+    <ClInclude Include="blackbone\Imports.h" />
+    <ClInclude Include="blackbone\Loader.h" />
+    <ClInclude Include="blackbone\NativeEnums.h" />
+    <ClInclude Include="blackbone\NativeStructs.h" />
+    <ClInclude Include="blackbone\NativeStructs10.h" />
+    <ClInclude Include="blackbone\NativeStructs7.h" />
+    <ClInclude Include="blackbone\NativeStructs8.h" />
+    <ClInclude Include="blackbone\NativeStructs81.h" />
+    <ClInclude Include="blackbone\PEStructs.h" />
+    <ClInclude Include="blackbone\Private.h" />
+    <ClInclude Include="blackbone\Remap.h" />
+    <ClInclude Include="blackbone\Routines.h" />
+    <ClInclude Include="blackbone\Utils.h" />
+    <ClInclude Include="blackbone\VadHelpers.h" />
+    <ClInclude Include="blackbone\VadRoutines.h" />
     <ClInclude Include="callback.h" />
     <ClInclude Include="CreateProcessCallback.h" />
     <ClInclude Include="driver_defs.h" />
@@ -135,21 +154,9 @@
     <ClInclude Include="functions.h" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="ImageLoadCallback.h" />
-    <ClInclude Include="Imports.h" />
-    <ClInclude Include="Loader.h" />
-    <ClInclude Include="NativeEnums.h" />
-    <ClInclude Include="NativeStructs.h" />
-    <ClInclude Include="NativeStructs10.h" />
-    <ClInclude Include="PEStructs.h" />
-    <ClInclude Include="Private.h" />
-    <ClInclude Include="remap.h" />
-    <ClInclude Include="routines.h" />
     <ClInclude Include="spoof_clear.h" />
     <ClInclude Include="spoof_core.h" />
     <ClInclude Include="spoof_util.h" />
-    <ClInclude Include="utils.h" />
-    <ClInclude Include="vadhelpers.h" />
-    <ClInclude Include="vadroutines.h" />
     <ClInclude Include="VMProtectDDK.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

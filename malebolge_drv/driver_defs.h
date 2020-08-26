@@ -1,8 +1,8 @@
 #pragma once
 #define PROCESS_QUERY_LIMITED_INFORMATION      0x1000
 
-#define DRIVER_NAME_S	L"\\Device\\malebolge_drv"
-#define SYMBOL_NAME_S	L"\\DosDevices\\malebolge_drv"
+#define DRIVER_NAME_S	L"\\Device\\sdifjdsifds99"
+#define SYMBOL_NAME_S	L"\\DosDevices\\sdifjdsifds99"
 
 #define CLIENT_DLL_S	L"\\csgo\\bin\\client.dll"
 #define SERVER_DLL_S	L"\\csgo\\bin\\server.dll"

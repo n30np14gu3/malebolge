@@ -1,44 +1,6 @@
-#include "utils.h"
+#include "Utils.h"
 #include "Private.h"
-#include "globals.h"
 #include <ntstrsafe.h>
-
-UCHAR* PsGetProcessImageFileName(IN PEPROCESS Process);
-
-NTSTATUS TerminatingProcess(HANDLE targetPid)
-{
-	if (targetPid == PROTECTED_PROCESS)
-	{
-		PROTECTED_PROCESS = 0;
-	}
-
-	NTSTATUS NtRet;
-	PEPROCESS PeProc = { 0 };
-	NtRet = PsLookupProcessByProcessId(targetPid, &PeProc);
-	if (NtRet != (NTSTATUS)0x00000000L)
-	{
-		return NtRet;
-	}
-	HANDLE ProcessHandle;
-	NtRet = ObOpenObjectByPointer(PeProc, 0, NULL, 25, *PsProcessType, KernelMode, &ProcessHandle);
-	if (NtRet != (NTSTATUS)0x00000000L)
-	{
-		return NtRet;
-	}
-	ZwTerminateProcess(ProcessHandle, 0);
-	ZwClose(ProcessHandle);
-	return NtRet;
-}
-
-UCHAR* GetProcessNameFromPid(HANDLE pid)
-{
-	PEPROCESS process;
-	if(!NT_SUCCESS(PsLookupProcessByProcessId(pid, &process)))
-	{
-		return NULL;
-	}
-	return 	PsGetProcessImageFileName(process);
-}
 
 #pragma alloc_text(PAGE, BBSafeAllocateString)
 #pragma alloc_text(PAGE, BBSafeInitString)
@@ -52,18 +14,18 @@ UCHAR* GetProcessNameFromPid(HANDLE pid)
 /// <param name="result">Resulting string</param>
 /// <param name="size">Buffer size in bytes to alloacate</param>
 /// <returns>Status code</returns>
-NTSTATUS BBSafeAllocateString(OUT PUNICODE_STRING result, IN USHORT size)
+NTSTATUS BBSafeAllocateString( OUT PUNICODE_STRING result, IN USHORT size )
 {
-    ASSERT(result != NULL);
+    ASSERT( result != NULL );
     if (result == NULL || size == 0)
         return STATUS_INVALID_PARAMETER;
 
-    result->Buffer = ExAllocatePoolWithTag(PagedPool, size, BB_POOL_TAG);
+    result->Buffer = ExAllocatePoolWithTag( PagedPool, size, BB_POOL_TAG );
     result->Length = 0;
     result->MaximumLength = size;
 
     if (result->Buffer)
-        RtlZeroMemory(result->Buffer, size);
+        RtlZeroMemory( result->Buffer, size );
     else
         return STATUS_NO_MEMORY;
 
@@ -76,9 +38,9 @@ NTSTATUS BBSafeAllocateString(OUT PUNICODE_STRING result, IN USHORT size)
 /// <param name="result">Resulting string</param>
 /// <param name="source">Source string</param>
 /// <returns>Status code</returns>
-NTSTATUS BBSafeInitString(OUT PUNICODE_STRING result, IN PUNICODE_STRING source)
+NTSTATUS BBSafeInitString( OUT PUNICODE_STRING result, IN PUNICODE_STRING source )
 {
-    ASSERT(result != NULL && source != NULL);
+    ASSERT( result != NULL && source != NULL );
     if (result == NULL || source == NULL || source->Buffer == NULL)
         return STATUS_INVALID_PARAMETER;
 
@@ -90,11 +52,11 @@ NTSTATUS BBSafeInitString(OUT PUNICODE_STRING result, IN PUNICODE_STRING source)
         return STATUS_SUCCESS;
     }
 
-    result->Buffer = ExAllocatePoolWithTag(PagedPool, source->MaximumLength, BB_POOL_TAG);
+    result->Buffer = ExAllocatePoolWithTag( PagedPool, source->MaximumLength, BB_POOL_TAG );
     result->Length = source->Length;
     result->MaximumLength = source->MaximumLength;
 
-    memcpy(result->Buffer, source->Buffer, source->Length);
+    memcpy( result->Buffer, source->Buffer, source->Length );
 
     return STATUS_SUCCESS;
 }
@@ -106,9 +68,9 @@ NTSTATUS BBSafeInitString(OUT PUNICODE_STRING result, IN PUNICODE_STRING source)
 /// <param name="target">Target string</param>
 /// <param name="CaseInSensitive">Case insensitive search</param>
 /// <returns>Found position or -1 if not found</returns>
-LONG BBSafeSearchString(IN PUNICODE_STRING source, IN PUNICODE_STRING target, IN BOOLEAN CaseInSensitive)
+LONG BBSafeSearchString( IN PUNICODE_STRING source, IN PUNICODE_STRING target, IN BOOLEAN CaseInSensitive )
 {
-    ASSERT(source != NULL && target != NULL);
+    ASSERT( source != NULL && target != NULL );
     if (source == NULL || target == NULL || source->Buffer == NULL || target->Buffer == NULL)
         return STATUS_INVALID_PARAMETER;
 
@@ -117,15 +79,15 @@ LONG BBSafeSearchString(IN PUNICODE_STRING source, IN PUNICODE_STRING target, IN
         return -1;
 
     USHORT diff = source->Length - target->Length;
-    for (USHORT i = 0; i <= (diff / sizeof(WCHAR)); i++)
+    for (USHORT i = 0; i <= (diff / sizeof( WCHAR )); i++)
     {
         if (RtlCompareUnicodeStrings(
             source->Buffer + i,
-            target->Length / sizeof(WCHAR),
+            target->Length / sizeof( WCHAR ),
             target->Buffer,
-            target->Length / sizeof(WCHAR),
+            target->Length / sizeof( WCHAR ),
             CaseInSensitive
-        ) == 0)
+            ) == 0)
         {
             return i;
         }
@@ -140,9 +102,9 @@ LONG BBSafeSearchString(IN PUNICODE_STRING source, IN PUNICODE_STRING target, IN
 /// <param name="path">Path.</param>
 /// <param name="name">Resulting name</param>
 /// <returns>Status code</returns>
-NTSTATUS BBStripPath(IN PUNICODE_STRING path, OUT PUNICODE_STRING name)
+NTSTATUS BBStripPath( IN PUNICODE_STRING path, OUT PUNICODE_STRING name )
 {
-    ASSERT(path != NULL && name);
+    ASSERT( path != NULL && name );
     if (path == NULL || name == NULL)
         return STATUS_INVALID_PARAMETER;
 
@@ -153,12 +115,12 @@ NTSTATUS BBStripPath(IN PUNICODE_STRING path, OUT PUNICODE_STRING name)
         return STATUS_NOT_FOUND;
     }
 
-    for (USHORT i = (path->Length / sizeof(WCHAR)) - 1; i != 0; i--)
+    for (USHORT i = (path->Length / sizeof( WCHAR )) - 1; i != 0; i--)
     {
         if (path->Buffer[i] == L'\\' || path->Buffer[i] == L'/')
         {
             name->Buffer = &path->Buffer[i + 1];
-            name->Length = name->MaximumLength = path->Length - (i + 1) * sizeof(WCHAR);
+            name->Length = name->MaximumLength = path->Length - (i + 1)*sizeof( WCHAR );
             return STATUS_SUCCESS;
         }
     }
@@ -173,9 +135,9 @@ NTSTATUS BBStripPath(IN PUNICODE_STRING path, OUT PUNICODE_STRING name)
 /// <param name="path">Path</param>
 /// <param name="name">Resulting directory path</param>
 /// <returns>Status code</returns>
-NTSTATUS BBStripFilename(IN PUNICODE_STRING path, OUT PUNICODE_STRING dir)
+NTSTATUS BBStripFilename( IN PUNICODE_STRING path, OUT PUNICODE_STRING dir )
 {
-    ASSERT(path != NULL && dir);
+    ASSERT( path != NULL && dir );
     if (path == NULL || dir == NULL)
         return STATUS_INVALID_PARAMETER;
 
@@ -186,12 +148,12 @@ NTSTATUS BBStripFilename(IN PUNICODE_STRING path, OUT PUNICODE_STRING dir)
         return STATUS_NOT_FOUND;
     }
 
-    for (USHORT i = (path->Length / sizeof(WCHAR)) - 1; i != 0; i--)
+    for (USHORT i = (path->Length / sizeof( WCHAR )) - 1; i != 0; i--)
     {
         if (path->Buffer[i] == L'\\' || path->Buffer[i] == L'/')
         {
             dir->Buffer = path->Buffer;
-            dir->Length = dir->MaximumLength = i * sizeof(WCHAR);
+            dir->Length = dir->MaximumLength = i*sizeof( WCHAR );
             return STATUS_SUCCESS;
         }
     }
@@ -205,21 +167,21 @@ NTSTATUS BBStripFilename(IN PUNICODE_STRING path, OUT PUNICODE_STRING dir)
 /// </summary>
 /// <param name="path">Fully qualifid path to a file</param>
 /// <returns>Status code</returns>
-NTSTATUS BBFileExists(IN PUNICODE_STRING path)
+NTSTATUS BBFileExists( IN PUNICODE_STRING path )
 {
     HANDLE hFile = NULL;
     IO_STATUS_BLOCK statusBlock = { 0 };
     OBJECT_ATTRIBUTES obAttr = { 0 };
-    InitializeObjectAttributes(&obAttr, path, OBJ_KERNEL_HANDLE, NULL, NULL);
+    InitializeObjectAttributes( &obAttr, path, OBJ_KERNEL_HANDLE, NULL, NULL );
 
     NTSTATUS status = ZwCreateFile(
         &hFile, FILE_READ_DATA | SYNCHRONIZE, &obAttr,
         &statusBlock, NULL, FILE_ATTRIBUTE_NORMAL,
         FILE_SHARE_READ, FILE_OPEN, FILE_SYNCHRONOUS_IO_NONALERT, NULL, 0
-    );
+        );
 
-    if (NT_SUCCESS(status))
-        ZwClose(hFile);
+    if (NT_SUCCESS( status ))
+        ZwClose( hFile );
 
     return status;
 }
@@ -234,9 +196,9 @@ NTSTATUS BBFileExists(IN PUNICODE_STRING path)
 /// <param name="size">Address range to search in</param>
 /// <param name="ppFound">Found location</param>
 /// <returns>Status code</returns>
-NTSTATUS BBSearchPattern(IN PCUCHAR pattern, IN UCHAR wildcard, IN ULONG_PTR len, IN const VOID* base, IN ULONG_PTR size, OUT PVOID* ppFound)
+NTSTATUS BBSearchPattern( IN PCUCHAR pattern, IN UCHAR wildcard, IN ULONG_PTR len, IN const VOID* base, IN ULONG_PTR size, OUT PVOID* ppFound )
 {
-    ASSERT(ppFound != NULL && pattern != NULL && base != NULL);
+    ASSERT( ppFound != NULL && pattern != NULL && base != NULL );
     if (ppFound == NULL || pattern == NULL || base == NULL)
         return STATUS_INVALID_PARAMETER;
 
@@ -267,13 +229,13 @@ NTSTATUS BBSearchPattern(IN PCUCHAR pattern, IN UCHAR wildcard, IN ULONG_PTR len
 /// </summary>
 /// <param name="imageBase">Process</param>
 /// <returns>If TRUE - terminating</returns>
-BOOLEAN BBCheckProcessTermination(PEPROCESS pProcess)
+BOOLEAN BBCheckProcessTermination( PEPROCESS pProcess )
 {
     LARGE_INTEGER zeroTime = { 0 };
-    return KeWaitForSingleObject(pProcess, Executive, KernelMode, FALSE, &zeroTime) == STATUS_WAIT_0;
+    return KeWaitForSingleObject( pProcess, Executive, KernelMode, FALSE, &zeroTime ) == STATUS_WAIT_0;
 }
 
-ULONG GenPrologue32(IN PUCHAR pBuf)
+ULONG GenPrologue32( IN PUCHAR pBuf )
 {
     *pBuf = 0x55;
     *(PUSHORT)(pBuf + 1) = 0xE589;
@@ -281,7 +243,7 @@ ULONG GenPrologue32(IN PUCHAR pBuf)
     return 3;
 }
 
-ULONG GenEpilogue32(IN PUCHAR pBuf, IN INT retSize)
+ULONG GenEpilogue32( IN PUCHAR pBuf, IN INT retSize )
 {
     *(PUSHORT)pBuf = 0xEC89;
     *(pBuf + 2) = 0x5D;
@@ -291,26 +253,26 @@ ULONG GenEpilogue32(IN PUCHAR pBuf, IN INT retSize)
     return 6;
 }
 
-ULONG GenCall32(IN PUCHAR pBuf, IN PVOID pFn, IN INT argc, ...)
+ULONG GenCall32( IN PUCHAR pBuf, IN PVOID pFn, IN INT argc, ... )
 {
     va_list vl;
-    va_start(vl, argc);
-    ULONG res = GenCall32V(pBuf, pFn, argc, vl);
-    va_end(vl);
+    va_start( vl, argc );
+    ULONG res = GenCall32V( pBuf, pFn, argc, vl );
+    va_end( vl );
 
     return res;
 }
 
-ULONG GenCall32V(IN PUCHAR pBuf, IN PVOID pFn, IN INT argc, IN va_list vl)
+ULONG GenCall32V( IN PUCHAR pBuf, IN PVOID pFn, IN INT argc, IN va_list vl )
 {
     ULONG ofst = 0;
 
-    PULONG pArgBuf = ExAllocatePoolWithTag(PagedPool, argc * sizeof(ULONG), BB_POOL_TAG);
+    PULONG pArgBuf = ExAllocatePoolWithTag( PagedPool, argc * sizeof( ULONG ), BB_POOL_TAG );
 
     // cast args
     for (INT i = 0; i < argc; i++)
     {
-        PVOID arg = va_arg(vl, PVOID);
+        PVOID arg = va_arg( vl, PVOID );
         pArgBuf[i] = (ULONG)(ULONG_PTR)arg;
     }
 
@@ -329,12 +291,12 @@ ULONG GenCall32V(IN PUCHAR pBuf, IN PVOID pFn, IN INT argc, IN va_list vl)
     *(PUSHORT)(pBuf + ofst) = 0xD0FF;                   // call eax
     ofst += 2;
 
-    ExFreePoolWithTag(pArgBuf, BB_POOL_TAG);
+    ExFreePoolWithTag( pArgBuf, BB_POOL_TAG );
 
     return ofst;
 }
 
-ULONG GenSync32(IN PUCHAR pBuf, IN PNTSTATUS pStatus, IN PVOID pSetEvent, IN HANDLE hEvent)
+ULONG GenSync32( IN PUCHAR pBuf, IN PNTSTATUS pStatus, IN PVOID pSetEvent, IN HANDLE hEvent )
 {
     ULONG ofst = 0;
 
@@ -361,7 +323,7 @@ ULONG GenSync32(IN PUCHAR pBuf, IN PNTSTATUS pStatus, IN PVOID pSetEvent, IN HAN
 
 
 
-ULONG GenPrologue64(IN PUCHAR pBuf)
+ULONG GenPrologue64( IN PUCHAR pBuf )
 {
     *(PULONG)(pBuf + 0) = 0x244C8948;       // mov [rsp + 0x08], rcx
     *(PUCHAR)(pBuf + 4) = 0x8;              // 
@@ -374,9 +336,9 @@ ULONG GenPrologue64(IN PUCHAR pBuf)
     return 20;
 }
 
-ULONG GenEpilogue64(IN PUCHAR pBuf, IN INT retSize)
+ULONG GenEpilogue64( IN PUCHAR pBuf, IN INT retSize )
 {
-    UNREFERENCED_PARAMETER(retSize);
+    UNREFERENCED_PARAMETER( retSize );
 
     *(PULONG)(pBuf + 0) = 0x244C8B48;       // mov rcx, [rsp + 0x08]
     *(PUCHAR)(pBuf + 4) = 0x8;              // 
@@ -390,23 +352,23 @@ ULONG GenEpilogue64(IN PUCHAR pBuf, IN INT retSize)
     return 21;
 }
 
-ULONG GenCall64(IN PUCHAR pBuf, IN PVOID pFn, INT argc, ...)
+ULONG GenCall64( IN PUCHAR pBuf, IN PVOID pFn, INT argc, ... )
 {
     va_list vl;
-    va_start(vl, argc);
-    ULONG res = GenCall64V(pBuf, pFn, argc, vl);
-    va_end(vl);
+    va_start( vl, argc );
+    ULONG res = GenCall64V( pBuf, pFn, argc, vl );
+    va_end( vl );
 
     return res;
 }
 
-ULONG GenCall64V(IN PUCHAR pBuf, IN PVOID pFn, IN INT argc, IN va_list vl)
+ULONG GenCall64V( IN PUCHAR pBuf, IN PVOID pFn, IN INT argc, IN va_list vl )
 {
     USHORT rsp_diff = 0x28;
     ULONG ofst = 0;
     if (argc > 4)
     {
-        rsp_diff = (USHORT)(argc * sizeof(ULONG_PTR));
+        rsp_diff = (USHORT)(argc * sizeof( ULONG_PTR ));
         if (rsp_diff % 0x10)
             rsp_diff = ((rsp_diff / 0x10) + 1) * 0x10;
         rsp_diff += 8;
@@ -418,28 +380,28 @@ ULONG GenCall64V(IN PUCHAR pBuf, IN PVOID pFn, IN INT argc, IN va_list vl)
 
     if (argc > 0)
     {
-        PVOID arg = va_arg(vl, PVOID);
+        PVOID arg = va_arg( vl, PVOID );
         *(PUSHORT)(pBuf + ofst) = 0xB948;           // mov rcx, arg
         *(PVOID*)(pBuf + ofst + 2) = arg;           //
         ofst += 10;
     }
     if (argc > 1)
     {
-        PVOID arg = va_arg(vl, PVOID);
+        PVOID arg = va_arg( vl, PVOID );
         *(PUSHORT)(pBuf + ofst) = 0xBA48;           // mov rdx, arg
         *(PVOID*)(pBuf + ofst + 2) = arg;           //
         ofst += 10;
     }
     if (argc > 2)
     {
-        PVOID arg = va_arg(vl, PVOID);
+        PVOID arg = va_arg( vl, PVOID );
         *(PUSHORT)(pBuf + ofst) = 0xB849;           // mov r8, arg
         *(PVOID*)(pBuf + ofst + 2) = arg;           //
         ofst += 10;
     }
     if (argc > 3)
     {
-        PVOID arg = va_arg(vl, PVOID);
+        PVOID arg = va_arg( vl, PVOID );
         *(PUSHORT)(pBuf + ofst) = 0xB949;           // mov r9, arg
         *(PVOID*)(pBuf + ofst + 2) = arg;           //
         ofst += 10;
@@ -447,7 +409,7 @@ ULONG GenCall64V(IN PUCHAR pBuf, IN PVOID pFn, IN INT argc, IN va_list vl)
 
     for (INT i = 4; i < argc; i++)
     {
-        PVOID arg = va_arg(vl, PVOID);
+        PVOID arg = va_arg( vl, PVOID );
 
         *(PUSHORT)(pBuf + ofst) = 0xB848;           // mov rcx, arg
         *(PVOID*)(pBuf + ofst + 2) = arg;           //
@@ -455,7 +417,7 @@ ULONG GenCall64V(IN PUCHAR pBuf, IN PVOID pFn, IN INT argc, IN va_list vl)
 
         // mov [rsp + i*8], rax
         *(PULONG)(pBuf + ofst) = 0x24448948;
-        *(PUCHAR)(pBuf + ofst + 4) = (UCHAR)(0x20 + (i - 4) * sizeof(arg));
+        *(PUCHAR)(pBuf + ofst + 4) = (UCHAR)(0x20 + (i - 4)*sizeof( arg ));
         ofst += 5;
     }
 
@@ -474,7 +436,7 @@ ULONG GenCall64V(IN PUCHAR pBuf, IN PVOID pFn, IN INT argc, IN va_list vl)
     return ofst;
 }
 
-ULONG GenSync64(IN PUCHAR pBuf, IN PNTSTATUS pStatus, IN PVOID pSetEvent, IN HANDLE hEvent)
+ULONG GenSync64( IN PUCHAR pBuf, IN PNTSTATUS pStatus, IN PVOID pSetEvent, IN HANDLE hEvent )
 {
     ULONG ofst = 0;
 
@@ -502,32 +464,32 @@ ULONG GenSync64(IN PUCHAR pBuf, IN PNTSTATUS pStatus, IN PVOID pSetEvent, IN HAN
 
 
 
-ULONG GenPrologueT(IN BOOLEAN wow64, IN PUCHAR pBuf)
+ULONG GenPrologueT( IN BOOLEAN wow64, IN PUCHAR pBuf )
 {
-    return wow64 ? GenPrologue32(pBuf) : GenPrologue64(pBuf);
+    return wow64 ? GenPrologue32( pBuf ) : GenPrologue64( pBuf );
 }
 
-ULONG GenEpilogueT(IN BOOLEAN wow64, IN PUCHAR pBuf, IN INT retSize)
+ULONG GenEpilogueT( IN BOOLEAN wow64, IN PUCHAR pBuf, IN INT retSize )
 {
-    return wow64 ? GenEpilogue32(pBuf, retSize) : GenEpilogue64(pBuf, retSize);
+    return wow64 ? GenEpilogue32( pBuf, retSize ) : GenEpilogue64( pBuf, retSize );
 }
 
-ULONG GenCallT(IN BOOLEAN wow64, IN PUCHAR pBuf, IN PVOID pFn, IN INT argc, ...)
+ULONG GenCallT( IN BOOLEAN wow64, IN PUCHAR pBuf, IN PVOID pFn, IN INT argc, ... )
 {
     va_list vl;
-    va_start(vl, argc);
-    ULONG res = wow64 ? GenCall32V(pBuf, pFn, argc, vl) : GenCall64V(pBuf, pFn, argc, vl);
-    va_end(vl);
+    va_start( vl, argc );
+    ULONG res = wow64 ? GenCall32V( pBuf, pFn, argc, vl ) : GenCall64V( pBuf, pFn, argc, vl );
+    va_end( vl );
 
     return res;
 }
 
-ULONG GenCallTV(IN BOOLEAN wow64, IN PUCHAR pBuf, IN PVOID pFn, IN INT argc, IN va_list vl)
+ULONG GenCallTV( IN BOOLEAN wow64, IN PUCHAR pBuf, IN PVOID pFn, IN INT argc, IN va_list vl )
 {
-    return wow64 ? GenCall32V(pBuf, pFn, argc, vl) : GenCall64V(pBuf, pFn, argc, vl);
+    return wow64 ? GenCall32V( pBuf, pFn, argc, vl ) : GenCall64V( pBuf, pFn, argc, vl );
 }
 
-ULONG GenSyncT(IN BOOLEAN wow64, IN PUCHAR pBuf, IN PNTSTATUS pStatus, IN PVOID pSetEvent, IN HANDLE hEvent)
+ULONG GenSyncT( IN BOOLEAN wow64, IN PUCHAR pBuf, IN PNTSTATUS pStatus, IN PVOID pSetEvent, IN HANDLE hEvent )
 {
-    return wow64 ? GenSync32(pBuf, pStatus, pSetEvent, hEvent) : GenSync64(pBuf, pStatus, pSetEvent, hEvent);
+    return wow64 ? GenSync32( pBuf, pStatus, pSetEvent, hEvent ) : GenSync64( pBuf, pStatus, pSetEvent, hEvent );
 }

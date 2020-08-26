@@ -1,12 +1,13 @@
 #include "Private.h"
 #include "Loader.h"
+#include "BlackBoneDef.h"
 #include "Utils.h"
 #include <Ntstrsafe.h>
 
-NTSTATUS BBMapWorker(IN PVOID pArg);
-VOID     KernelApcPrepareCallback(PKAPC, PKNORMAL_ROUTINE*, PVOID*, PVOID*, PVOID*);
-VOID     KernelApcInjectCallback(PKAPC, PKNORMAL_ROUTINE*, PVOID*, PVOID*, PVOID*);
-BOOLEAN  BBSkipThread(IN PETHREAD pThread, IN BOOLEAN isWow64);
+NTSTATUS BBMapWorker             ( IN PVOID pArg );
+VOID     KernelApcPrepareCallback( PKAPC, PKNORMAL_ROUTINE*, PVOID*, PVOID*, PVOID* );
+VOID     KernelApcInjectCallback ( PKAPC, PKNORMAL_ROUTINE*, PVOID*, PVOID*, PVOID* );
+BOOLEAN  BBSkipThread            ( IN PETHREAD pThread, IN BOOLEAN isWow64 );
 
 
 extern DYNAMIC_DATA dynData;
@@ -28,7 +29,7 @@ extern DYNAMIC_DATA dynData;
 /// Remove list entry
 /// </summary>
 /// <param name="Entry">Entry link</param>
-FORCEINLINE VOID RemoveEntryList32(IN PLIST_ENTRY32 Entry)
+FORCEINLINE VOID RemoveEntryList32( IN PLIST_ENTRY32 Entry )
 {
     ((PLIST_ENTRY32)Entry->Blink)->Flink = Entry->Flink;
     ((PLIST_ENTRY32)Entry->Flink)->Blink = Entry->Blink;
@@ -39,12 +40,12 @@ FORCEINLINE VOID RemoveEntryList32(IN PLIST_ENTRY32 Entry)
 /// </summary>
 /// <param name="pThisModule">Any valid system module</param>
 /// <returns>Status code</returns>
-NTSTATUS BBInitLdrData(IN PKLDR_DATA_TABLE_ENTRY pThisModule)
+NTSTATUS BBInitLdrData( IN PKLDR_DATA_TABLE_ENTRY pThisModule )
 {
-    PVOID kernelBase = GetKernelBase(NULL);
+    PVOID kernelBase = GetKernelBase( NULL );
     if (kernelBase == NULL)
     {
-        DPRINT("BlackBone: %s: Failed to retrieve Kernel base address. Aborting\n", __FUNCTION__);
+        DPRINT( "BlackBone: %s: Failed to retrieve Kernel base address. Aborting\n", __FUNCTION__ );
         return STATUS_NOT_FOUND;
     }
 
@@ -52,7 +53,7 @@ NTSTATUS BBInitLdrData(IN PKLDR_DATA_TABLE_ENTRY pThisModule)
     for (PLIST_ENTRY pListEntry = pThisModule->InLoadOrderLinks.Flink; pListEntry != &pThisModule->InLoadOrderLinks; pListEntry = pListEntry->Flink)
     {
         // Search for Ntoskrnl entry
-        PKLDR_DATA_TABLE_ENTRY pEntry = CONTAINING_RECORD(pListEntry, KLDR_DATA_TABLE_ENTRY, InLoadOrderLinks);
+        PKLDR_DATA_TABLE_ENTRY pEntry = CONTAINING_RECORD( pListEntry, KLDR_DATA_TABLE_ENTRY, InLoadOrderLinks );
         if (kernelBase == pEntry->DllBase)
         {
             // Ntoskrnl is always first entry in the list
@@ -67,7 +68,7 @@ NTSTATUS BBInitLdrData(IN PKLDR_DATA_TABLE_ENTRY pThisModule)
 
     if (!PsLoadedModuleList)
     {
-        DPRINT("BlackBone: %s: Failed to retrieve PsLoadedModuleList address. Aborting\n", __FUNCTION__);
+        DPRINT( "BlackBone: %s: Failed to retrieve PsLoadedModuleList address. Aborting\n", __FUNCTION__ );
         return STATUS_NOT_FOUND;
     }
 
@@ -81,24 +82,24 @@ NTSTATUS BBInitLdrData(IN PKLDR_DATA_TABLE_ENTRY pThisModule)
 /// <param name="pName">Base name of the image (e.g. hal.dll)</param>
 /// <param name="pAddress">Address inside module</param>
 /// <returns>Found loader entry. NULL if nothing found</returns>
-PKLDR_DATA_TABLE_ENTRY BBGetSystemModule(IN PUNICODE_STRING pName, IN PVOID pAddress)
+PKLDR_DATA_TABLE_ENTRY BBGetSystemModule( IN PUNICODE_STRING pName, IN PVOID pAddress )
 {
-    ASSERT((pName != NULL || pAddress != NULL) && PsLoadedModuleList != NULL);
+    ASSERT( (pName != NULL || pAddress != NULL) && PsLoadedModuleList != NULL );
     if ((pName == NULL && pAddress == NULL) || PsLoadedModuleList == NULL)
         return NULL;
 
     // No images
-    if (IsListEmpty(PsLoadedModuleList))
+    if (IsListEmpty( PsLoadedModuleList ))
         return NULL;
 
     // Search in PsLoadedModuleList
     for (PLIST_ENTRY pListEntry = PsLoadedModuleList->Flink; pListEntry != PsLoadedModuleList; pListEntry = pListEntry->Flink)
     {
-        PKLDR_DATA_TABLE_ENTRY pEntry = CONTAINING_RECORD(pListEntry, KLDR_DATA_TABLE_ENTRY, InLoadOrderLinks);
+        PKLDR_DATA_TABLE_ENTRY pEntry = CONTAINING_RECORD( pListEntry, KLDR_DATA_TABLE_ENTRY, InLoadOrderLinks );
 
         // Check by name or by address
-        if ((pName && RtlCompareUnicodeString(&pEntry->BaseDllName, pName, TRUE) == 0) ||
-            (pAddress && pAddress >= pEntry->DllBase && (PUCHAR)pAddress < (PUCHAR)pEntry->DllBase + pEntry->SizeOfImage))
+        if ((pName && RtlCompareUnicodeString( &pEntry->BaseDllName, pName, TRUE ) == 0) ||
+             (pAddress && pAddress >= pEntry->DllBase && (PUCHAR)pAddress < (PUCHAR)pEntry->DllBase + pEntry->SizeOfImage))
         {
             return pEntry;
         }
@@ -114,9 +115,9 @@ PKLDR_DATA_TABLE_ENTRY BBGetSystemModule(IN PUNICODE_STRING pName, IN PVOID pAdd
 /// <param name="ModuleName">Nodule name to search for</param>
 /// <param name="isWow64">If TRUE - search in 32-bit PEB</param>
 /// <returns>Found address, NULL if not found</returns>
-PVOID BBGetUserModule(IN PEPROCESS pProcess, IN PUNICODE_STRING ModuleName, IN BOOLEAN isWow64)
+PVOID BBGetUserModule( IN PEPROCESS pProcess, IN PUNICODE_STRING ModuleName, IN BOOLEAN isWow64 )
 {
-    ASSERT(pProcess != NULL);
+    ASSERT( pProcess != NULL );
     if (pProcess == NULL)
         return NULL;
 
@@ -129,79 +130,79 @@ PVOID BBGetUserModule(IN PEPROCESS pProcess, IN PUNICODE_STRING ModuleName, IN B
         // Wow64 process
         if (isWow64)
         {
-            PPEB32 pPeb32 = (PPEB32)PsGetProcessWow64Process(pProcess);
+            PPEB32 pPeb32 = (PPEB32)PsGetProcessWow64Process( pProcess );
             if (pPeb32 == NULL)
             {
-                DPRINT("BlackBone: %s: No PEB present. Aborting\n", __FUNCTION__);
+                DPRINT( "BlackBone: %s: No PEB present. Aborting\n", __FUNCTION__ );
                 return NULL;
             }
 
             // Wait for loader a bit
             for (INT i = 0; !pPeb32->Ldr && i < 10; i++)
             {
-                DPRINT("BlackBone: %s: Loader not intialiezd, waiting\n", __FUNCTION__);
-                KeDelayExecutionThread(KernelMode, TRUE, &time);
+                DPRINT( "BlackBone: %s: Loader not intialiezd, waiting\n", __FUNCTION__ );
+                KeDelayExecutionThread( KernelMode, TRUE, &time );
             }
 
             // Still no loader
             if (!pPeb32->Ldr)
             {
-                DPRINT("BlackBone: %s: Loader was not intialiezd in time. Aborting\n", __FUNCTION__);
+                DPRINT( "BlackBone: %s: Loader was not intialiezd in time. Aborting\n", __FUNCTION__ );
                 return NULL;
             }
 
             // Search in InLoadOrderModuleList
             for (PLIST_ENTRY32 pListEntry = (PLIST_ENTRY32)((PPEB_LDR_DATA32)pPeb32->Ldr)->InLoadOrderModuleList.Flink;
-                pListEntry != &((PPEB_LDR_DATA32)pPeb32->Ldr)->InLoadOrderModuleList;
-                pListEntry = (PLIST_ENTRY32)pListEntry->Flink)
+                  pListEntry != &((PPEB_LDR_DATA32)pPeb32->Ldr)->InLoadOrderModuleList;
+                  pListEntry = (PLIST_ENTRY32)pListEntry->Flink)
             {
                 UNICODE_STRING ustr;
-                PLDR_DATA_TABLE_ENTRY32 pEntry = CONTAINING_RECORD(pListEntry, LDR_DATA_TABLE_ENTRY32, InLoadOrderLinks);
+                PLDR_DATA_TABLE_ENTRY32 pEntry = CONTAINING_RECORD( pListEntry, LDR_DATA_TABLE_ENTRY32, InLoadOrderLinks );
 
-                RtlUnicodeStringInit(&ustr, (PWCH)pEntry->BaseDllName.Buffer);
+                RtlUnicodeStringInit( &ustr, (PWCH)pEntry->BaseDllName.Buffer );
 
-                if (RtlCompareUnicodeString(&ustr, ModuleName, TRUE) == 0)
+                if (RtlCompareUnicodeString( &ustr, ModuleName, TRUE ) == 0)
                     return (PVOID)pEntry->DllBase;
             }
         }
         // Native process
         else
         {
-            PPEB pPeb = PsGetProcessPeb(pProcess);
+            PPEB pPeb = PsGetProcessPeb( pProcess );
             if (!pPeb)
             {
-                DPRINT("BlackBone: %s: No PEB present. Aborting\n", __FUNCTION__);
+                DPRINT( "BlackBone: %s: No PEB present. Aborting\n", __FUNCTION__ );
                 return NULL;
             }
 
             // Wait for loader a bit
             for (INT i = 0; !pPeb->Ldr && i < 10; i++)
             {
-                DPRINT("BlackBone: %s: Loader not intialiezd, waiting\n", __FUNCTION__);
-                KeDelayExecutionThread(KernelMode, TRUE, &time);
+                DPRINT( "BlackBone: %s: Loader not intialiezd, waiting\n", __FUNCTION__ );
+                KeDelayExecutionThread( KernelMode, TRUE, &time );
             }
 
             // Still no loader
             if (!pPeb->Ldr)
             {
-                DPRINT("BlackBone: %s: Loader was not intialiezd in time. Aborting\n", __FUNCTION__);
+                DPRINT( "BlackBone: %s: Loader was not intialiezd in time. Aborting\n", __FUNCTION__ );
                 return NULL;
             }
 
             // Search in InLoadOrderModuleList
             for (PLIST_ENTRY pListEntry = pPeb->Ldr->InLoadOrderModuleList.Flink;
-                pListEntry != &pPeb->Ldr->InLoadOrderModuleList;
-                pListEntry = pListEntry->Flink)
+                  pListEntry != &pPeb->Ldr->InLoadOrderModuleList;
+                  pListEntry = pListEntry->Flink)
             {
-                PLDR_DATA_TABLE_ENTRY pEntry = CONTAINING_RECORD(pListEntry, LDR_DATA_TABLE_ENTRY, InLoadOrderLinks);
-                if (RtlCompareUnicodeString(&pEntry->BaseDllName, ModuleName, TRUE) == 0)
+                PLDR_DATA_TABLE_ENTRY pEntry = CONTAINING_RECORD( pListEntry, LDR_DATA_TABLE_ENTRY, InLoadOrderLinks );
+                if (RtlCompareUnicodeString( &pEntry->BaseDllName, ModuleName, TRUE ) == 0)
                     return pEntry->DllBase;
             }
         }
     }
     __except (EXCEPTION_EXECUTE_HANDLER)
     {
-        DPRINT("BlackBone: %s: Exception, Code: 0x%X\n", __FUNCTION__, GetExceptionCode());
+        DPRINT( "BlackBone: %s: Exception, Code: 0x%X\n", __FUNCTION__, GetExceptionCode() );
     }
 
     return NULL;
@@ -214,10 +215,10 @@ PVOID BBGetUserModule(IN PEPROCESS pProcess, IN PUNICODE_STRING ModuleName, IN B
 /// <param name="pBase">Module base</param>
 /// <param name="isWow64">If TRUE - unlink from PEB32 Loader, otherwise use PEB64</param>
 /// <returns>Status code</returns>
-NTSTATUS BBUnlinkFromLoader(IN PEPROCESS pProcess, IN PVOID pBase, IN BOOLEAN isWow64)
+NTSTATUS BBUnlinkFromLoader( IN PEPROCESS pProcess, IN PVOID pBase, IN BOOLEAN isWow64 )
 {
     NTSTATUS status = STATUS_SUCCESS;
-    ASSERT(pProcess != NULL);
+    ASSERT( pProcess != NULL );
     if (pProcess == NULL)
         return STATUS_INVALID_PARAMETER;
 
@@ -227,27 +228,27 @@ NTSTATUS BBUnlinkFromLoader(IN PEPROCESS pProcess, IN PVOID pBase, IN BOOLEAN is
         // Wow64 process
         if (isWow64)
         {
-            PPEB32 pPeb32 = (PPEB32)PsGetProcessWow64Process(pProcess);
+            PPEB32 pPeb32 = (PPEB32)PsGetProcessWow64Process( pProcess );
             if (pPeb32 == NULL)
             {
-                DPRINT("BlackBone: %s: No PEB present. Aborting\n", __FUNCTION__);
+                DPRINT( "BlackBone: %s: No PEB present. Aborting\n", __FUNCTION__ );
                 return STATUS_NOT_FOUND;
             }
 
             // Search in InLoadOrderModuleList
             for (PLIST_ENTRY32 pListEntry = (PLIST_ENTRY32)((PPEB_LDR_DATA32)pPeb32->Ldr)->InLoadOrderModuleList.Flink;
-                pListEntry != &((PPEB_LDR_DATA32)pPeb32->Ldr)->InLoadOrderModuleList;
-                pListEntry = (PLIST_ENTRY32)pListEntry->Flink)
+                  pListEntry != &((PPEB_LDR_DATA32)pPeb32->Ldr)->InLoadOrderModuleList;
+                  pListEntry = (PLIST_ENTRY32)pListEntry->Flink)
             {
-                PLDR_DATA_TABLE_ENTRY32 pEntry = CONTAINING_RECORD(pListEntry, LDR_DATA_TABLE_ENTRY32, InLoadOrderLinks);
+                PLDR_DATA_TABLE_ENTRY32 pEntry = CONTAINING_RECORD( pListEntry, LDR_DATA_TABLE_ENTRY32, InLoadOrderLinks );
 
                 // Unlink
                 if ((PVOID)pEntry->DllBase == pBase)
                 {
-                    RemoveEntryList32(&pEntry->InLoadOrderLinks);
-                    RemoveEntryList32(&pEntry->InInitializationOrderLinks);
-                    RemoveEntryList32(&pEntry->InMemoryOrderLinks);
-                    RemoveEntryList32(&pEntry->HashLinks);
+                    RemoveEntryList32( &pEntry->InLoadOrderLinks );
+                    RemoveEntryList32( &pEntry->InInitializationOrderLinks );
+                    RemoveEntryList32( &pEntry->InMemoryOrderLinks );
+                    RemoveEntryList32( &pEntry->HashLinks );
 
                     break;
                 }
@@ -256,27 +257,27 @@ NTSTATUS BBUnlinkFromLoader(IN PEPROCESS pProcess, IN PVOID pBase, IN BOOLEAN is
         // Native process
         else
         {
-            PPEB pPeb = PsGetProcessPeb(pProcess);
+            PPEB pPeb = PsGetProcessPeb( pProcess );
             if (!pPeb)
             {
-                DPRINT("BlackBone: %s: No PEB present. Aborting\n", __FUNCTION__);
+                DPRINT( "BlackBone: %s: No PEB present. Aborting\n", __FUNCTION__ );
                 return STATUS_NOT_FOUND;
             }
 
             // Search in InLoadOrderModuleList
             for (PLIST_ENTRY pListEntry = pPeb->Ldr->InLoadOrderModuleList.Flink;
-                pListEntry != &pPeb->Ldr->InLoadOrderModuleList;
-                pListEntry = pListEntry->Flink)
+                  pListEntry != &pPeb->Ldr->InLoadOrderModuleList;
+                  pListEntry = pListEntry->Flink)
             {
-                PLDR_DATA_TABLE_ENTRY pEntry = CONTAINING_RECORD(pListEntry, LDR_DATA_TABLE_ENTRY, InLoadOrderLinks);
-
+                PLDR_DATA_TABLE_ENTRY pEntry = CONTAINING_RECORD( pListEntry, LDR_DATA_TABLE_ENTRY, InLoadOrderLinks );
+                
                 // Unlink
                 if (pEntry->DllBase == pBase)
                 {
-                    RemoveEntryList(&pEntry->InLoadOrderLinks);
-                    RemoveEntryList(&pEntry->InInitializationOrderLinks);
-                    RemoveEntryList(&pEntry->InMemoryOrderLinks);
-                    RemoveEntryList(&pEntry->HashLinks);
+                    RemoveEntryList( &pEntry->InLoadOrderLinks );
+                    RemoveEntryList( &pEntry->InInitializationOrderLinks );
+                    RemoveEntryList( &pEntry->InMemoryOrderLinks );
+                    RemoveEntryList( &pEntry->HashLinks );
 
                     break;
                 }
@@ -285,7 +286,7 @@ NTSTATUS BBUnlinkFromLoader(IN PEPROCESS pProcess, IN PVOID pBase, IN BOOLEAN is
     }
     __except (EXCEPTION_EXECUTE_HANDLER)
     {
-        DPRINT("BlackBone: %s: Exception, Code: 0x%X\n", __FUNCTION__, GetExceptionCode());
+        DPRINT( "BlackBone: %s: Exception, Code: 0x%X\n", __FUNCTION__, GetExceptionCode() );
     }
 
     return status;
@@ -299,7 +300,7 @@ NTSTATUS BBUnlinkFromLoader(IN PEPROCESS pProcess, IN PVOID pBase, IN BOOLEAN is
 /// <param name="pProcess">Target process for user module</param>
 /// <param name="baseName">Dll name for api schema</param>
 /// <returns>Found address, NULL if not found</returns>
-PVOID BBGetModuleExport(IN PVOID pBase, IN PCCHAR name_ord, IN PEPROCESS pProcess, IN PUNICODE_STRING baseName)
+PVOID BBGetModuleExport( IN PVOID pBase, IN PCCHAR name_ord, IN PEPROCESS pProcess, IN PUNICODE_STRING baseName )
 {
     PIMAGE_DOS_HEADER pDosHdr = (PIMAGE_DOS_HEADER)pBase;
     PIMAGE_NT_HEADERS32 pNtHdr32 = NULL;
@@ -308,7 +309,7 @@ PVOID BBGetModuleExport(IN PVOID pBase, IN PCCHAR name_ord, IN PEPROCESS pProces
     ULONG expSize = 0;
     ULONG_PTR pAddress = 0;
 
-    ASSERT(pBase != NULL);
+    ASSERT( pBase != NULL );
     if (pBase == NULL)
         return NULL;
 
@@ -361,7 +362,7 @@ PVOID BBGetModuleExport(IN PVOID pBase, IN PCCHAR name_ord, IN PEPROCESS pProces
             return NULL;
 
         if (((ULONG_PTR)name_ord <= 0xFFFF && (USHORT)((ULONG_PTR)name_ord) == OrdIndex + pExport->Base) ||
-            ((ULONG_PTR)name_ord > 0xFFFF && strcmp(pName, name_ord) == 0))
+            ((ULONG_PTR)name_ord > 0xFFFF && strcmp( pName, name_ord ) == 0))
         {
             pAddress = pAddressOfFuncs[OrdIndex] + (ULONG_PTR)pBase;
 
@@ -381,15 +382,15 @@ PVOID BBGetModuleExport(IN PVOID pBase, IN PCCHAR name_ord, IN PEPROCESS pProces
                 if (pProcess == NULL)
                     return NULL;
 
-                RtlInitAnsiString(&forwarder, (PCSZ)pAddress);
-                RtlInitEmptyUnicodeString(&uForwarder, strbuf, sizeof(strbuf));
+                RtlInitAnsiString( &forwarder, (PCSZ)pAddress );
+                RtlInitEmptyUnicodeString( &uForwarder, strbuf, sizeof( strbuf ) );
 
-                RtlAnsiStringToUnicodeString(&uForwarder, &forwarder, FALSE);
-                for (ULONG j = 0; j < uForwarder.Length / sizeof(WCHAR); j++)
+                RtlAnsiStringToUnicodeString( &uForwarder, &forwarder, FALSE );
+                for (ULONG j = 0; j < uForwarder.Length / sizeof( WCHAR ); j++)
                 {
                     if (uForwarder.Buffer[j] == L'.')
                     {
-                        uForwarder.Length = (USHORT)(j * sizeof(WCHAR));
+                        uForwarder.Length = (USHORT)(j * sizeof( WCHAR ));
                         uForwarder.Buffer[j] = L'\0';
                         delimIdx = j;
                         break;
@@ -397,20 +398,20 @@ PVOID BBGetModuleExport(IN PVOID pBase, IN PCCHAR name_ord, IN PEPROCESS pProces
                 }
 
                 // Get forward function name/ordinal
-                RtlInitAnsiString(&import, forwarder.Buffer + delimIdx + 1);
-                RtlAppendUnicodeToString(&uForwarder, L".dll");
+                RtlInitAnsiString( &import, forwarder.Buffer + delimIdx + 1 );
+                RtlAppendUnicodeToString( &uForwarder, L".dll" );
 
                 //
                 // Check forwarded module
                 //
                 UNICODE_STRING resolved = { 0 };
                 UNICODE_STRING resolvedName = { 0 };
-                BBResolveImagePath(NULL, pProcess, KApiShemaOnly, &uForwarder, baseName, &resolved);
-                BBStripPath(&resolved, &resolvedName);
+                BBResolveImagePath( NULL, pProcess, KApiShemaOnly, &uForwarder, baseName, &resolved );
+                BBStripPath( &resolved, &resolvedName );
 
-                forwardBase = BBGetUserModule(pProcess, &resolvedName, PsGetProcessWow64Process(pProcess) != NULL);
-                result = BBGetModuleExport(forwardBase, import.Buffer, pProcess, &resolvedName);
-                RtlFreeUnicodeString(&resolved);
+                forwardBase = BBGetUserModule( pProcess, &resolvedName, PsGetProcessWow64Process( pProcess ) != NULL );
+                result = BBGetModuleExport( forwardBase, import.Buffer, pProcess, &resolvedName );
+                RtlFreeUnicodeString( &resolved );
 
                 return result;
             }
@@ -428,9 +429,9 @@ PVOID BBGetModuleExport(IN PVOID pBase, IN PCCHAR name_ord, IN PEPROCESS pProces
 /// <param name="pThread">Thread to check</param>
 /// /// <param name="isWow64">If TRUE - check Wow64 TEB</param>
 /// <returns>If TRUE - BBLookupProcessThread should skip thread</returns>
-BOOLEAN BBSkipThread(IN PETHREAD pThread, IN BOOLEAN isWow64)
+BOOLEAN BBSkipThread( IN PETHREAD pThread, IN BOOLEAN isWow64 )
 {
-    PUCHAR pTeb64 = PsGetThreadTeb(pThread);
+    PUCHAR pTeb64 = PsGetThreadTeb( pThread );
     if (!pTeb64)
         return TRUE;
 
@@ -473,33 +474,33 @@ BOOLEAN BBSkipThread(IN PETHREAD pThread, IN BOOLEAN isWow64)
 /// <param name="pProcess">Target process</param>
 /// <param name="ppThread">Found thread. Thread object reference count is increased by 1</param>
 /// <returns>Status code</returns>
-NTSTATUS BBLookupProcessThread(IN PEPROCESS pProcess, OUT PETHREAD* ppThread)
+NTSTATUS BBLookupProcessThread( IN PEPROCESS pProcess, OUT PETHREAD* ppThread )
 {
     NTSTATUS status = STATUS_SUCCESS;
-    HANDLE pid = PsGetProcessId(pProcess);
-    PVOID pBuf = ExAllocatePoolWithTag(NonPagedPool, 1024 * 1024, BB_POOL_TAG);
+    HANDLE pid = PsGetProcessId( pProcess );
+    PVOID pBuf = ExAllocatePoolWithTag( NonPagedPool, 1024 * 1024, BB_POOL_TAG );
     PSYSTEM_PROCESS_INFO pInfo = (PSYSTEM_PROCESS_INFO)pBuf;
 
-    ASSERT(ppThread != NULL);
+    ASSERT( ppThread != NULL );
     if (ppThread == NULL)
         return STATUS_INVALID_PARAMETER;
 
     if (!pInfo)
     {
-        DPRINT("BlackBone: %s: Failed to allocate memory for process list\n", __FUNCTION__);
+        DPRINT( "BlackBone: %s: Failed to allocate memory for process list\n", __FUNCTION__ );
         return STATUS_NO_MEMORY;
     }
 
     // Get the process thread list
-    status = ZwQuerySystemInformation(SystemProcessInformation, pInfo, 1024 * 1024, NULL);
-    if (!NT_SUCCESS(status))
+    status = ZwQuerySystemInformation( SystemProcessInformation, pInfo, 1024 * 1024, NULL );
+    if (!NT_SUCCESS( status ))
     {
-        ExFreePoolWithTag(pBuf, BB_POOL_TAG);
+        ExFreePoolWithTag( pBuf, BB_POOL_TAG );
         return status;
     }
 
     // Find target thread
-    if (NT_SUCCESS(status))
+    if (NT_SUCCESS( status ))
     {
         status = STATUS_NOT_FOUND;
         for (;;)
@@ -516,10 +517,10 @@ NTSTATUS BBLookupProcessThread(IN PEPROCESS pProcess, OUT PETHREAD* ppThread)
         }
     }
 
-    BOOLEAN wow64 = PsGetProcessWow64Process(pProcess) != NULL;
+    BOOLEAN wow64 = PsGetProcessWow64Process( pProcess ) != NULL;
 
     // Reference target thread
-    if (NT_SUCCESS(status))
+    if (NT_SUCCESS( status ))
     {
         status = STATUS_NOT_FOUND;
 
@@ -529,17 +530,17 @@ NTSTATUS BBLookupProcessThread(IN PEPROCESS pProcess, OUT PETHREAD* ppThread)
             // Skip current thread
             if (/*pInfo->Threads[i].WaitReason == Suspended ||
                  pInfo->Threads[i].ThreadState == 5 ||*/
-                pInfo->Threads[i].ClientId.UniqueThread == PsGetCurrentThreadId())
+                 pInfo->Threads[i].ClientId.UniqueThread == PsGetCurrentThreadId())
             {
                 continue;
             }
 
-            status = PsLookupThreadByThreadId(pInfo->Threads[i].ClientId.UniqueThread, ppThread);
+            status = PsLookupThreadByThreadId( pInfo->Threads[i].ClientId.UniqueThread, ppThread );
 
             // Skip specific threads
-            if (*ppThread && BBSkipThread(*ppThread, wow64))
+            if (*ppThread && BBSkipThread( *ppThread, wow64 ))
             {
-                ObDereferenceObject(*ppThread);
+                ObDereferenceObject( *ppThread );
                 *ppThread = NULL;
                 continue;
             }
@@ -548,10 +549,10 @@ NTSTATUS BBLookupProcessThread(IN PEPROCESS pProcess, OUT PETHREAD* ppThread)
         }
     }
     else
-        DPRINT("BlackBone: %s: Failed to locate process\n", __FUNCTION__);
+        DPRINT( "BlackBone: %s: Failed to locate process\n", __FUNCTION__ );
 
     if (pBuf)
-        ExFreePoolWithTag(pBuf, BB_POOL_TAG);
+        ExFreePoolWithTag( pBuf, BB_POOL_TAG );
 
     // No suitable thread
     if (!*ppThread)
@@ -576,50 +577,50 @@ NTSTATUS BBExecuteInNewThread(
     IN ULONG flags,
     IN BOOLEAN wait,
     OUT PNTSTATUS pExitStatus
-)
+    )
 {
     HANDLE hThread = NULL;
     OBJECT_ATTRIBUTES ob = { 0 };
 
-    InitializeObjectAttributes(&ob, NULL, OBJ_KERNEL_HANDLE, NULL, NULL);
+    InitializeObjectAttributes( &ob, NULL, OBJ_KERNEL_HANDLE, NULL, NULL );
 
     NTSTATUS status = ZwCreateThreadEx(
         &hThread, THREAD_QUERY_LIMITED_INFORMATION, &ob,
         ZwCurrentProcess(), pBaseAddress, pParam, flags,
         0, 0x1000, 0x100000, NULL
-    );
+        );
 
     // Wait for completion
-    if (NT_SUCCESS(status) && wait != FALSE)
+    if (NT_SUCCESS( status ) && wait != FALSE)
     {
         // Force 60 sec timeout
         LARGE_INTEGER timeout = { 0 };
         timeout.QuadPart = -(60ll * 10 * 1000 * 1000);
 
-        status = ZwWaitForSingleObject(hThread, TRUE, &timeout);
-        if (NT_SUCCESS(status))
+        status = ZwWaitForSingleObject( hThread, TRUE, &timeout );
+        if (NT_SUCCESS( status ))
         {
             THREAD_BASIC_INFORMATION info = { 0 };
             ULONG bytes = 0;
 
-            status = ZwQueryInformationThread(hThread, ThreadBasicInformation, &info, sizeof(info), &bytes);
-            if (NT_SUCCESS(status) && pExitStatus)
+            status = ZwQueryInformationThread( hThread, ThreadBasicInformation, &info, sizeof( info ), &bytes );
+            if (NT_SUCCESS( status ) && pExitStatus)
             {
                 *pExitStatus = info.ExitStatus;
             }
-            else if (!NT_SUCCESS(status))
+            else if (!NT_SUCCESS( status ))
             {
-                DPRINT("BlackBone: %s: ZwQueryInformationThread failed with status 0x%X\n", __FUNCTION__, status);
+                DPRINT( "BlackBone: %s: ZwQueryInformationThread failed with status 0x%X\n", __FUNCTION__, status );
             }
         }
         else
-            DPRINT("BlackBone: %s: ZwWaitForSingleObject failed with status 0x%X\n", __FUNCTION__, status);
+            DPRINT( "BlackBone: %s: ZwWaitForSingleObject failed with status 0x%X\n", __FUNCTION__, status );
     }
     else
-        DPRINT("BlackBone: %s: ZwCreateThreadEx failed with status 0x%X\n", __FUNCTION__, status);
+        DPRINT( "BlackBone: %s: ZwCreateThreadEx failed with status 0x%X\n", __FUNCTION__, status );
 
     if (hThread)
-        ZwClose(hThread);
+        ZwClose( hThread );
 
     return status;
 }
@@ -641,19 +642,19 @@ NTSTATUS BBQueueUserApc(
     IN PVOID Arg2,
     IN PVOID Arg3,
     IN BOOLEAN bForce
-)
+    )
 {
-    ASSERT(pThread != NULL);
+    ASSERT( pThread != NULL );
     if (pThread == NULL)
         return STATUS_INVALID_PARAMETER;
 
     // Allocate APC
     PKAPC pPrepareApc = NULL;
-    PKAPC pInjectApc = ExAllocatePoolWithTag(NonPagedPool, sizeof(KAPC), BB_POOL_TAG);
+    PKAPC pInjectApc = ExAllocatePoolWithTag( NonPagedPool, sizeof( KAPC ), BB_POOL_TAG );
 
     if (pInjectApc == NULL)
     {
-        DPRINT("BlackBone: %s: Failed to allocate APC\n", __FUNCTION__);
+        DPRINT( "BlackBone: %s: Failed to allocate APC\n", __FUNCTION__ );
         return STATUS_NO_MEMORY;
     }
 
@@ -662,35 +663,35 @@ NTSTATUS BBQueueUserApc(
         pInjectApc, (PKTHREAD)pThread,
         OriginalApcEnvironment, &KernelApcInjectCallback,
         NULL, (PKNORMAL_ROUTINE)(ULONG_PTR)pUserFunc, UserMode, Arg1
-    );
+        );
 
     // Setup force-delivery APC
     if (bForce)
     {
-        pPrepareApc = ExAllocatePoolWithTag(NonPagedPool, sizeof(KAPC), BB_POOL_TAG);
+        pPrepareApc = ExAllocatePoolWithTag( NonPagedPool, sizeof( KAPC ), BB_POOL_TAG );
         KeInitializeApc(
             pPrepareApc, (PKTHREAD)pThread,
             OriginalApcEnvironment, &KernelApcPrepareCallback,
             NULL, NULL, KernelMode, NULL
-        );
+            );
     }
 
     // Insert APC
-    if (KeInsertQueueApc(pInjectApc, Arg2, Arg3, 0))
+    if (KeInsertQueueApc( pInjectApc, Arg2, Arg3, 0 ))
     {
         if (bForce && pPrepareApc)
-            KeInsertQueueApc(pPrepareApc, NULL, NULL, 0);
+            KeInsertQueueApc( pPrepareApc, NULL, NULL, 0 );
 
         return STATUS_SUCCESS;
     }
     else
     {
-        DPRINT("BlackBone: %s: Failed to insert APC\n", __FUNCTION__);
+        DPRINT( "BlackBone: %s: Failed to insert APC\n", __FUNCTION__ );
 
-        ExFreePoolWithTag(pInjectApc, BB_POOL_TAG);
+        ExFreePoolWithTag( pInjectApc, BB_POOL_TAG );
 
         if (pPrepareApc)
-            ExFreePoolWithTag(pPrepareApc, BB_POOL_TAG);
+            ExFreePoolWithTag( pPrepareApc, BB_POOL_TAG );
 
         return STATUS_NOT_CAPABLE;
     }
@@ -705,18 +706,18 @@ VOID KernelApcPrepareCallback(
     PVOID* NormalContext,
     PVOID* SystemArgument1,
     PVOID* SystemArgument2
-)
+    )
 {
-    UNREFERENCED_PARAMETER(NormalRoutine);
-    UNREFERENCED_PARAMETER(NormalContext);
-    UNREFERENCED_PARAMETER(SystemArgument1);
-    UNREFERENCED_PARAMETER(SystemArgument2);
+    UNREFERENCED_PARAMETER( NormalRoutine );
+    UNREFERENCED_PARAMETER( NormalContext );
+    UNREFERENCED_PARAMETER( SystemArgument1 );
+    UNREFERENCED_PARAMETER( SystemArgument2 );
 
     //DPRINT( "BlackBone: %s: Called\n", __FUNCTION__ );
 
     // Alert current thread
-    KeTestAlertThread(UserMode);
-    ExFreePoolWithTag(Apc, BB_POOL_TAG);
+    KeTestAlertThread( UserMode );
+    ExFreePoolWithTag( Apc, BB_POOL_TAG );
 }
 
 VOID KernelApcInjectCallback(
@@ -725,22 +726,22 @@ VOID KernelApcInjectCallback(
     PVOID* NormalContext,
     PVOID* SystemArgument1,
     PVOID* SystemArgument2
-)
+    )
 {
-    UNREFERENCED_PARAMETER(SystemArgument1);
-    UNREFERENCED_PARAMETER(SystemArgument2);
+    UNREFERENCED_PARAMETER( SystemArgument1 );
+    UNREFERENCED_PARAMETER( SystemArgument2 );
 
     //DPRINT( "BlackBone: %s: Called. NormalRoutine = 0x%p\n", __FUNCTION__, *NormalRoutine );
 
     // Skip execution
-    if (PsIsThreadTerminating(PsGetCurrentThread()))
+    if (PsIsThreadTerminating( PsGetCurrentThread() ))
         *NormalRoutine = NULL;
 
     // Fix Wow64 APC
     if (PsGetCurrentProcessWow64Process() != NULL)
-        PsWrapApcWow64Thread(NormalContext, (PVOID*)NormalRoutine);
+        PsWrapApcWow64Thread( NormalContext, (PVOID*)NormalRoutine );
 
-    ExFreePoolWithTag(Apc, BB_POOL_TAG);
+    ExFreePoolWithTag( Apc, BB_POOL_TAG );
 }
 
 /// <summary>
@@ -748,7 +749,7 @@ VOID KernelApcInjectCallback(
 /// </summary>
 /// <param name="pArg">Path to the driver - PUNICODE_STRING type</param>
 /// <returns>Status code</returns>
-NTSTATUS BBMapWorker(IN PVOID pArg)
+NTSTATUS BBMapWorker( IN PVOID pArg )
 {
     NTSTATUS status = STATUS_SUCCESS;
     HANDLE hFile = NULL;
@@ -761,46 +762,46 @@ NTSTATUS BBMapWorker(IN PVOID pArg)
     PMDL pMDL = NULL;
     FILE_STANDARD_INFORMATION fileInfo = { 0 };
 
-    InitializeObjectAttributes(&obAttr, pPath, OBJ_KERNEL_HANDLE, NULL, NULL);
+    InitializeObjectAttributes( &obAttr, pPath, OBJ_KERNEL_HANDLE, NULL, NULL );
 
     // Open driver file
-    status = ZwCreateFile(
-        &hFile, FILE_READ_DATA | SYNCHRONIZE, &obAttr,
-        &statusBlock, NULL, FILE_ATTRIBUTE_NORMAL, FILE_SHARE_READ,
+    status = ZwCreateFile( 
+        &hFile, FILE_READ_DATA | SYNCHRONIZE, &obAttr, 
+        &statusBlock, NULL, FILE_ATTRIBUTE_NORMAL, FILE_SHARE_READ, 
         FILE_OPEN, FILE_SYNCHRONOUS_IO_NONALERT, NULL, 0
-    );
+        );
 
-    if (!NT_SUCCESS(status))
+    if (!NT_SUCCESS( status ))
     {
-        DPRINT("BlackBone: %s: Failed to open '%wZ'. Status: 0x%X\n", __FUNCTION__, pPath, status);
-        PsTerminateSystemThread(status);
+        DPRINT( "BlackBone: %s: Failed to open '%wZ'. Status: 0x%X\n", __FUNCTION__, pPath, status );
+        PsTerminateSystemThread( status );
         return status;
     }
 
     // Allocate memory for file contents
-    status = ZwQueryInformationFile(hFile, &statusBlock, &fileInfo, sizeof(fileInfo), FileStandardInformation);
-    if (NT_SUCCESS(status))
-        fileData = ExAllocatePoolWithTag(PagedPool, fileInfo.EndOfFile.QuadPart, BB_POOL_TAG);
+    status = ZwQueryInformationFile( hFile, &statusBlock, &fileInfo, sizeof( fileInfo ), FileStandardInformation );
+    if (NT_SUCCESS( status ))
+        fileData = ExAllocatePoolWithTag( PagedPool, fileInfo.EndOfFile.QuadPart, BB_POOL_TAG );
     else
-        DPRINT("BlackBone: %s: Failed to get '%wZ' size. Status: 0x%X\n", __FUNCTION__, pPath, status);
+        DPRINT( "BlackBone: %s: Failed to get '%wZ' size. Status: 0x%X\n", __FUNCTION__, pPath, status );
 
     // Get file contents
-    status = ZwReadFile(hFile, NULL, NULL, NULL, &statusBlock, fileData, fileInfo.EndOfFile.LowPart, NULL, NULL);
-    if (NT_SUCCESS(status))
+    status = ZwReadFile( hFile, NULL, NULL, NULL, &statusBlock, fileData, fileInfo.EndOfFile.LowPart, NULL, NULL );
+    if (NT_SUCCESS( status ))
     {
-        pNTHeader = RtlImageNtHeader(fileData);
+        pNTHeader = RtlImageNtHeader( fileData );
         if (!pNTHeader)
         {
-            DPRINT("BlackBone: %s: Failed to obtaint NT Header for '%wZ'\n", __FUNCTION__, pPath);
+            DPRINT( "BlackBone: %s: Failed to obtaint NT Header for '%wZ'\n", __FUNCTION__, pPath );
             status = STATUS_INVALID_IMAGE_FORMAT;
         }
     }
     else
-        DPRINT("BlackBone: %s: Failed to read '%wZ'. Status: 0x%X\n", __FUNCTION__, pPath, status);
+        DPRINT( "BlackBone: %s: Failed to read '%wZ'. Status: 0x%X\n", __FUNCTION__, pPath, status );
 
-    ZwClose(hFile);
+    ZwClose( hFile );
 
-    if (NT_SUCCESS(status))
+    if (NT_SUCCESS( status ))
     {
         //
         // Allocate memory from System PTEs
@@ -808,13 +809,13 @@ NTSTATUS BBMapWorker(IN PVOID pArg)
         PHYSICAL_ADDRESS start = { 0 }, end = { 0 };
         end.QuadPart = MAXULONG64;
 
-        pMDL = MmAllocatePagesForMdl(start, end, start, pNTHeader->OptionalHeader.SizeOfImage);
-        imageSection = MmGetSystemAddressForMdlSafe(pMDL, NormalPagePriority);
+        pMDL = MmAllocatePagesForMdl( start, end, start, pNTHeader->OptionalHeader.SizeOfImage );
+        imageSection = MmGetSystemAddressForMdlSafe( pMDL, NormalPagePriority );
 
-        if (NT_SUCCESS(status) && imageSection)
+        if (NT_SUCCESS( status ) && imageSection)
         {
             // Copy header
-            RtlCopyMemory(imageSection, fileData, pNTHeader->OptionalHeader.SizeOfHeaders);
+            RtlCopyMemory( imageSection, fileData, pNTHeader->OptionalHeader.SizeOfHeaders );
 
             // Copy sections
             for (PIMAGE_SECTION_HEADER pSection = (PIMAGE_SECTION_HEADER)(pNTHeader + 1);
@@ -825,21 +826,21 @@ NTSTATUS BBMapWorker(IN PVOID pArg)
                     (PUCHAR)imageSection + pSection->VirtualAddress,
                     (PUCHAR)fileData + pSection->PointerToRawData,
                     pSection->SizeOfRawData
-                );
+                    );
             }
 
             // Relocate image
-            status = LdrRelocateImage(imageSection, STATUS_SUCCESS, STATUS_CONFLICTING_ADDRESSES, STATUS_INVALID_IMAGE_FORMAT);
-            if (!NT_SUCCESS(status))
-                DPRINT("BlackBone: %s: Failed to relocate image '%wZ'. Status: 0x%X\n", __FUNCTION__, pPath, status);
+            status = LdrRelocateImage( imageSection, STATUS_SUCCESS, STATUS_CONFLICTING_ADDRESSES, STATUS_INVALID_IMAGE_FORMAT );
+            if (!NT_SUCCESS( status ))
+                DPRINT( "BlackBone: %s: Failed to relocate image '%wZ'. Status: 0x%X\n", __FUNCTION__, pPath, status );
 
             // Fill IAT
-            if (NT_SUCCESS(status))
-                status = BBResolveImageRefs(imageSection, TRUE, NULL, FALSE, NULL, 0);
+            if (NT_SUCCESS( status ))
+                status = BBResolveImageRefs( imageSection, TRUE, NULL, FALSE, NULL, 0 );
         }
         else
         {
-            DPRINT("BlackBone: %s: Failed to allocate memory for image '%wZ'\n", __FUNCTION__, pPath);
+            DPRINT( "BlackBone: %s: Failed to allocate memory for image '%wZ'\n", __FUNCTION__, pPath );
             status = STATUS_MEMORY_NOT_ALLOCATED;
         }
     }
@@ -853,37 +854,37 @@ NTSTATUS BBMapWorker(IN PVOID pArg)
     }*/
 
     // Initialize kernel security cookie
-    if (NT_SUCCESS(status))
-        BBCreateCookie(imageSection);
-
+	if (NT_SUCCESS( status ))
+		BBCreateCookie( imageSection );
+    
     // Call entry point
-    if (NT_SUCCESS(status) && pNTHeader->OptionalHeader.AddressOfEntryPoint)
+    if (NT_SUCCESS( status ) && pNTHeader->OptionalHeader.AddressOfEntryPoint)
     {
         PDRIVER_INITIALIZE pEntryPoint = (PDRIVER_INITIALIZE)((ULONG_PTR)imageSection + pNTHeader->OptionalHeader.AddressOfEntryPoint);
-        pEntryPoint(NULL, NULL);
+        pEntryPoint( NULL, NULL );
     }
 
     // Wipe header
-    if (NT_SUCCESS(status) && imageSection)
-        RtlZeroMemory(imageSection, pNTHeader->OptionalHeader.SizeOfHeaders);
+    if (NT_SUCCESS( status ) && imageSection)
+        RtlZeroMemory( imageSection, pNTHeader->OptionalHeader.SizeOfHeaders );
 
     // Erase info about allocated region
     if (pMDL)
     {
         // Free image memory in case of failure
-        if (!NT_SUCCESS(status))
-            MmFreePagesFromMdl(pMDL);
+        if(!NT_SUCCESS( status ))
+            MmFreePagesFromMdl( pMDL );
 
-        ExFreePool(pMDL);
+        ExFreePool( pMDL );
     }
 
     if (fileData)
-        ExFreePoolWithTag(fileData, BB_POOL_TAG);
+        ExFreePoolWithTag( fileData, BB_POOL_TAG );
 
-    if (NT_SUCCESS(status))
-        DPRINT("BlackBone: %s: Successfully mapped '%wZ' at 0x%p\n", __FUNCTION__, pPath, imageSection);
+    if (NT_SUCCESS( status ))
+        DPRINT( "BlackBone: %s: Successfully mapped '%wZ' at 0x%p\n", __FUNCTION__, pPath, imageSection );
 
-    PsTerminateSystemThread(status);
+    PsTerminateSystemThread( status );
     return status;
 }
 
@@ -892,7 +893,7 @@ NTSTATUS BBMapWorker(IN PVOID pArg)
 /// </summary>
 /// <param name="pPath">Fully qualified native path to the driver</param>
 /// <returns>Status code</returns>
-NTSTATUS BBMMapDriver(IN PUNICODE_STRING pPath)
+NTSTATUS BBMMapDriver( IN PUNICODE_STRING pPath )
 {
     HANDLE hThread = NULL;
     CLIENT_ID clientID = { 0 };
@@ -900,34 +901,34 @@ NTSTATUS BBMMapDriver(IN PUNICODE_STRING pPath)
     PETHREAD pThread = NULL;
     OBJECT_HANDLE_INFORMATION handleInfo = { 0 };
 
-    InitializeObjectAttributes(&obAttr, NULL, OBJ_KERNEL_HANDLE, NULL, NULL);
+    InitializeObjectAttributes( &obAttr, NULL, OBJ_KERNEL_HANDLE, NULL, NULL );
 
-    ASSERT(pPath != NULL);
+    ASSERT( pPath != NULL );
     if (pPath == NULL)
         return STATUS_INVALID_PARAMETER;
 
-    NTSTATUS status = PsCreateSystemThread(&hThread, THREAD_ALL_ACCESS, &obAttr, NULL, &clientID, &BBMapWorker, pPath);
-    if (!NT_SUCCESS(status))
+    NTSTATUS status = PsCreateSystemThread( &hThread, THREAD_ALL_ACCESS, &obAttr, NULL, &clientID, &BBMapWorker, pPath );
+    if (!NT_SUCCESS( status ))
     {
-        DPRINT("BlackBone: %s: Failed to create worker thread. Status: 0x%X\n", __FUNCTION__, status);
+        DPRINT( "BlackBone: %s: Failed to create worker thread. Status: 0x%X\n", __FUNCTION__, status );
         return status;
     }
 
     // Wait on worker thread
-    status = ObReferenceObjectByHandle(hThread, THREAD_ALL_ACCESS, *PsThreadType, KernelMode, &pThread, &handleInfo);
-    if (NT_SUCCESS(status))
+    status = ObReferenceObjectByHandle( hThread, THREAD_ALL_ACCESS, *PsThreadType, KernelMode, &pThread, &handleInfo );
+    if (NT_SUCCESS( status ))
     {
         THREAD_BASIC_INFORMATION info = { 0 };
         ULONG bytes = 0;
 
-        status = KeWaitForSingleObject(pThread, Executive, KernelMode, TRUE, NULL);
-        status = ZwQueryInformationThread(hThread, ThreadBasicInformation, &info, sizeof(info), &bytes);
-        if (NT_SUCCESS(status));
-        status = info.ExitStatus;
+        status = KeWaitForSingleObject( pThread, Executive, KernelMode, TRUE, NULL );
+        status = ZwQueryInformationThread( hThread, ThreadBasicInformation, &info, sizeof( info ), &bytes );
+        if (NT_SUCCESS( status ));
+            status = info.ExitStatus;
     }
 
     if (pThread)
-        ObDereferenceObject(pThread);
+        ObDereferenceObject( pThread );
 
     return status;
 }

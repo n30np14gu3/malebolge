@@ -1,6 +1,6 @@
 #include "globals.h"
 #include "functions.h"
-#include "routines.h"
+#include "blackbone/Routines.h"
 
 NTSTATUS KeReadVirtualMemory(PEPROCESS Process, DWORD64 SourceAddress, DWORD64 TargetAddress, SIZE_T Size, PSIZE_T ReadedBytes);
 NTSTATUS KeWriteVirtualMemory(PEPROCESS Process, DWORD64 SourceAddress, DWORD64 TargetAddress, SIZE_T Size, PSIZE_T WritedBytes);
@@ -13,6 +13,7 @@ NTSTATUS NTAPI ExRaiseHardError(LONG ErrorStatus, ULONG NumberOfParameters, ULON
 
 NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 {
+	UNREFERENCED_PARAMETER(DeviceObject);
 	ULONG bytesIO = 0;
 	PIO_STACK_LOCATION stack = IoGetCurrentIrpStackLocation(Irp);
 
@@ -24,11 +25,8 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 	PKERNEL_WRITE_REQUEST32 pWriteRequest32;
 	PKERNEL_READ_REQUEST32 pReadRequest32;
 	PKERNEL_GET_CSGO_MODULES pModules;
-	ULONG inputBufferLength = 0;
-	PINJECT_DLL pInject;
 	SIZE_T rwBytes = 0;
 
-	inputBufferLength = stack->Parameters.DeviceIoControl.InputBufferLength;
 	
 	switch(controlCode)
 	{
@@ -142,14 +140,7 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 		break;
 
 	case IO_INJECT_DLL:
-		if(inputBufferLength >= sizeof(INJECT_DLL))
-		{
-			Irp->IoStatus.Status = BBInjectDll((PINJECT_DLL)Irp->AssociatedIrp.SystemBuffer);
-		}
-		else
-		{
-			Irp->IoStatus.Status = STATUS_INFO_LENGTH_MISMATCH;
-		}
+		BBInjectDll((PINJECT_DLL)Irp->AssociatedIrp.SystemBuffer);
 		break;
 		default:break;
 	}	

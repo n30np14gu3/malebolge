@@ -26,5 +26,3 @@ extern DWORD32 ENGINE_DLL_BASE;
 extern BOOLEAN DRIVER_INITED;
 
 extern ULONG TerminateProcess;
-
-#define PRINTF(x) DbgPrintEx(0, 0, x)

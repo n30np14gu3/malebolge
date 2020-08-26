@@ -1,6 +1,6 @@
 #include "Private.h"
-#include "utils.h"
-#include <ntstrsafe.h>
+#include "Utils.h"
+#include <Ntstrsafe.h>
 
 #pragma alloc_text(PAGE, ExpLookupHandleTableEntry)
 #pragma alloc_text(PAGE, GetKernelBase)
@@ -17,14 +17,14 @@ extern DYNAMIC_DATA dynData;
 PVOID g_KernelBase = NULL;
 ULONG g_KernelSize = 0;
 PSYSTEM_SERVICE_DESCRIPTOR_TABLE g_SSDT = NULL;
-KDDEBUGGER_DATA64 g_KdBlock = { 0 };
+KDDEBUGGER_DATA64 g_KdBlock = {0};
 
 MMPTE ValidKernelPte =
 {
-    MM_PTE_VALID_MASK |
-    MM_PTE_WRITE_MASK |
+    MM_PTE_VALID_MASK  |
+    MM_PTE_WRITE_MASK  |
     MM_PTE_GLOBAL_MASK |
-    MM_PTE_DIRTY_MASK |
+    MM_PTE_DIRTY_MASK  |
     MM_PTE_ACCESS_MASK
 };
 
@@ -35,15 +35,15 @@ VOID InitializeDebuggerBlock()
 {
     CONTEXT context = { 0 };
     context.ContextFlags = CONTEXT_FULL;
-    RtlCaptureContext(&context);
-
-    PDUMP_HEADER dumpHeader = ExAllocatePool(NonPagedPool, DUMP_BLOCK_SIZE);
+    RtlCaptureContext( &context );
+    
+    PDUMP_HEADER dumpHeader = ExAllocatePoolWithTag( NonPagedPool, DUMP_BLOCK_SIZE, BB_POOL_TAG );
     if (dumpHeader)
     {
-        KeCapturePersistentThreadState(&context, NULL, 0, 0, 0, 0, 0, dumpHeader);
-        RtlCopyMemory(&g_KdBlock, (PUCHAR)dumpHeader + KDDEBUGGER_DATA_OFFSET, sizeof(g_KdBlock));
+        KeCapturePersistentThreadState( &context, NULL, 0, 0, 0, 0, 0, dumpHeader );
+        RtlCopyMemory( &g_KdBlock, (PUCHAR)dumpHeader + KDDEBUGGER_DATA_OFFSET, sizeof( g_KdBlock ) );
 
-        ExFreePool(dumpHeader);
+        ExFreePool( dumpHeader );
     }
 }
 
@@ -53,7 +53,7 @@ VOID InitializeDebuggerBlock()
 /// <param name="HandleTable">Handle table</param>
 /// <param name="tHandle">Handle to search for</param>
 /// <returns>Found entry, NULL if nothing found</returns>
-PHANDLE_TABLE_ENTRY ExpLookupHandleTableEntry(IN PHANDLE_TABLE HandleTable, IN EXHANDLE tHandle)
+PHANDLE_TABLE_ENTRY ExpLookupHandleTableEntry( IN PHANDLE_TABLE HandleTable, IN EXHANDLE tHandle )
 {
     ULONG_PTR TableCode = HandleTable->TableCode & 3;
     if (tHandle.Value >= HandleTable->NextHandleNeedingPool)
@@ -123,7 +123,7 @@ PHANDLE_TABLE_ENTRY ExpLookupHandleTableEntry(IN PHANDLE_TABLE HandleTable, IN E
 /// </summary>
 /// <param name="pSize">Size of module</param>
 /// <returns>Found address, NULL if not found</returns>
-PVOID GetKernelBase(OUT PULONG pSize)
+PVOID GetKernelBase( OUT PULONG pSize )
 {
     NTSTATUS status = STATUS_SUCCESS;
     ULONG bytes = 0;
@@ -139,26 +139,26 @@ PVOID GetKernelBase(OUT PULONG pSize)
         return g_KernelBase;
     }
 
-    RtlUnicodeStringInit(&routineName, L"NtOpenFile");
+    RtlUnicodeStringInit( &routineName, L"NtOpenFile" );
 
-    checkPtr = MmGetSystemRoutineAddress(&routineName);
+    checkPtr = MmGetSystemRoutineAddress( &routineName );
     if (checkPtr == NULL)
         return NULL;
 
     // Protect from UserMode AV
-    status = ZwQuerySystemInformation(SystemModuleInformation, 0, bytes, &bytes);
+    status = ZwQuerySystemInformation( SystemModuleInformation, 0, bytes, &bytes );
     if (bytes == 0)
     {
-        DPRINT("BlackBone: %s: Invalid SystemModuleInformation size\n", __FUNCTION__);
+        DPRINT( "BlackBone: %s: Invalid SystemModuleInformation size\n", __FUNCTION__ );
         return NULL;
     }
 
-    pMods = (PRTL_PROCESS_MODULES)ExAllocatePoolWithTag(NonPagedPool, bytes, BB_POOL_TAG);
-    RtlZeroMemory(pMods, bytes);
+    pMods = (PRTL_PROCESS_MODULES)ExAllocatePoolWithTag( NonPagedPool, bytes, BB_POOL_TAG );
+    RtlZeroMemory( pMods, bytes );
 
-    status = ZwQuerySystemInformation(SystemModuleInformation, pMods, bytes, &bytes);
+    status = ZwQuerySystemInformation( SystemModuleInformation, pMods, bytes, &bytes );
 
-    if (NT_SUCCESS(status))
+    if (NT_SUCCESS( status ))
     {
         PRTL_PROCESS_MODULE_INFORMATION pMod = pMods->Modules;
 
@@ -178,7 +178,7 @@ PVOID GetKernelBase(OUT PULONG pSize)
     }
 
     if (pMods)
-        ExFreePoolWithTag(pMods, BB_POOL_TAG);
+        ExFreePoolWithTag( pMods, BB_POOL_TAG );
 
     return g_KernelBase;
 }
@@ -189,7 +189,7 @@ PVOID GetKernelBase(OUT PULONG pSize)
 /// <returns>SSDT base, NULL if not found</returns>
 PSYSTEM_SERVICE_DESCRIPTOR_TABLE GetSSDTBase()
 {
-    PUCHAR ntosBase = GetKernelBase(NULL);
+    PUCHAR ntosBase = GetKernelBase( NULL );
 
     // Already found
     if (g_SSDT != NULL)
@@ -197,8 +197,8 @@ PSYSTEM_SERVICE_DESCRIPTOR_TABLE GetSSDTBase()
 
     if (!ntosBase)
         return NULL;
-
-    PIMAGE_NT_HEADERS pHdr = RtlImageNtHeader(ntosBase);
+    
+    PIMAGE_NT_HEADERS pHdr = RtlImageNtHeader( ntosBase );
     PIMAGE_SECTION_HEADER pFirstSec = (PIMAGE_SECTION_HEADER)(pHdr + 1);
     for (PIMAGE_SECTION_HEADER pSec = pFirstSec; pSec < pFirstSec + pHdr->FileHeader.NumberOfSections; pSec++)
     {
@@ -214,8 +214,8 @@ PSYSTEM_SERVICE_DESCRIPTOR_TABLE GetSSDTBase()
 
             // KiSystemServiceRepeat pattern
             UCHAR pattern[] = "\x4c\x8d\x15\xcc\xcc\xcc\xcc\x4c\x8d\x1d\xcc\xcc\xcc\xcc\xf7";
-            NTSTATUS status = BBSearchPattern(pattern, 0xCC, sizeof(pattern) - 1, ntosBase + pSec->VirtualAddress, pSec->Misc.VirtualSize, &pFound);
-            if (NT_SUCCESS(status))
+            NTSTATUS status = BBSearchPattern( pattern, 0xCC, sizeof( pattern ) - 1, ntosBase + pSec->VirtualAddress, pSec->Misc.VirtualSize, &pFound );
+            if (NT_SUCCESS( status ))
             {
                 g_SSDT = (PSYSTEM_SERVICE_DESCRIPTOR_TABLE)((PUCHAR)pFound + *(PULONG)((PUCHAR)pFound + 3) + 7);
                 //DPRINT( "BlackBone: %s: KeSystemServiceDescriptorTable = 0x%p\n", __FUNCTION__, g_SSDT );
@@ -223,7 +223,7 @@ PSYSTEM_SERVICE_DESCRIPTOR_TABLE GetSSDTBase()
             }
         }
     }
-
+   
     return NULL;
 }
 
@@ -232,11 +232,11 @@ PSYSTEM_SERVICE_DESCRIPTOR_TABLE GetSSDTBase()
 /// </summary>
 /// <param name="index">Service index</param>
 /// <returns>Found service address, NULL if not found</returns>
-PVOID GetSSDTEntry(IN ULONG index)
+PVOID GetSSDTEntry( IN ULONG index )
 {
     ULONG size = 0;
     PSYSTEM_SERVICE_DESCRIPTOR_TABLE pSSDT = GetSSDTBase();
-    PVOID pBase = GetKernelBase(&size);
+    PVOID pBase = GetKernelBase( &size );
 
     if (pSSDT && pBase)
     {
@@ -256,7 +256,7 @@ PVOID GetSSDTEntry(IN ULONG index)
 /// </summary>
 /// <param name="pAddress">Target address</param>
 /// <returns>Found PTE</returns>
-PMMPTE GetPTEForVA(IN PVOID pAddress)
+PMMPTE GetPTEForVA( IN PVOID pAddress )
 {
     if (dynData.ver >= WINVER_10_RS1)
     {
@@ -270,57 +270,57 @@ PMMPTE GetPTEForVA(IN PVOID pAddress)
     else
     {
         // Check if large page
-        PMMPTE pPDE = MiGetPdeAddress(pAddress);
+        PMMPTE pPDE = MiGetPdeAddress( pAddress );
         if (pPDE->u.Hard.LargePage)
             return pPDE;
 
-        return MiGetPteAddress(pAddress);
+        return MiGetPteAddress( pAddress );
     }
 }
 
-VOID DpcRoutine(KDPC* pDpc, void* pContext, void* pArg1, void* pArg2)
+VOID DpcRoutine( KDPC *pDpc, void *pContext, void *pArg1, void *pArg2 )
 {
     KIRQL Irql;
     PNOPPROCINFO Info = (PNOPPROCINFO)pContext;
 
-    UNREFERENCED_PARAMETER(pDpc);
-    UNREFERENCED_PARAMETER(pArg1);
-    UNREFERENCED_PARAMETER(pArg2);
+    UNREFERENCED_PARAMETER( pDpc );
+    UNREFERENCED_PARAMETER( pArg1 );
+    UNREFERENCED_PARAMETER( pArg2 );
 
-    InterlockedIncrement(&Info->DPCCount);
+    InterlockedIncrement( &Info->DPCCount );
     do
     {
         __nop();
     } while (Info->ActiveCores != Info->DPCCount);
 
-    KeRaiseIrql(HIGH_LEVEL, &Irql);
+    KeRaiseIrql( HIGH_LEVEL, &Irql );
     do
     {
         __nop();
     } while (!Info->IsCodeExecuted);
 
-    InterlockedDecrement(&Info->DPCCount);
-    KeLowerIrql(Irql);
+    InterlockedDecrement( &Info->DPCCount );
+    KeLowerIrql( Irql );
 }
 
 /// <summary>
 /// Initialize structure for processor start/stop
 /// </summary>
 /// <param name="Info">>Processors data</param>
-VOID InitializeStopProcessors(OUT NOPPROCINFO* Info)
+VOID InitializeStopProcessors( OUT NOPPROCINFO* Info )
 {
     KAFFINITY aff = 0;
-    RtlZeroMemory(Info, sizeof(NOPPROCINFO));
+    RtlZeroMemory( Info, sizeof( NOPPROCINFO ) );
 
-    Info->Cores = KeQueryActiveProcessorCount(&aff);
+    Info->Cores = KeQueryActiveProcessorCount( &aff );
 
     if (Info->Cores > 1)
     {
         for (ULONG i = 0; i < Info->Cores; i++)
         {
-            KeInitializeDpc(&Info->DpcTraps[i], DpcRoutine, Info);
-            KeSetImportanceDpc(&Info->DpcTraps[i], LowImportance);
-            KeSetTargetProcessorDpc(&Info->DpcTraps[i], (CCHAR)i);
+            KeInitializeDpc( &Info->DpcTraps[i], DpcRoutine, Info );
+            KeSetImportanceDpc( &Info->DpcTraps[i], LowImportance );
+            KeSetTargetProcessorDpc( &Info->DpcTraps[i], (CCHAR)i );
         }
     }
 }
@@ -329,17 +329,17 @@ VOID InitializeStopProcessors(OUT NOPPROCINFO* Info)
 /// Stall all but current active processors 
 /// </summary>
 /// <param name="Info">Processors data</param>
-VOID StopProcessors(IN NOPPROCINFO* Info)
+VOID StopProcessors( IN NOPPROCINFO* Info )
 {
     ULONG CurrentProcessor;
     KAFFINITY ActiveProcessors;
 
     if (Info->Cores > 1)
     {
-        Info->SavedPriority = KeSetPriorityThread(KeGetCurrentThread(), HIGH_PRIORITY);
+        Info->SavedPriority = KeSetPriorityThread( KeGetCurrentThread(), HIGH_PRIORITY );
         ActiveProcessors = KeQueryActiveProcessors();
 
-        KeRaiseIrql(DISPATCH_LEVEL, &Info->SavedIrql);
+        KeRaiseIrql( DISPATCH_LEVEL, &Info->SavedIrql );
 
         CurrentProcessor = KeGetCurrentProcessorNumber();
         Info->ActiveCores = Info->DPCCount = 0;
@@ -348,44 +348,44 @@ VOID StopProcessors(IN NOPPROCINFO* Info)
         {
             if ((i != CurrentProcessor) && ((ActiveProcessors & (1ull << i)) != 0))
             {
-                InterlockedIncrement(&Info->ActiveCores);
-                KeInsertQueueDpc(&Info->DpcTraps[i], &Info, 0);
+                InterlockedIncrement( &Info->ActiveCores );
+                KeInsertQueueDpc( &Info->DpcTraps[i], &Info, 0 );
             }
         }
 
-        KeLowerIrql(Info->SavedIrql);
+        KeLowerIrql( Info->SavedIrql );
 
         do
         {
             __nop();
         } while (Info->ActiveCores != Info->DPCCount);
 
-        KeRaiseIrql(HIGH_LEVEL, &Info->SavedIrql);
+        KeRaiseIrql( HIGH_LEVEL, &Info->SavedIrql );
     }
     else
-        KeRaiseIrql(HIGH_LEVEL, &Info->SavedIrql);
+        KeRaiseIrql( HIGH_LEVEL, &Info->SavedIrql );
 };
 
 /// <summary>
 /// Resume all stopped active processors 
 /// </summary>
 /// <param name="Info">Processors data</param>
-VOID StartProcessors(IN NOPPROCINFO* Info)
+VOID StartProcessors( IN NOPPROCINFO* Info )
 {
     if (Info->Cores > 1)
     {
-        InterlockedExchange(&Info->IsCodeExecuted, 1);
-        KeLowerIrql(Info->SavedIrql);
+        InterlockedExchange( &Info->IsCodeExecuted, 1 );
+        KeLowerIrql( Info->SavedIrql );
 
         do
         {
             __nop();
         } while (Info->DPCCount > 0);
 
-        KeSetPriorityThread(KeGetCurrentThread(), Info->SavedPriority);
+        KeSetPriorityThread( KeGetCurrentThread(), Info->SavedPriority );
     }
     else
-        KeLowerIrql(Info->SavedIrql);
+        KeLowerIrql( Info->SavedIrql );
 }
 
 /// <summary>
@@ -394,9 +394,9 @@ VOID StartProcessors(IN NOPPROCINFO* Info)
 /// <param name="SizeOfImage">Block size to allocate</param>
 /// <param name="ppFoundBase">Allocated address</param>
 /// <returns>Status code</returns>
-NTSTATUS AllocateInDiscardedMemory(IN ULONG size, OUT PVOID* ppFoundBase)
+NTSTATUS AllocateInDiscardedMemory( IN ULONG size, OUT PVOID* ppFoundBase )
 {
-    ASSERT(ppFoundBase != NULL);
+    ASSERT( ppFoundBase != NULL );
     if (ppFoundBase == NULL)
         return STATUS_INVALID_PARAMETER;
 
@@ -404,10 +404,10 @@ NTSTATUS AllocateInDiscardedMemory(IN ULONG size, OUT PVOID* ppFoundBase)
     if (dynData.MiAllocPage == 0)
         return STATUS_INVALID_ADDRESS;
 
-    PVOID pBase = GetKernelBase(NULL);
+    PVOID pBase = GetKernelBase( NULL );
     fnMiAllocateDriverPage MiAllocateDriverPage = (fnMiAllocateDriverPage)((ULONG_PTR)pBase + dynData.MiAllocPage);
 
-    PIMAGE_NT_HEADERS pNTOSHdr = RtlImageNtHeader(pBase);
+    PIMAGE_NT_HEADERS pNTOSHdr = RtlImageNtHeader( pBase );
     if (!pNTOSHdr)
         return STATUS_INVALID_IMAGE_FORMAT;
 
@@ -418,34 +418,34 @@ NTSTATUS AllocateInDiscardedMemory(IN ULONG size, OUT PVOID* ppFoundBase)
     for (PIMAGE_SECTION_HEADER pSection = pLastSection - 1; pSection >= pFirstSection; --pSection)
     {
         // Find first suitable discarded section
-        if (pSection->Characteristics & IMAGE_SCN_MEM_DISCARDABLE && (ULONG_PTR)PAGE_ALIGN(pSection->Misc.VirtualSize) >= size)
+        if (pSection->Characteristics & IMAGE_SCN_MEM_DISCARDABLE && (ULONG_PTR)PAGE_ALIGN( pSection->Misc.VirtualSize ) >= size)
         {
             // TODO: implement some randomization for starting address
             PVOID pSectionBase = (PUCHAR)pBase + pSection->VirtualAddress;
 
             // I don't care about large pages
             // If image was mapped using large pages bugcheck is imminent
-            ULONG_PTR TotalPTEs = BYTES_TO_PAGES(size);
-            PMMPTE pStartPTE = MiGetPteAddress(pSectionBase);
+            ULONG_PTR TotalPTEs = BYTES_TO_PAGES( size );
+            PMMPTE pStartPTE = MiGetPteAddress( pSectionBase );
             PMMPTE pEndPTE = pStartPTE + TotalPTEs;
             MMPTE TempPTE = ValidKernelPte;
 
             // Allocate physical pages for PTEs
             for (PMMPTE pPTE = pStartPTE; pPTE < pEndPTE; ++pPTE)
             {
-                PVOID VA = MiGetVirtualAddressMappedByPte(pPTE);
+                PVOID VA = MiGetVirtualAddressMappedByPte( pPTE );
 
                 // Already allocated
-                if (MI_IS_PHYSICAL_ADDRESS(VA))
+                if (MI_IS_PHYSICAL_ADDRESS( VA ))
                 {
                     //DPRINT( "BlackBone: %s: VA 0x%p is already backed by PFN: 0x%p\n", __FUNCTION__, VA, pPTE->u.Hard.PageFrameNumber );
                     continue;
                 }
 
-                PFN_NUMBER pfn = MiAllocateDriverPage(pPTE);
+                PFN_NUMBER pfn = MiAllocateDriverPage( pPTE );
                 if (pfn == 0)
                 {
-                    DPRINT("BlackBone: %s: Failed to allocate physical page for PTE 0x%p\n", __FUNCTION__, pPTE);
+                    DPRINT( "BlackBone: %s: Failed to allocate physical page for PTE 0x%p\n", __FUNCTION__, pPTE );
                     return STATUS_NO_MEMORY;
                 }
                 else
@@ -476,11 +476,11 @@ ZwProtectVirtualMemory(
     IN OUT SIZE_T* NumberOfBytesToProtect,
     IN ULONG NewAccessProtection,
     OUT PULONG OldAccessProtection
-)
+    )
 {
     NTSTATUS status = STATUS_SUCCESS;
 
-    fnNtProtectVirtualMemory NtProtectVirtualMemory = (fnNtProtectVirtualMemory)(ULONG_PTR)GetSSDTEntry(dynData.NtProtectIndex);
+    fnNtProtectVirtualMemory NtProtectVirtualMemory = (fnNtProtectVirtualMemory)(ULONG_PTR)GetSSDTEntry( dynData.NtProtectIndex );
     if (NtProtectVirtualMemory)
     {
         //
@@ -499,7 +499,7 @@ ZwProtectVirtualMemory(
         if (NumberOfBytesToProtect)
             SizeCopy = *NumberOfBytesToProtect;
 
-        status = NtProtectVirtualMemory(ProcessHandle, &BaseCopy, &SizeCopy, NewAccessProtection, OldAccessProtection);
+        status = NtProtectVirtualMemory( ProcessHandle, &BaseCopy, &SizeCopy, NewAccessProtection, OldAccessProtection );
 
         *pPrevMode = prevMode;
     }
@@ -524,11 +524,11 @@ ZwCreateThreadEx(
     IN SIZE_T SizeOfStackCommit,
     IN SIZE_T SizeOfStackReserve,
     IN PNT_PROC_THREAD_ATTRIBUTE_LIST AttributeList
-)
+    )
 {
     NTSTATUS status = STATUS_SUCCESS;
 
-    fnNtCreateThreadEx NtCreateThreadEx = (fnNtCreateThreadEx)(ULONG_PTR)GetSSDTEntry(dynData.NtCreateThdIndex);
+    fnNtCreateThreadEx NtCreateThreadEx = (fnNtCreateThreadEx)(ULONG_PTR)GetSSDTEntry( dynData.NtCreateThdExIndex );
     if (NtCreateThreadEx)
     {
         //
@@ -544,7 +544,7 @@ ZwCreateThreadEx(
             ProcessHandle, lpStartAddress, lpParameter,
             Flags, StackZeroBits, SizeOfStackCommit,
             SizeOfStackReserve, AttributeList
-        );
+            );
 
         *pPrevMode = prevMode;
     }
@@ -554,18 +554,18 @@ ZwCreateThreadEx(
     return status;
 }
 
-NTSTATUS NTAPI ZwTerminateThread(IN HANDLE ThreadHandle, IN NTSTATUS ExitStatus)
+NTSTATUS NTAPI ZwTerminateThread( IN HANDLE ThreadHandle, IN NTSTATUS ExitStatus )
 {
     NTSTATUS status = STATUS_SUCCESS;
 
-    fnNtTerminateThread NtTerminateThread = (fnNtTerminateThread)(ULONG_PTR)GetSSDTEntry(dynData.NtTermThdIndex);
+    fnNtTerminateThread NtTerminateThread = (fnNtTerminateThread)(ULONG_PTR)GetSSDTEntry( dynData.NtTermThdIndex );
     if (NtTerminateThread)
     {
         PUCHAR pPrevMode = (PUCHAR)PsGetCurrentThread() + dynData.PrevMode;
         UCHAR prevMode = *pPrevMode;
         *pPrevMode = KernelMode;
 
-        status = NtTerminateThread(ThreadHandle, ExitStatus);
+        status = NtTerminateThread( ThreadHandle, ExitStatus );
         *pPrevMode = prevMode;
     }
     else

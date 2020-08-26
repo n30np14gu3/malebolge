@@ -1,8 +1,11 @@
 #include <Windows.h>
+#include <SubAuth.h>
 #include <TlHelp32.h>
 #include <comdef.h>
 #include "KernelInterface.h"
 #include "../SDK/globals.h"
+
+typedef BOOLEAN (_stdcall *pRtlDosPathNameToNtPathName_U)(PCWSTR DosFileName, PUNICODE_STRING NtFileName, PWSTR* FilePart, PVOID RelativeName);
 
 KernelInterface::KernelInterface()
 {
@@ -18,6 +21,42 @@ KernelInterface::KernelInterface()
 		m_dwErrorCode = GetLastError();
 	}
 	NoErrors = true;
+}
+
+void KernelInterface::Inject(const wchar_t* szDll)
+{
+	if(m_hDriver == INVALID_HANDLE_VALUE)
+		return;
+	
+	DWORD bytes = 0;
+	INJECT_DLL data = { IT_MMap };
+	UNICODE_STRING ustr = { 0 };
+
+	HMODULE hNtdll = GetModuleHandle("ntdll.dll");
+	if(hNtdll == nullptr)
+		return;
+
+	pRtlDosPathNameToNtPathName_U pFunc = reinterpret_cast<pRtlDosPathNameToNtPathName_U>(GetProcAddress(hNtdll, "RtlDosPathNameToNtPathName_U"));
+	if(pFunc == nullptr)
+		return;
+
+	pFunc(szDll, &ustr, nullptr, nullptr);
+	wcscpy_s(data.FullDllPath, ustr.Buffer);
+
+	data.pid = m_dwProcessId;
+	data.initRVA = 0;
+	data.wait = false;
+	data.unlink = false;
+	data.erasePE = false;
+	data.flags = KNoFlags;
+	data.imageBase = 0;
+	data.imageSize = 0;
+	data.asImage = false;
+
+	if(!DeviceIoControl(m_hDriver, IO_INJECT_DLL, &data, sizeof(data), nullptr, 0, &bytes, nullptr))
+		return;
+
+	memset(&data, 0, sizeof(data));
 }
 
 bool KernelInterface::Attach(bool update)

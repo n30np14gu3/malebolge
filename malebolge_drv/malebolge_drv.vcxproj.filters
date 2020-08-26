@@ -14,9 +14,6 @@
     <ClCompile Include="IoControl.c">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="utils.c">
-      <Filter>SDK\utils</Filter>
-    </ClCompile>
     <ClCompile Include="ProcessPreCallback.c">
       <Filter>Core\Callback Routines\PreCallback</Filter>
     </ClCompile>
@@ -41,32 +38,41 @@
     <ClCompile Include="spoof_core.c">
       <Filter>SDK\spoofer\core</Filter>
     </ClCompile>
-    <ClCompile Include="Loader.c">
-      <Filter>SDK\inject\Loader</Filter>
+    <ClCompile Include="blackbone\BlackBoneDrv.c">
+      <Filter>blackbone</Filter>
     </ClCompile>
-    <ClCompile Include="Private.c">
-      <Filter>SDK\inject\Private</Filter>
+    <ClCompile Include="blackbone\Inject.c">
+      <Filter>blackbone</Filter>
     </ClCompile>
-    <ClCompile Include="MMap.c">
-      <Filter>SDK\inject</Filter>
+    <ClCompile Include="blackbone\ldrreloc.c">
+      <Filter>blackbone</Filter>
     </ClCompile>
-    <ClCompile Include="vadhelpers.c">
-      <Filter>SDK\inject\Routines\VAD</Filter>
+    <ClCompile Include="blackbone\Loader.c">
+      <Filter>blackbone</Filter>
     </ClCompile>
-    <ClCompile Include="vadroutines.c">
-      <Filter>SDK\inject\Routines\VAD</Filter>
+    <ClCompile Include="blackbone\MMap.c">
+      <Filter>blackbone</Filter>
     </ClCompile>
-    <ClCompile Include="routines.c">
-      <Filter>SDK\inject\Routines</Filter>
+    <ClCompile Include="blackbone\NotifyRoutine.c">
+      <Filter>blackbone</Filter>
     </ClCompile>
-    <ClCompile Include="remap.c">
-      <Filter>SDK\inject\Remap</Filter>
+    <ClCompile Include="blackbone\Private.c">
+      <Filter>blackbone</Filter>
     </ClCompile>
-    <ClCompile Include="ldrreloc.c">
-      <Filter>SDK\inject\Native</Filter>
+    <ClCompile Include="blackbone\Remap.c">
+      <Filter>blackbone</Filter>
     </ClCompile>
-    <ClCompile Include="Inject.c">
-      <Filter>SDK\inject</Filter>
+    <ClCompile Include="blackbone\Routines.c">
+      <Filter>blackbone</Filter>
+    </ClCompile>
+    <ClCompile Include="blackbone\Utils.c">
+      <Filter>blackbone</Filter>
+    </ClCompile>
+    <ClCompile Include="blackbone\VadHelpers.c">
+      <Filter>blackbone</Filter>
+    </ClCompile>
+    <ClCompile Include="blackbone\VadRoutines.c">
+      <Filter>blackbone</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -75,9 +81,6 @@
     </Filter>
     <Filter Include="Core">
       <UniqueIdentifier>{ae71b2d6-6d9c-415d-bde1-f8c2e8dcbdb8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SDK\utils">
-      <UniqueIdentifier>{a3eada48-f010-4085-ae62-029194a7f709}</UniqueIdentifier>
     </Filter>
     <Filter Include="SDK\spoofer">
       <UniqueIdentifier>{8567f840-4c53-46fa-aa67-6c00ecfc28f8}</UniqueIdentifier>
@@ -94,9 +97,6 @@
     <Filter Include="Core\Callback Routines\ImageLoadCallback">
       <UniqueIdentifier>{193ffdb2-a6f0-4d6e-82fa-90673b70efd4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SDK\inject">
-      <UniqueIdentifier>{50be524c-6ae3-4d29-a1c7-3f1e6e49bb07}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Core\Callback Routines\CreateProcessCallback">
       <UniqueIdentifier>{30c25023-5e55-4347-831a-517e523e1062}</UniqueIdentifier>
     </Filter>
@@ -109,26 +109,8 @@
     <Filter Include="SDK\spoofer\utils">
       <UniqueIdentifier>{d30891f3-4942-47d7-8aff-47d66d175792}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SDK\inject\Loader">
-      <UniqueIdentifier>{df743c98-ddd2-4123-a160-3855d72f8546}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SDK\inject\Private">
-      <UniqueIdentifier>{ece91deb-582d-4950-9c8c-cd1a21ad5fa1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SDK\inject\Native">
-      <UniqueIdentifier>{9d25c29c-278e-4942-baa4-845a9010cabe}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SDK\inject\Utils">
-      <UniqueIdentifier>{780842dc-7923-44aa-a474-b2f80cf8b196}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SDK\inject\Routines">
-      <UniqueIdentifier>{cf680df2-0c1e-4be2-aa0c-20e75c2c01c6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SDK\inject\Routines\VAD">
-      <UniqueIdentifier>{d756fe6b-07b3-4c3b-b46f-11c0a48b98fc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SDK\inject\Remap">
-      <UniqueIdentifier>{015e5a34-0ac8-4b9b-a99b-71facb6da0df}</UniqueIdentifier>
+    <Filter Include="blackbone">
+      <UniqueIdentifier>{86b3eb6e-e21d-42c2-9bf0-f848e59757dd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -140,9 +122,6 @@
     </ClInclude>
     <ClInclude Include="functions.h">
       <Filter>SDK</Filter>
-    </ClInclude>
-    <ClInclude Include="utils.h">
-      <Filter>SDK\utils</Filter>
     </ClInclude>
     <ClInclude Include="driver_io.h">
       <Filter>SDK</Filter>
@@ -168,41 +147,59 @@
     <ClInclude Include="spoof_core.h">
       <Filter>SDK\spoofer\core</Filter>
     </ClInclude>
-    <ClInclude Include="Loader.h">
-      <Filter>SDK\inject\Loader</Filter>
+    <ClInclude Include="blackbone\apiset.h">
+      <Filter>blackbone</Filter>
     </ClInclude>
-    <ClInclude Include="NativeEnums.h">
-      <Filter>SDK\inject\Native</Filter>
+    <ClInclude Include="blackbone\BlackBoneDef.h">
+      <Filter>blackbone</Filter>
     </ClInclude>
-    <ClInclude Include="NativeStructs.h">
-      <Filter>SDK\inject\Native</Filter>
+    <ClInclude Include="blackbone\BlackBoneDrv.h">
+      <Filter>blackbone</Filter>
     </ClInclude>
-    <ClInclude Include="NativeStructs10.h">
-      <Filter>SDK\inject\Native</Filter>
+    <ClInclude Include="blackbone\Imports.h">
+      <Filter>blackbone</Filter>
     </ClInclude>
-    <ClInclude Include="PEStructs.h">
-      <Filter>SDK\inject\Native</Filter>
+    <ClInclude Include="blackbone\Loader.h">
+      <Filter>blackbone</Filter>
     </ClInclude>
-    <ClInclude Include="Imports.h">
-      <Filter>SDK\inject\Native</Filter>
+    <ClInclude Include="blackbone\NativeEnums.h">
+      <Filter>blackbone</Filter>
     </ClInclude>
-    <ClInclude Include="Private.h">
-      <Filter>SDK\inject\Private</Filter>
+    <ClInclude Include="blackbone\NativeStructs.h">
+      <Filter>blackbone</Filter>
     </ClInclude>
-    <ClInclude Include="apiset.h">
-      <Filter>SDK\inject\Native</Filter>
+    <ClInclude Include="blackbone\NativeStructs7.h">
+      <Filter>blackbone</Filter>
     </ClInclude>
-    <ClInclude Include="routines.h">
-      <Filter>SDK\inject\Routines</Filter>
+    <ClInclude Include="blackbone\NativeStructs8.h">
+      <Filter>blackbone</Filter>
     </ClInclude>
-    <ClInclude Include="vadroutines.h">
-      <Filter>SDK\inject\Routines\VAD</Filter>
+    <ClInclude Include="blackbone\NativeStructs10.h">
+      <Filter>blackbone</Filter>
     </ClInclude>
-    <ClInclude Include="vadhelpers.h">
-      <Filter>SDK\inject\Routines\VAD</Filter>
+    <ClInclude Include="blackbone\NativeStructs81.h">
+      <Filter>blackbone</Filter>
     </ClInclude>
-    <ClInclude Include="remap.h">
-      <Filter>SDK\inject\Remap</Filter>
+    <ClInclude Include="blackbone\PEStructs.h">
+      <Filter>blackbone</Filter>
+    </ClInclude>
+    <ClInclude Include="blackbone\Private.h">
+      <Filter>blackbone</Filter>
+    </ClInclude>
+    <ClInclude Include="blackbone\Remap.h">
+      <Filter>blackbone</Filter>
+    </ClInclude>
+    <ClInclude Include="blackbone\Routines.h">
+      <Filter>blackbone</Filter>
+    </ClInclude>
+    <ClInclude Include="blackbone\Utils.h">
+      <Filter>blackbone</Filter>
+    </ClInclude>
+    <ClInclude Include="blackbone\VadHelpers.h">
+      <Filter>blackbone</Filter>
+    </ClInclude>
+    <ClInclude Include="blackbone\VadRoutines.h">
+      <Filter>blackbone</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

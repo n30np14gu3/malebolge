@@ -1,17 +1,28 @@
 #pragma once
 
 #include "PEStructs.h"
+
+#ifdef _WIN10_
 #include "NativeStructs10.h"
+#elif _WIN81_
+#include "NativeStructs81.h"
+#elif _WIN8_
+#include "NativeStructs8.h"
+#elif _WIN7_
+#include "NativeStructs7.h"
+#else
+#error Unsupported OS build version
+#endif
 
 #define MAKEINTRESOURCEW(i) ((PWCH)((ULONG_PTR)((USHORT)(i))))
 
-typedef struct _SYSTEM_SERVICE_DESCRIPTOR_TABLE
+typedef struct _SYSTEM_SERVICE_DESCRIPTOR_TABLE 
 {
     PULONG_PTR ServiceTableBase;
     PULONG ServiceCounterTableBase;
     ULONG_PTR NumberOfServices;
     PUCHAR ParamTableBase;
-} SYSTEM_SERVICE_DESCRIPTOR_TABLE, * PSYSTEM_SERVICE_DESCRIPTOR_TABLE;
+} SYSTEM_SERVICE_DESCRIPTOR_TABLE, *PSYSTEM_SERVICE_DESCRIPTOR_TABLE;
 
 typedef union _PS_PROTECTION
 {
@@ -22,7 +33,7 @@ typedef union _PS_PROTECTION
         int Audit : 1;
         int Signer : 4;
     } Flags;
-} PS_PROTECTION, * PPS_PROTECTION;
+} PS_PROTECTION, *PPS_PROTECTION;
 
 typedef union _KEXECUTE_OPTIONS
 {
@@ -39,7 +50,7 @@ typedef union _KEXECUTE_OPTIONS
     } Flags;
 
     UCHAR ExecuteOptions;
-} KEXECUTE_OPTIONS, * PKEXECUTE_OPTIONS;
+} KEXECUTE_OPTIONS, *PKEXECUTE_OPTIONS;
 
 typedef struct _EPROCESS_FLAGS2
 {
@@ -71,7 +82,7 @@ typedef struct _EPROCESS_FLAGS2
     unsigned int ProcessStateChangeRequest : 2;
     unsigned int ProcessStateChangeInProgress : 1;
     unsigned int DisallowWin32kSystemCalls : 1;
-} EPROCESS_FLAGS2, * PEPROCESS_FLAGS2;
+} EPROCESS_FLAGS2, *PEPROCESS_FLAGS2;
 
 typedef struct _MITIGATION_FLAGS
 {
@@ -107,7 +118,7 @@ typedef struct _MITIGATION_FLAGS
     unsigned int EnableModuleTamperingProtectionNoInherit : 1;
     unsigned int RestrictIndirectBranchPrediction;
     unsigned int IsolateSecurityDomain;
-} MITIGATION_FLAGS, * PMITIGATION_FLAGS;
+} MITIGATION_FLAGS, *PMITIGATION_FLAGS;
 
 typedef union _EXHANDLE
 {
@@ -116,9 +127,9 @@ typedef union _EXHANDLE
         int TagBits : 2;
         int Index : 30;
     } u;
-    void* GenericHandleOverlay;
+    void * GenericHandleOverlay;
     ULONG_PTR Value;
-} EXHANDLE, * PEXHANDLE;
+} EXHANDLE, *PEXHANDLE;
 
 #pragma warning(disable : 4214 4201)
 
@@ -139,14 +150,14 @@ typedef struct _POOL_HEADER // Size=16
     unsigned long PoolTag; // Size=4 Offset=4
     union
     {
-        struct _EPROCESS* ProcessBilled; // Size=8 Offset=8
+        struct _EPROCESS * ProcessBilled; // Size=8 Offset=8
         struct
         {
             unsigned short AllocatorBackTraceIndex; // Size=2 Offset=8
             unsigned short PoolTagHash; // Size=2 Offset=10
         };
     };
-} POOL_HEADER, * PPOOL_HEADER;
+} POOL_HEADER, *PPOOL_HEADER;
 #pragma pack(pop)
 
 typedef struct _HANDLE_TABLE_ENTRY // Size=16
@@ -155,7 +166,7 @@ typedef struct _HANDLE_TABLE_ENTRY // Size=16
     {
         ULONG_PTR VolatileLowValue; // Size=8 Offset=0
         ULONG_PTR LowValue; // Size=8 Offset=0
-        struct _HANDLE_TABLE_ENTRY_INFO* InfoTable; // Size=8 Offset=0
+        struct _HANDLE_TABLE_ENTRY_INFO * InfoTable; // Size=8 Offset=0
         struct
         {
             ULONG_PTR Unlocked : 1; // Size=8 Offset=0 BitOffset=0 BitCount=1
@@ -167,7 +178,7 @@ typedef struct _HANDLE_TABLE_ENTRY // Size=16
     union
     {
         ULONG_PTR HighValue; // Size=8 Offset=8
-        struct _HANDLE_TABLE_ENTRY* NextFreeHandleEntry; // Size=8 Offset=8
+        struct _HANDLE_TABLE_ENTRY * NextFreeHandleEntry; // Size=8 Offset=8
         union _EXHANDLE LeafHandleValue; // Size=8 Offset=8
         struct
         {
@@ -177,7 +188,7 @@ typedef struct _HANDLE_TABLE_ENTRY // Size=16
         };
     };
     ULONG TypeInfo; // Size=4 Offset=12
-} HANDLE_TABLE_ENTRY, * PHANDLE_TABLE_ENTRY;
+} HANDLE_TABLE_ENTRY, *PHANDLE_TABLE_ENTRY;
 
 
 
@@ -187,7 +198,7 @@ typedef struct _OBJECT_HEADER // Size=56
     union
     {
         ULONG_PTR HandleCount; // Size=8 Offset=8
-        void* NextToFree; // Size=8 Offset=8
+        void * NextToFree; // Size=8 Offset=8
     };
     void* Lock; // Size=8 Offset=16
     UCHAR TypeIndex; // Size=1 Offset=24
@@ -219,42 +230,42 @@ typedef struct _OBJECT_HEADER // Size=56
     ULONG Spare; // Size=4 Offset=28
     union
     {
-        struct _OBJECT_CREATE_INFORMATION* ObjectCreateInfo; // Size=8 Offset=32
-        void* QuotaBlockCharged; // Size=8 Offset=32
+        struct _OBJECT_CREATE_INFORMATION * ObjectCreateInfo; // Size=8 Offset=32
+        void * QuotaBlockCharged; // Size=8 Offset=32
     };
-    void* SecurityDescriptor; // Size=8 Offset=40
+    void * SecurityDescriptor; // Size=8 Offset=40
     struct _QUAD Body; // Size=8 Offset=48
-} OBJECT_HEADER, * POBJECT_HEADER;
+} OBJECT_HEADER, *POBJECT_HEADER;
 
 typedef union _EX_FAST_REF // Size=8
 {
-    void* Object;
+    void * Object;
     struct
     {
-        unsigned __int64 RefCnt : 4;
+        unsigned __int64 RefCnt : 4; 
     };
     unsigned __int64 Value;
-} EX_FAST_REF, * PEX_FAST_REF;
+} EX_FAST_REF, *PEX_FAST_REF;
 
 typedef struct _CONTROL_AREA // Size=120
 {
-    struct _SEGMENT* Segment;
+    struct _SEGMENT * Segment;
     struct _LIST_ENTRY ListHead;
     unsigned __int64 NumberOfSectionReferences;
-    unsigned __int64 NumberOfPfnReferences;
+    unsigned __int64 NumberOfPfnReferences; 
     unsigned __int64 NumberOfMappedViews;
     unsigned __int64 NumberOfUserReferences;
-    unsigned long f1;
+    unsigned long f1; 
     unsigned long f2;
     EX_FAST_REF FilePointer;
     // Other fields
-} CONTROL_AREA, * PCONTROL_AREA;
+} CONTROL_AREA, *PCONTROL_AREA;
 
 typedef struct _SUBSECTION // Size=56
 {
     PCONTROL_AREA ControlArea;
     // Other fields
-} SUBSECTION, * PSUBSECTION;
+} SUBSECTION, *PSUBSECTION;
 
 typedef struct _MEMORY_BASIC_INFORMATION_EX
 {
@@ -265,14 +276,14 @@ typedef struct _MEMORY_BASIC_INFORMATION_EX
     ULONG State;
     ULONG Protect;
     ULONG Type;
-} MEMORY_BASIC_INFORMATION_EX, * PMEMORY_BASIC_INFORMATION_EX;
+} MEMORY_BASIC_INFORMATION_EX, *PMEMORY_BASIC_INFORMATION_EX;
 
 typedef struct _SYSTEM_CALL_COUNT_INFORMATION
 {
     ULONG Length;
     ULONG NumberOfTables;
     ULONG limits[2];
-} SYSTEM_CALL_COUNT_INFORMATION, * PSYSTEM_CALL_COUNT_INFORMATION;
+ } SYSTEM_CALL_COUNT_INFORMATION, *PSYSTEM_CALL_COUNT_INFORMATION;
 
 typedef struct _SYSTEM_THREAD_INFORMATION
 {
@@ -287,7 +298,7 @@ typedef struct _SYSTEM_THREAD_INFORMATION
     ULONG ContextSwitches;
     ULONG ThreadState;
     KWAIT_REASON WaitReason;
-}SYSTEM_THREAD_INFORMATION, * PSYSTEM_THREAD_INFORMATION;
+}SYSTEM_THREAD_INFORMATION, *PSYSTEM_THREAD_INFORMATION;
 
 typedef struct _THREAD_BASIC_INFORMATION
 {
@@ -297,7 +308,7 @@ typedef struct _THREAD_BASIC_INFORMATION
     ULONG_PTR AffinityMask;
     LONG Priority;
     LONG BasePriority;
-} THREAD_BASIC_INFORMATION, * PTHREAD_BASIC_INFORMATION;
+} THREAD_BASIC_INFORMATION, *PTHREAD_BASIC_INFORMATION;
 
 typedef struct _SYSTEM_PROCESS_INFO
 {
@@ -336,7 +347,7 @@ typedef struct _SYSTEM_PROCESS_INFO
     LARGE_INTEGER WriteTransferCount;
     LARGE_INTEGER OtherTransferCount;
     SYSTEM_THREAD_INFORMATION Threads[1];
-}SYSTEM_PROCESS_INFO, * PSYSTEM_PROCESS_INFO;
+}SYSTEM_PROCESS_INFO, *PSYSTEM_PROCESS_INFO;
 
 #pragma warning(disable : 4214)
 typedef struct _MMPTE_HARDWARE64
@@ -357,17 +368,17 @@ typedef struct _MMPTE_HARDWARE64
     ULONGLONG reserved1 : 4;
     ULONGLONG SoftwareWsIndex : 11;
     ULONGLONG NoExecute : 1;
-} MMPTE_HARDWARE64, * PMMPTE_HARDWARE64;
+} MMPTE_HARDWARE64, *PMMPTE_HARDWARE64;
 
-typedef struct _MMPTE
+typedef struct _MMPTE 
 {
-    union
+    union  
     {
         ULONG_PTR Long;
         MMPTE_HARDWARE64 Hard;
     } u;
 } MMPTE;
-typedef MMPTE* PMMPTE;
+typedef MMPTE *PMMPTE;
 
 #pragma warning(default : 4214)
 
@@ -377,13 +388,13 @@ typedef struct _NT_PROC_THREAD_ATTRIBUTE_ENTRY
     SIZE_T Size;
     ULONG_PTR Value;
     ULONG Unknown;
-} NT_PROC_THREAD_ATTRIBUTE_ENTRY, * NT_PPROC_THREAD_ATTRIBUTE_ENTRY;
+} NT_PROC_THREAD_ATTRIBUTE_ENTRY, *NT_PPROC_THREAD_ATTRIBUTE_ENTRY;
 
 typedef struct _NT_PROC_THREAD_ATTRIBUTE_LIST
 {
     ULONG Length;
     NT_PROC_THREAD_ATTRIBUTE_ENTRY Entry[1];
-} NT_PROC_THREAD_ATTRIBUTE_LIST, * PNT_PROC_THREAD_ATTRIBUTE_LIST;
+} NT_PROC_THREAD_ATTRIBUTE_LIST, *PNT_PROC_THREAD_ATTRIBUTE_LIST;
 
 
 typedef struct _RTL_PROCESS_MODULE_INFORMATION
@@ -398,16 +409,16 @@ typedef struct _RTL_PROCESS_MODULE_INFORMATION
     USHORT LoadCount;
     USHORT OffsetToFileName;
     UCHAR  FullPathName[MAXIMUM_FILENAME_LENGTH];
-} RTL_PROCESS_MODULE_INFORMATION, * PRTL_PROCESS_MODULE_INFORMATION;
+} RTL_PROCESS_MODULE_INFORMATION, *PRTL_PROCESS_MODULE_INFORMATION;
 
 typedef struct _RTL_PROCESS_MODULES
 {
     ULONG NumberOfModules;
     RTL_PROCESS_MODULE_INFORMATION Modules[1];
-} RTL_PROCESS_MODULES, * PRTL_PROCESS_MODULES;
+} RTL_PROCESS_MODULES, *PRTL_PROCESS_MODULES;
 
 #pragma warning(disable : 4214)
-typedef union _MEMORY_WORKING_SET_EX_BLOCK
+typedef union _MEMORY_WORKING_SET_EX_BLOCK 
 {
     ULONG_PTR Flags;
     struct
@@ -426,18 +437,18 @@ typedef union _MEMORY_WORKING_SET_EX_BLOCK
         ULONG_PTR ReservedUlong : 32;
 #endif
     };
-} MEMORY_WORKING_SET_EX_BLOCK, * PMEMORY_WORKING_SET_EX_BLOCK;
+} MEMORY_WORKING_SET_EX_BLOCK, *PMEMORY_WORKING_SET_EX_BLOCK;
 
-typedef struct _MEMORY_WORKING_SET_EX_INFORMATION
+typedef struct _MEMORY_WORKING_SET_EX_INFORMATION 
 {
     PVOID VirtualAddress;
     MEMORY_WORKING_SET_EX_BLOCK VirtualAttributes;
-} MEMORY_WORKING_SET_EX_INFORMATION, * PMEMORY_WORKING_SET_EX_INFORMATION;
+} MEMORY_WORKING_SET_EX_INFORMATION, *PMEMORY_WORKING_SET_EX_INFORMATION;
 
 #pragma warning(default : 4214)
 
 
-typedef struct _PEB_LDR_DATA
+typedef struct _PEB_LDR_DATA 
 {
     ULONG Length;
     UCHAR Initialized;
@@ -445,9 +456,9 @@ typedef struct _PEB_LDR_DATA
     LIST_ENTRY InLoadOrderModuleList;
     LIST_ENTRY InMemoryOrderModuleList;
     LIST_ENTRY InInitializationOrderModuleList;
-} PEB_LDR_DATA, * PPEB_LDR_DATA;
+} PEB_LDR_DATA, *PPEB_LDR_DATA;
 
-typedef struct _LDR_DATA_TABLE_ENTRY
+typedef struct _LDR_DATA_TABLE_ENTRY 
 {
     LIST_ENTRY InLoadOrderLinks;
     LIST_ENTRY InMemoryOrderLinks;
@@ -462,10 +473,10 @@ typedef struct _LDR_DATA_TABLE_ENTRY
     USHORT TlsIndex;
     LIST_ENTRY HashLinks;
     ULONG TimeDateStamp;
-} LDR_DATA_TABLE_ENTRY, * PLDR_DATA_TABLE_ENTRY;
+} LDR_DATA_TABLE_ENTRY, *PLDR_DATA_TABLE_ENTRY;
 
 
-typedef struct _PEB
+typedef struct _PEB 
 {
     UCHAR InheritedAddressSpace;
     UCHAR ReadImageFileExecOptions;
@@ -485,7 +496,7 @@ typedef struct _PEB
     ULONG SystemReserved;
     ULONG AtlThunkSListPtr32;
     PVOID ApiSetMap;
-} PEB, * PPEB;
+} PEB, *PPEB;
 
 typedef struct _PEB_LDR_DATA32
 {
@@ -495,7 +506,7 @@ typedef struct _PEB_LDR_DATA32
     LIST_ENTRY32 InLoadOrderModuleList;
     LIST_ENTRY32 InMemoryOrderModuleList;
     LIST_ENTRY32 InInitializationOrderModuleList;
-} PEB_LDR_DATA32, * PPEB_LDR_DATA32;
+} PEB_LDR_DATA32, *PPEB_LDR_DATA32;
 
 typedef struct _LDR_DATA_TABLE_ENTRY32
 {
@@ -512,7 +523,7 @@ typedef struct _LDR_DATA_TABLE_ENTRY32
     USHORT TlsIndex;
     LIST_ENTRY32 HashLinks;
     ULONG TimeDateStamp;
-} LDR_DATA_TABLE_ENTRY32, * PLDR_DATA_TABLE_ENTRY32;
+} LDR_DATA_TABLE_ENTRY32, *PLDR_DATA_TABLE_ENTRY32;
 
 typedef struct _PEB32
 {
@@ -534,16 +545,16 @@ typedef struct _PEB32
     ULONG SystemReserved;
     ULONG AtlThunkSListPtr32;
     ULONG ApiSetMap;
-} PEB32, * PPEB32;
+} PEB32, *PPEB32;
 
-typedef struct _WOW64_PROCESS
+typedef struct _WOW64_PROCESS 
 {
     PPEB32 Wow64;
-} WOW64_PROCESS, * PWOW64_PROCESS;
+} WOW64_PROCESS, *PWOW64_PROCESS;
 
-typedef union _WOW64_APC_CONTEXT
+typedef union _WOW64_APC_CONTEXT 
 {
-    struct
+    struct 
     {
         ULONG Apc32BitContext;
         ULONG Apc32BitRoutine;
@@ -551,7 +562,7 @@ typedef union _WOW64_APC_CONTEXT
 
     PVOID Apc64BitContext;
 
-} WOW64_APC_CONTEXT, * PWOW64_APC_CONTEXT;
+} WOW64_APC_CONTEXT, *PWOW64_APC_CONTEXT;
 
 typedef struct _NON_PAGED_DEBUG_INFO
 {
@@ -564,7 +575,7 @@ typedef struct _NON_PAGED_DEBUG_INFO
     ULONG       CheckSum;
     ULONG       SizeOfImage;
     ULONGLONG   ImageBase;
-} NON_PAGED_DEBUG_INFO, * PNON_PAGED_DEBUG_INFO;
+} NON_PAGED_DEBUG_INFO, *PNON_PAGED_DEBUG_INFO;
 
 typedef struct _KLDR_DATA_TABLE_ENTRY
 {
@@ -587,7 +598,7 @@ typedef struct _KLDR_DATA_TABLE_ENTRY
     // ULONG padding on IA64
     PVOID LoadedImports;
     PVOID PatchInformation;
-} KLDR_DATA_TABLE_ENTRY, * PKLDR_DATA_TABLE_ENTRY;
+} KLDR_DATA_TABLE_ENTRY, *PKLDR_DATA_TABLE_ENTRY;
 
 
 //
@@ -616,7 +627,7 @@ typedef struct _DBGKD_DEBUG_DATA_HEADER64 {
 
     ULONG           Size;
 
-} DBGKD_DEBUG_DATA_HEADER64, * PDBGKD_DEBUG_DATA_HEADER64;
+} DBGKD_DEBUG_DATA_HEADER64, *PDBGKD_DEBUG_DATA_HEADER64;
 
 
 //
@@ -911,7 +922,7 @@ typedef struct _KDDEBUGGER_DATA64 {
     ULONG RetpolineStubOffset;
     ULONG RetpolineStubSize;
 
-} KDDEBUGGER_DATA64, * PKDDEBUGGER_DATA64;
+} KDDEBUGGER_DATA64, *PKDDEBUGGER_DATA64;
 
 
 typedef struct _DUMP_HEADER
@@ -932,23 +943,23 @@ typedef struct _DUMP_HEADER
     ULONG_PTR BugCheckParameter3;
     ULONG_PTR BugCheckParameter4;
     CHAR VersionUser[32];
-    struct _KDDEBUGGER_DATA64* KdDebuggerDataBlock;
-} DUMP_HEADER, * PDUMP_HEADER;
-C_ASSERT(FIELD_OFFSET(DUMP_HEADER, Signature) == 0);
-C_ASSERT(FIELD_OFFSET(DUMP_HEADER, ValidDump) == 4);
-C_ASSERT(FIELD_OFFSET(DUMP_HEADER, MajorVersion) == 8);
-C_ASSERT(FIELD_OFFSET(DUMP_HEADER, MinorVersion) == 0xc);
-C_ASSERT(FIELD_OFFSET(DUMP_HEADER, DirectoryTableBase) == 0x10);
-C_ASSERT(FIELD_OFFSET(DUMP_HEADER, PfnDataBase) == 0x18);
-C_ASSERT(FIELD_OFFSET(DUMP_HEADER, PsLoadedModuleList) == 0x20);
-C_ASSERT(FIELD_OFFSET(DUMP_HEADER, PsActiveProcessHead) == 0x28);
-C_ASSERT(FIELD_OFFSET(DUMP_HEADER, MachineImageType) == 0x30);
-C_ASSERT(FIELD_OFFSET(DUMP_HEADER, NumberProcessors) == 0x34);
-C_ASSERT(FIELD_OFFSET(DUMP_HEADER, BugCheckCode) == 0x38);
-C_ASSERT(FIELD_OFFSET(DUMP_HEADER, BugCheckParameter1) == 0x40);
-C_ASSERT(FIELD_OFFSET(DUMP_HEADER, BugCheckParameter2) == 0x48);
-C_ASSERT(FIELD_OFFSET(DUMP_HEADER, BugCheckParameter3) == 0x50);
-C_ASSERT(FIELD_OFFSET(DUMP_HEADER, BugCheckParameter4) == 0x58);
-C_ASSERT(FIELD_OFFSET(DUMP_HEADER, KdDebuggerDataBlock) == 0x80);
+    struct _KDDEBUGGER_DATA64 *KdDebuggerDataBlock;
+} DUMP_HEADER, *PDUMP_HEADER;
+C_ASSERT( FIELD_OFFSET( DUMP_HEADER, Signature ) == 0 );
+C_ASSERT( FIELD_OFFSET( DUMP_HEADER, ValidDump ) == 4 );
+C_ASSERT( FIELD_OFFSET( DUMP_HEADER, MajorVersion ) == 8 );
+C_ASSERT( FIELD_OFFSET( DUMP_HEADER, MinorVersion ) == 0xc );
+C_ASSERT( FIELD_OFFSET( DUMP_HEADER, DirectoryTableBase ) == 0x10 );
+C_ASSERT( FIELD_OFFSET( DUMP_HEADER, PfnDataBase ) == 0x18 );
+C_ASSERT( FIELD_OFFSET( DUMP_HEADER, PsLoadedModuleList ) == 0x20 );
+C_ASSERT( FIELD_OFFSET( DUMP_HEADER, PsActiveProcessHead ) == 0x28 );
+C_ASSERT( FIELD_OFFSET( DUMP_HEADER, MachineImageType ) == 0x30 );
+C_ASSERT( FIELD_OFFSET( DUMP_HEADER, NumberProcessors ) == 0x34 );
+C_ASSERT( FIELD_OFFSET( DUMP_HEADER, BugCheckCode ) == 0x38 );
+C_ASSERT( FIELD_OFFSET( DUMP_HEADER, BugCheckParameter1 ) == 0x40 );
+C_ASSERT( FIELD_OFFSET( DUMP_HEADER, BugCheckParameter2 ) == 0x48 );
+C_ASSERT( FIELD_OFFSET( DUMP_HEADER, BugCheckParameter3 ) == 0x50 );
+C_ASSERT( FIELD_OFFSET( DUMP_HEADER, BugCheckParameter4 ) == 0x58 );
+C_ASSERT( FIELD_OFFSET( DUMP_HEADER, KdDebuggerDataBlock ) == 0x80 );
 
 extern KDDEBUGGER_DATA64 g_KdBlock;

@@ -5,7 +5,7 @@
 void ImageLoadCallback(PUNICODE_STRING FullImageName, HANDLE ProcessId, PIMAGE_INFO ImageInfo)
 {
 #ifndef DEBUG
-	VMProtectBeginUltra("#ImageLoadCallback");
+	VMProtectBeginMutation("#ImageLoadCallback");
 #endif
 	if(wcsstr(FullImageName->Buffer, CLIENT_DLL))
 	{

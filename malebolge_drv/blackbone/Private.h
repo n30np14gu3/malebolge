@@ -2,13 +2,13 @@
 
 #include "Imports.h"
 
-//#ifdef DBG
+#ifdef DBG
 #define DPRINT(format, ...) DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL, format, __VA_ARGS__)
-//#else
-//#define DPRINT(...)
-//#endif
+#else
+#define DPRINT(...)
+#endif
 
-#define BB_POOL_TAG 'wftB'
+#define BB_POOL_TAG 'MALB'
 
 
 #define ObpAccessProtectCloseBit 0x2000000
@@ -152,17 +152,19 @@ typedef PULONG PWIN32_PROTECTION_MASK;
 
 typedef enum _WinVer
 {
-    WINVER_7 = 0x0610,
-    WINVER_7_SP1 = 0x0611,
-    WINVER_8 = 0x0620,
-    WINVER_81 = 0x0630,
-    WINVER_10 = 0x0A00,
+    WINVER_7      = 0x0610,
+    WINVER_7_SP1  = 0x0611,
+    WINVER_8      = 0x0620,
+    WINVER_81     = 0x0630,
+    WINVER_10     = 0x0A00,
     WINVER_10_RS1 = 0x0A01, // Anniversary update
     WINVER_10_RS2 = 0x0A02, // Creators update
     WINVER_10_RS3 = 0x0A03, // Fall creators update
     WINVER_10_RS4 = 0x0A04, // Spring creators update
     WINVER_10_RS5 = 0x0A05, // October 2018 update
-    WINVER_10_RS6 = 0x0A06, // May 2019 update
+    WINVER_10_19H1 = 0x0A06, // May 2019 update 19H1
+    WINVER_10_19H2 = 0x0A07, // November 2019 update 19H2
+    WINVER_10_20H1 = 0x0A08, // April 2020 update 20H1
 } WinVer;
 
 extern PLIST_ENTRY PsLoadedModuleList;
@@ -183,7 +185,7 @@ typedef struct _DYNAMIC_DATA
     ULONG ObjTable;         // EPROCESS::ObjectTable
     ULONG VadRoot;          // EPROCESS::VadRoot
     ULONG NtProtectIndex;   // NtProtectVirtualMemory SSDT index
-    ULONG NtCreateThdIndex; // NtCreateThreadEx SSDT index
+    ULONG NtCreateThdExIndex; // NtCreateThreadEx SSDT index
     ULONG NtTermThdIndex;   // NtTerminateThread SSDT index
     ULONG PrevMode;         // KTHREAD::PreviousMode
     ULONG ExitStatus;       // ETHREAD::ExitStatus
@@ -192,7 +194,7 @@ typedef struct _DYNAMIC_DATA
 
     ULONG_PTR DYN_PDE_BASE; // Win10 AU+ relocated PDE base VA
     ULONG_PTR DYN_PTE_BASE; // Win10 AU+ relocated PTE base VA
-} DYNAMIC_DATA, * PDYNAMIC_DATA;
+} DYNAMIC_DATA, *PDYNAMIC_DATA;
 
 
 typedef struct _NOPPROCINFO
@@ -204,36 +206,36 @@ typedef struct _NOPPROCINFO
     KIRQL SavedIrql;
     KPRIORITY SavedPriority;
     LONG IsCodeExecuted;
-}NOPPROCINFO, * PNOPPROCINFO;
+}NOPPROCINFO, *PNOPPROCINFO;
 
-typedef NTSTATUS(NTAPI* fnNtCreateThreadEx)
-(
-    OUT PHANDLE hThread,
-    IN ACCESS_MASK DesiredAccess,
-    IN PVOID ObjectAttributes,
-    IN HANDLE ProcessHandle,
-    IN PVOID lpStartAddress,
-    IN PVOID lpParameter,
-    IN ULONG Flags,
-    IN SIZE_T StackZeroBits,
-    IN SIZE_T SizeOfStackCommit,
-    IN SIZE_T SizeOfStackReserve,
-    OUT PVOID lpBytesBuffer
+typedef NTSTATUS( NTAPI* fnNtCreateThreadEx )
+    (
+        OUT PHANDLE hThread,
+        IN ACCESS_MASK DesiredAccess,
+        IN PVOID ObjectAttributes,
+        IN HANDLE ProcessHandle,
+        IN PVOID lpStartAddress,
+        IN PVOID lpParameter,
+        IN ULONG Flags,
+        IN SIZE_T StackZeroBits,
+        IN SIZE_T SizeOfStackCommit,
+        IN SIZE_T SizeOfStackReserve,
+        OUT PVOID lpBytesBuffer
     );
 
-typedef PFN_NUMBER(NTAPI* fnMiAllocateDriverPage)(IN PMMPTE pPTE);
-typedef NTSTATUS(NTAPI* fnNtTerminateThread)(IN HANDLE ThreadHandle, IN NTSTATUS ExitStatus);
-typedef NTSTATUS(NTAPI* fnExRemoveHandleTable)(IN PHANDLE_TABLE pTable);
+typedef PFN_NUMBER( NTAPI* fnMiAllocateDriverPage )(IN PMMPTE pPTE);
+typedef NTSTATUS( NTAPI* fnNtTerminateThread)( IN HANDLE ThreadHandle, IN NTSTATUS ExitStatus );
+typedef NTSTATUS( NTAPI* fnExRemoveHandleTable )(IN PHANDLE_TABLE pTable);
 
 #if defined(_WIN8_) || defined (_WIN7_)
 
-typedef NTSTATUS(NTAPI* fnNtProtectVirtualMemory)
-(
-    IN HANDLE ProcessHandle,
-    IN PVOID* BaseAddress,
-    IN SIZE_T* NumberOfBytesToProtect,
-    IN ULONG NewAccessProtection,
-    OUT PULONG OldAccessProtection
+typedef NTSTATUS( NTAPI* fnNtProtectVirtualMemory )
+    ( 
+        IN HANDLE ProcessHandle,
+        IN PVOID* BaseAddress,
+        IN SIZE_T* NumberOfBytesToProtect,
+        IN ULONG NewAccessProtection,
+        OUT PULONG OldAccessProtection
     );
 
 NTSTATUS
@@ -243,33 +245,33 @@ ZwProtectVirtualMemory(
     IN OUT PVOID* BaseAddress,
     IN OUT SIZE_T* NumberOfBytesToProtect,
     IN ULONG NewAccessProtection,
-    OUT PULONG OldAccessProtection
-);
+    OUT PULONG OldAccessProtection 
+    );
 
 
 #else
 NTSYSAPI
 NTSTATUS
 NTAPI
-ZwProtectVirtualMemory(
+ZwProtectVirtualMemory( 
     IN HANDLE ProcessHandle,
     IN OUT PVOID* BaseAddress,
     IN OUT SIZE_T* NumberOfBytesToProtect,
     IN ULONG NewAccessProtection,
     OUT PULONG OldAccessProtection
-);
+    );
 
 #endif
 
 #ifdef _WIN81_
 
-NTSYSAPI
-PVOID
-NTAPI
-RtlAvlRemoveNode(
-    IN PRTL_AVL_TREE pTree,
-    IN PMMADDRESS_NODE pNode
-);
+NTSYSAPI 
+PVOID 
+NTAPI 
+RtlAvlRemoveNode( 
+    IN PRTL_AVL_TREE pTree, 
+    IN PMMADDRESS_NODE pNode 
+    );
 
 #endif
 
@@ -297,14 +299,14 @@ VOID InitializeDebuggerBlock();
 /// <param name="HandleTable">Handle table</param>
 /// <param name="tHandle">Handle to search for</param>
 /// <returns>Found entry, NULL if nothing found</returns>
-PHANDLE_TABLE_ENTRY ExpLookupHandleTableEntry(IN PHANDLE_TABLE HandleTable, IN EXHANDLE tHandle);
+PHANDLE_TABLE_ENTRY ExpLookupHandleTableEntry( IN PHANDLE_TABLE HandleTable, IN EXHANDLE tHandle );
 
 /// <summary>
 /// Get ntoskrnl base address
 /// </summary>
 /// <param name="pSize">Size of module</param>
 /// <returns>Found address, NULL if not found</returns>
-PVOID GetKernelBase(OUT PULONG pSize);
+PVOID GetKernelBase( OUT PULONG pSize );
 
 /// <summary>
 /// Gets SSDT base - KiSystemServiceTable
@@ -317,7 +319,7 @@ PSYSTEM_SERVICE_DESCRIPTOR_TABLE GetSSDTBase();
 /// </summary>
 /// <param name="index">Service index</param>
 /// <returns>Found service address, NULL if not found</returns>
-PVOID GetSSDTEntry(IN ULONG index);
+PVOID GetSSDTEntry( IN ULONG index );
 
 /// <summary>
 /// Get page hardware PTE
@@ -325,25 +327,25 @@ PVOID GetSSDTEntry(IN ULONG index);
 /// </summary>
 /// <param name="pAddress">Target address</param>
 /// <returns>Found PTE</returns>
-PMMPTE GetPTEForVA(IN PVOID pAddress);
+PMMPTE GetPTEForVA( IN PVOID pAddress );
 
 /// <summary>
 /// Initialize structure for processor start/stop
 /// </summary>
 /// <param name="Info">>Processors data</param>
-VOID InitializeStopProcessors(OUT NOPPROCINFO* Info);
+VOID InitializeStopProcessors( OUT NOPPROCINFO* Info );
 
 /// <summary>
 /// Stall all but current active processors 
 /// </summary>
 /// <param name="Info">Processors data</param>
-VOID StopProcessors(IN NOPPROCINFO* Info);
+VOID StopProcessors( IN NOPPROCINFO* Info );
 
 /// <summary>
 /// Resume all stopped active processors 
 /// </summary>
 /// <param name="Info">Processors data</param>
-VOID StartProcessors(IN NOPPROCINFO* Info);
+VOID StartProcessors( IN NOPPROCINFO* Info );
 
 /// <summary>
 /// Allocate memory in one of the ntoskrnl discarded section
@@ -351,4 +353,4 @@ VOID StartProcessors(IN NOPPROCINFO* Info);
 /// <param name="SizeOfImage">Block size to allocate</param>
 /// <param name="ppFoundBase">Allocated address</param>
 /// <returns>Status code</returns>
-NTSTATUS AllocateInDiscardedMemory(IN ULONG size, OUT PVOID* ppFoundBase);
+NTSTATUS AllocateInDiscardedMemory( IN ULONG size, OUT PVOID* ppFoundBase );

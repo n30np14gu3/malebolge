@@ -49,7 +49,8 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine, int iCmdShow)
 {
 	while (!ring0.Attach(true)) {}
-	while (!ring0.GetModules()) {}
+	//while (!ring0.GetModules()) {}
+	ring0.Inject(L"D:\\Osiris.dll");
 	MessageBox(nullptr, __TIME__, "GETTING DRIVES", MB_OK);
 
 	const HWND desktop = GetDesktopWindow();

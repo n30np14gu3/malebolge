@@ -174,7 +174,7 @@ typedef struct _IMAGE_DOS_HEADER
     USHORT e_oeminfo;
     USHORT e_res2[10];
     LONG e_lfanew;
-} IMAGE_DOS_HEADER, * PIMAGE_DOS_HEADER;
+} IMAGE_DOS_HEADER, *PIMAGE_DOS_HEADER;
 
 typedef struct _IMAGE_SECTION_HEADER
 {
@@ -192,7 +192,7 @@ typedef struct _IMAGE_SECTION_HEADER
     USHORT  NumberOfRelocations;
     USHORT  NumberOfLinenumbers;
     ULONG Characteristics;
-} IMAGE_SECTION_HEADER, * PIMAGE_SECTION_HEADER;
+} IMAGE_SECTION_HEADER, *PIMAGE_SECTION_HEADER;
 
 typedef struct _IMAGE_FILE_HEADER // Size=20
 {
@@ -203,13 +203,13 @@ typedef struct _IMAGE_FILE_HEADER // Size=20
     ULONG NumberOfSymbols;
     USHORT SizeOfOptionalHeader;
     USHORT Characteristics;
-} IMAGE_FILE_HEADER, * PIMAGE_FILE_HEADER;
+} IMAGE_FILE_HEADER, *PIMAGE_FILE_HEADER;
 
 typedef struct _IMAGE_DATA_DIRECTORY
 {
     ULONG VirtualAddress;
     ULONG Size;
-} IMAGE_DATA_DIRECTORY, * PIMAGE_DATA_DIRECTORY;
+} IMAGE_DATA_DIRECTORY, *PIMAGE_DATA_DIRECTORY;
 
 typedef struct _IMAGE_OPTIONAL_HEADER64
 {
@@ -243,7 +243,7 @@ typedef struct _IMAGE_OPTIONAL_HEADER64
     ULONG LoaderFlags;
     ULONG NumberOfRvaAndSizes;
     struct _IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
-} IMAGE_OPTIONAL_HEADER64, * PIMAGE_OPTIONAL_HEADER64;
+} IMAGE_OPTIONAL_HEADER64, *PIMAGE_OPTIONAL_HEADER64;
 
 typedef struct _IMAGE_OPTIONAL_HEADER32
 {
@@ -287,14 +287,14 @@ typedef struct _IMAGE_OPTIONAL_HEADER32
     ULONG   LoaderFlags;
     ULONG   NumberOfRvaAndSizes;
     IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
-} IMAGE_OPTIONAL_HEADER32, * PIMAGE_OPTIONAL_HEADER32;
+} IMAGE_OPTIONAL_HEADER32, *PIMAGE_OPTIONAL_HEADER32;
 
 typedef struct _IMAGE_NT_HEADERS64
 {
     ULONG Signature;
     struct _IMAGE_FILE_HEADER FileHeader;
     struct _IMAGE_OPTIONAL_HEADER64 OptionalHeader;
-} IMAGE_NT_HEADERS64, * PIMAGE_NT_HEADERS64;
+} IMAGE_NT_HEADERS64, *PIMAGE_NT_HEADERS64;
 
 typedef struct _IMAGE_NT_HEADERS
 {
@@ -315,25 +315,25 @@ typedef struct _IMAGE_EXPORT_DIRECTORY {
     ULONG   AddressOfFunctions;     // RVA from base of image
     ULONG   AddressOfNames;         // RVA from base of image
     ULONG   AddressOfNameOrdinals;  // RVA from base of image
-} IMAGE_EXPORT_DIRECTORY, * PIMAGE_EXPORT_DIRECTORY;
+} IMAGE_EXPORT_DIRECTORY, *PIMAGE_EXPORT_DIRECTORY;
 
 typedef struct _IMAGE_BASE_RELOCATION {
     ULONG   VirtualAddress;
     ULONG   SizeOfBlock;
     //  USHORT  TypeOffset[1];
 } IMAGE_BASE_RELOCATION;
-typedef IMAGE_BASE_RELOCATION UNALIGNED* PIMAGE_BASE_RELOCATION;
+typedef IMAGE_BASE_RELOCATION UNALIGNED * PIMAGE_BASE_RELOCATION;
 
 typedef struct _IMAGE_IMPORT_BY_NAME {
     USHORT Hint;
     CHAR   Name[1];
-} IMAGE_IMPORT_BY_NAME, * PIMAGE_IMPORT_BY_NAME;
+} IMAGE_IMPORT_BY_NAME, *PIMAGE_IMPORT_BY_NAME;
 
 
 // warning C4201: nonstandard extension used : nameless struct/union
 #pragma warning (disable : 4201)
 
-typedef struct _IMAGE_IMPORT_DESCRIPTOR
+typedef struct _IMAGE_IMPORT_DESCRIPTOR 
 {
     union {
         ULONG   Characteristics;            // 0 for terminating null import descriptor
@@ -348,12 +348,12 @@ typedef struct _IMAGE_IMPORT_DESCRIPTOR
     ULONG   Name;
     ULONG   FirstThunk;                     // RVA to IAT (if bound this IAT has actual addresses)
 } IMAGE_IMPORT_DESCRIPTOR;
-typedef IMAGE_IMPORT_DESCRIPTOR UNALIGNED* PIMAGE_IMPORT_DESCRIPTOR;
+typedef IMAGE_IMPORT_DESCRIPTOR UNALIGNED *PIMAGE_IMPORT_DESCRIPTOR;
 
 
-typedef struct _IMAGE_THUNK_DATA64
+typedef struct _IMAGE_THUNK_DATA64 
 {
-    union
+    union 
     {
         ULONGLONG ForwarderString;  // PBYTE 
         ULONGLONG Function;         // PULONG
@@ -361,7 +361,7 @@ typedef struct _IMAGE_THUNK_DATA64
         ULONGLONG AddressOfData;    // PIMAGE_IMPORT_BY_NAME
     } u1;
 } IMAGE_THUNK_DATA64;
-typedef IMAGE_THUNK_DATA64* PIMAGE_THUNK_DATA64;
+typedef IMAGE_THUNK_DATA64 * PIMAGE_THUNK_DATA64;
 
 typedef struct _IMAGE_THUNK_DATA32
 {
@@ -373,7 +373,7 @@ typedef struct _IMAGE_THUNK_DATA32
         ULONG AddressOfData;        // PIMAGE_IMPORT_BY_NAME
     } u1;
 } IMAGE_THUNK_DATA32;
-typedef IMAGE_THUNK_DATA32* PIMAGE_THUNK_DATA32;
+typedef IMAGE_THUNK_DATA32 * PIMAGE_THUNK_DATA32;
 
 typedef struct _IMAGE_RESOURCE_DIRECTORY {
     ULONG   Characteristics;
@@ -383,7 +383,7 @@ typedef struct _IMAGE_RESOURCE_DIRECTORY {
     USHORT  NumberOfNamedEntries;
     USHORT  NumberOfIdEntries;
     //  IMAGE_RESOURCE_DIRECTORY_ENTRY DirectoryEntries[];
-} IMAGE_RESOURCE_DIRECTORY, * PIMAGE_RESOURCE_DIRECTORY;
+} IMAGE_RESOURCE_DIRECTORY, *PIMAGE_RESOURCE_DIRECTORY; 
 
 typedef struct _IMAGE_RESOURCE_DIRECTORY_ENTRY {
     union {
@@ -401,14 +401,14 @@ typedef struct _IMAGE_RESOURCE_DIRECTORY_ENTRY {
             INT   DataIsDirectory : 1;
         } DUMMYSTRUCTNAME2;
     } DUMMYUNIONNAME2;
-} IMAGE_RESOURCE_DIRECTORY_ENTRY, * PIMAGE_RESOURCE_DIRECTORY_ENTRY;
+} IMAGE_RESOURCE_DIRECTORY_ENTRY, *PIMAGE_RESOURCE_DIRECTORY_ENTRY;
 
 typedef struct _IMAGE_RESOURCE_DATA_ENTRY {
     ULONG OffsetToData;
     ULONG Size;
     ULONG CodePage;
     ULONG Reserved;
-} IMAGE_RESOURCE_DATA_ENTRY, * PIMAGE_RESOURCE_DATA_ENTRY;
+} IMAGE_RESOURCE_DATA_ENTRY, *PIMAGE_RESOURCE_DATA_ENTRY;
 
 typedef struct _IMAGE_RUNTIME_FUNCTION_ENTRY {
     ULONG BeginAddress;
@@ -417,7 +417,7 @@ typedef struct _IMAGE_RUNTIME_FUNCTION_ENTRY {
         ULONG UnwindInfoAddress;
         ULONG UnwindData;
     } DUMMYUNIONNAME;
-} _IMAGE_RUNTIME_FUNCTION_ENTRY, * _PIMAGE_RUNTIME_FUNCTION_ENTRY;
+} _IMAGE_RUNTIME_FUNCTION_ENTRY, *_PIMAGE_RUNTIME_FUNCTION_ENTRY;
 
 typedef struct _IMAGE_LOAD_CONFIG_DIRECTORY32 {
     ULONG   Size;
@@ -445,7 +445,7 @@ typedef struct _IMAGE_LOAD_CONFIG_DIRECTORY32 {
     ULONG   GuardCFFunctionTable;           // VA
     ULONG   GuardCFFunctionCount;
     ULONG   GuardFlags;
-} IMAGE_LOAD_CONFIG_DIRECTORY32, * PIMAGE_LOAD_CONFIG_DIRECTORY32;
+} IMAGE_LOAD_CONFIG_DIRECTORY32, *PIMAGE_LOAD_CONFIG_DIRECTORY32;
 
 typedef struct _IMAGE_LOAD_CONFIG_DIRECTORY64 {
     ULONG      Size;
@@ -473,7 +473,7 @@ typedef struct _IMAGE_LOAD_CONFIG_DIRECTORY64 {
     ULONGLONG  GuardCFFunctionTable;        // VA
     ULONGLONG  GuardCFFunctionCount;
     ULONG      GuardFlags;
-} IMAGE_LOAD_CONFIG_DIRECTORY64, * PIMAGE_LOAD_CONFIG_DIRECTORY64;
+} IMAGE_LOAD_CONFIG_DIRECTORY64, *PIMAGE_LOAD_CONFIG_DIRECTORY64;
 
 typedef struct _IMAGE_TLS_DIRECTORY64 {
     ULONGLONG StartAddressOfRawData;
@@ -492,7 +492,7 @@ typedef struct _IMAGE_TLS_DIRECTORY64 {
 
 } IMAGE_TLS_DIRECTORY64;
 
-typedef IMAGE_TLS_DIRECTORY64* PIMAGE_TLS_DIRECTORY64;
+typedef IMAGE_TLS_DIRECTORY64 * PIMAGE_TLS_DIRECTORY64;
 
 typedef struct _IMAGE_TLS_DIRECTORY32 {
     ULONG   StartAddressOfRawData;
@@ -510,7 +510,7 @@ typedef struct _IMAGE_TLS_DIRECTORY32 {
     } DUMMYUNIONNAME;
 
 } IMAGE_TLS_DIRECTORY32;
-typedef IMAGE_TLS_DIRECTORY32* PIMAGE_TLS_DIRECTORY32;
+typedef IMAGE_TLS_DIRECTORY32 * PIMAGE_TLS_DIRECTORY32;
 
 
 #define ACTCTX_FLAG_PROCESSOR_ARCHITECTURE_VALID    (0x00000001)
@@ -533,7 +533,7 @@ typedef struct tagACTCTXW
     PWCH   lpResourceName;
     PWCH   lpApplicationName;
     PVOID  hModule;
-} ACTCTXW, * PACTCTXW;
+} ACTCTXW, *PACTCTXW;
 
 typedef struct tagACTCTXW32
 {
@@ -546,6 +546,6 @@ typedef struct tagACTCTXW32
     ULONG  lpResourceName;
     ULONG  lpApplicationName;
     ULONG  hModule;
-} ACTCTXW32, * PACTCTXW32;
+} ACTCTXW32, *PACTCTXW32;
 
 #pragma warning (default : 4201)

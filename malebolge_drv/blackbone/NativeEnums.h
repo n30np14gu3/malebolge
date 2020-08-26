@@ -1,4 +1,5 @@
 #pragma once
+
 typedef enum _MEMORY_INFORMATION_CLASS_EX
 {
     MemoryBasicInformationEx = 0,
@@ -195,7 +196,7 @@ typedef enum _KAPC_ENVIRONMENT
     AttachedApcEnvironment,
     CurrentApcEnvironment,
     InsertApcEnvironment
-} KAPC_ENVIRONMENT, * PKAPC_ENVIRONMENT;
+} KAPC_ENVIRONMENT, *PKAPC_ENVIRONMENT;
 
 typedef enum _MI_VAD_TYPE
 {
@@ -207,7 +208,7 @@ typedef enum _MI_VAD_TYPE
     VadLargePages,
     VadRotatePhysical,
     VadLargePageSection
-} MI_VAD_TYPE, * PMI_VAD_TYPE;
+} MI_VAD_TYPE, *PMI_VAD_TYPE;
 
 typedef enum _MMSYSTEM_PTE_POOL_TYPE
 {

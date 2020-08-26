@@ -1,5 +1,5 @@
 #include "Private.h"
-#include "vadhelpers.h"
+#include "VadHelpers.h"
 
 #pragma alloc_text(PAGE, MiPromoteNode)
 #pragma alloc_text(PAGE, MiRebalanceNode)
@@ -9,7 +9,7 @@
 VOID
 MiPromoteNode(
     IN PMMADDRESS_NODE C
-)
+    )
 
 /*++
 
@@ -55,8 +55,8 @@ MiPromoteNode(
     // Capture the current parent and grandparent (may be the root).
     //
 
-    P = SANITIZE_PARENT_NODE(C->u1.Parent);
-    G = SANITIZE_PARENT_NODE(P->u1.Parent);
+    P = SANITIZE_PARENT_NODE( C->u1.Parent );
+    G = SANITIZE_PARENT_NODE( P->u1.Parent );
 
     //
     // Break down the promotion into two cases based upon whether C
@@ -81,7 +81,7 @@ MiPromoteNode(
 
         if (P->LeftChild != NULL) {
 
-            P->LeftChild->u1.Parent = MI_MAKE_PARENT(P, P->LeftChild->u1.Balance);
+            P->LeftChild->u1.Parent = MI_MAKE_PARENT( P, P->LeftChild->u1.Balance );
         }
 
         C->RightChild = P;
@@ -109,7 +109,7 @@ MiPromoteNode(
         P->RightChild = C->LeftChild;
 
         if (P->RightChild != NULL) {
-            P->RightChild->u1.Parent = MI_MAKE_PARENT(P, P->RightChild->u1.Balance);
+            P->RightChild->u1.Parent = MI_MAKE_PARENT( P, P->RightChild->u1.Balance );
         }
 
         C->LeftChild = P;
@@ -119,7 +119,7 @@ MiPromoteNode(
     // Update parent of P, for either case above.
     //
 
-    P->u1.Parent = MI_MAKE_PARENT(C, P->u1.Balance);
+    P->u1.Parent = MI_MAKE_PARENT( C, P->u1.Balance );
 
     //
     // Finally update G <-> C links for either case above.
@@ -131,13 +131,13 @@ MiPromoteNode(
     else {
         G->RightChild = C;
     }
-    C->u1.Parent = MI_MAKE_PARENT(G, C->u1.Balance);
+    C->u1.Parent = MI_MAKE_PARENT( G, C->u1.Balance );
 }
 
 ULONG
 MiRebalanceNode(
     IN PMMADDRESS_NODE S
-)
+    )
 
 /*++
 
@@ -217,7 +217,7 @@ MiRebalanceNode(
 
     if ((SCHAR)R->u1.Balance == a) {
 
-        MiPromoteNode(R);
+        MiPromoteNode( R );
         R->u1.Balance = 0;
         S->u1.Balance = 0;
 
@@ -284,8 +284,8 @@ MiRebalanceNode(
         // Promote him twice to implement the double rotation.
         //
 
-        MiPromoteNode(P);
-        MiPromoteNode(P);
+        MiPromoteNode( P );
+        MiPromoteNode( P );
 
         //
         // Now adjust the balance factors.
@@ -294,11 +294,11 @@ MiRebalanceNode(
         S->u1.Balance = 0;
         R->u1.Balance = 0;
         if ((SCHAR)P->u1.Balance == a) {
-            COUNT_BALANCE_MAX((SCHAR)-a);
+            COUNT_BALANCE_MAX( (SCHAR)-a );
             S->u1.Balance = (ULONG_PTR)-a;
         }
         else if ((SCHAR)P->u1.Balance == -a) {
-            COUNT_BALANCE_MAX((SCHAR)a);
+            COUNT_BALANCE_MAX( (SCHAR)a );
             R->u1.Balance = (ULONG_PTR)a;
         }
 
@@ -335,8 +335,8 @@ MiRebalanceNode(
     // in the delete path.
     //
 
-    MiPromoteNode(R);
-    COUNT_BALANCE_MAX((SCHAR)-a);
+    MiPromoteNode( R );
+    COUNT_BALANCE_MAX( (SCHAR)-a );
     R->u1.Balance = -a;
     return TRUE;
 }
@@ -521,274 +521,274 @@ VOID
 MiRemoveNode(
     IN PMMADDRESS_NODE NodeToDelete,
     IN PMM_AVL_TABLE Table
-)
+    )
+
+/*++
+
+    Routine Description:
+
+        This routine deletes the specified node from the balanced tree, rebalancing
+        as necessary.  If the NodeToDelete has at least one NULL child pointers,
+        then it is chosen as the EasyDelete, otherwise a subtree predecessor or
+        successor is found as the EasyDelete.  In either case the EasyDelete is
+        deleted and the tree is rebalanced.  Finally if the NodeToDelete was
+        different than the EasyDelete, then the EasyDelete is linked back into the
+        tree in place of the NodeToDelete.
+
+    Arguments:
+
+    NodeToDelete - Pointer to the node which the caller wishes to delete.
+
+    Table - The generic table in which the delete is to occur.
+
+    Return Value:
+
+        None.
+
+    Environment:
+
+        Kernel mode.  The PFN lock is held for some of the tables.
+
+--*/
+
 {
-///*++
-//
-//    Routine Description:
-//
-//        This routine deletes the specified node from the balanced tree, rebalancing
-//        as necessary.  If the NodeToDelete has at least one NULL child pointers,
-//        then it is chosen as the EasyDelete, otherwise a subtree predecessor or
-//        successor is found as the EasyDelete.  In either case the EasyDelete is
-//        deleted and the tree is rebalanced.  Finally if the NodeToDelete was
-//        different than the EasyDelete, then the EasyDelete is linked back into the
-//        tree in place of the NodeToDelete.
-//
-//    Arguments:
-//
-//    NodeToDelete - Pointer to the node which the caller wishes to delete.
-//
-//    Table - The generic table in which the delete is to occur.
-//
-//    Return Value:
-//
-//        None.
-//
-//    Environment:
-//
-//        Kernel mode.  The PFN lock is held for some of the tables.
-//
-//--*/
-//
-//{
-//    PMMADDRESS_NODE Parent;
-//    PMMADDRESS_NODE EasyDelete;
-//    PMMADDRESS_NODE P;
-//    SCHAR a;
-//
-//    //
-//    // If the NodeToDelete has at least one NULL child pointer, then we can
-//    // delete it directly.
-//    //
-//
-//    if ((NodeToDelete->LeftChild == NULL) ||
-//        (NodeToDelete->RightChild == NULL)) {
-//
-//        EasyDelete = NodeToDelete;
-//    }
-//
-//    //
-//    // Otherwise, we may as well pick the longest side to delete from (if one is
-//    // is longer), as that reduces the probability that we will have to
-//    // rebalance.
-//    //
-//
-//    else if ((SCHAR)NodeToDelete->u1.Balance >= 0) {
-//
-//        //
-//        // Pick up the subtree successor.
-//        //
-//
-//        EasyDelete = NodeToDelete->RightChild;
-//        while (EasyDelete->LeftChild != NULL) {
-//            EasyDelete = EasyDelete->LeftChild;
-//        }
-//    }
-//    else {
-//
-//        //
-//        // Pick up the subtree predecessor.
-//        //
-//
-//        EasyDelete = NodeToDelete->LeftChild;
-//        while (EasyDelete->RightChild != NULL) {
-//            EasyDelete = EasyDelete->RightChild;
-//        }
-//    }
-//
-//    //
-//    // Rebalancing must know which side of the first parent the delete occurred
-//    // on.  Assume it is the left side and otherwise correct below.
-//    //
-//
-//    a = -1;
-//
-//    //
-//    // Now we can do the simple deletion for the no left child case.
-//    //
-//
-//    if (EasyDelete->LeftChild == NULL) {
-//
-//        Parent = SANITIZE_PARENT_NODE(EasyDelete->u1.Parent);
-//
-//        if (MiIsLeftChild(EasyDelete)) {
-//            Parent->LeftChild = EasyDelete->RightChild;
-//        }
-//        else {
-//            Parent->RightChild = EasyDelete->RightChild;
-//            a = 1;
-//        }
-//
-//        if (EasyDelete->RightChild != NULL) {
-//            EasyDelete->RightChild->u1.Parent = MI_MAKE_PARENT(Parent, EasyDelete->RightChild->u1.Balance);
-//        }
-//
-//        //
-//        // Now we can do the simple deletion for the no right child case,
-//        // plus we know there is a left child.
-//        //
-//
-//    }
-//    else {
-//
-//        Parent = SANITIZE_PARENT_NODE(EasyDelete->u1.Parent);
-//
-//        if (MiIsLeftChild(EasyDelete)) {
-//            Parent->LeftChild = EasyDelete->LeftChild;
-//        }
-//        else {
-//            Parent->RightChild = EasyDelete->LeftChild;
-//            a = 1;
-//        }
-//
-//        EasyDelete->LeftChild->u1.Parent = MI_MAKE_PARENT(Parent,
-//            EasyDelete->LeftChild->u1.Balance);
-//    }
-//
-//    //
-//    // For delete rebalancing, set the balance at the root to 0 to properly
-//    // terminate the rebalance without special tests, and to be able to detect
-//    // if the depth of the tree actually decreased.
-//    //
-//
-//#if defined( _WIN81_ ) || defined ( _WIN10_ )
-//    Table->BalancedRoot->u1.Balance = 0;
-//#else
-//    Table->BalancedRoot.u1.Balance = 0;
-//#endif
-//    P = SANITIZE_PARENT_NODE(EasyDelete->u1.Parent);
-//
-//    //
-//    // Loop until the tree is balanced.
-//    //
-//
-//    for (;;) {
-//
-//        //
-//        // First handle the case where the tree became more balanced.  Zero
-//        // the balance factor, calculate a for the next loop and move on to
-//        // the parent.
-//        //
-//
-//        if ((SCHAR)P->u1.Balance == a) {
-//
-//            P->u1.Balance = 0;
-//
-//            //
-//            // If this node is curently balanced, we can show it is now unbalanced
-//            // and terminate the scan since the subtree length has not changed.
-//            // (This may be the root, since we set Balance to 0 above!)
-//            //
-//
-//        }
-//        else if (P->u1.Balance == 0)
-//        {
-//            COUNT_BALANCE_MAX((SCHAR)-a);
-//            P->u1.Balance = -a;
-//
-//            //
-//            // If we shortened the depth all the way back to the root, then
-//            // the tree really has one less level.
-//            //
-//
-//#if !defined( _WIN81_ ) && !defined ( _WIN10_ )
-//            if (Table->BalancedRoot.u1.Balance != 0) {
-//                Table->DepthOfTree -= 1;
-//            }
-//#endif
-//
-//            break;
-//
-//            //
-//            // Otherwise we made the short side 2 levels less than the long side,
-//            // and rebalancing is required.  On return, some node has been promoted
-//            // to above node P.  If Case 3 from Knuth was not encountered, then we
-//            // want to effectively resume rebalancing from P's original parent which
-//            // is effectively its grandparent now.
-//            //
-//
-//        }
-//        else
-//        {
-//
-//            //
-//            // We are done if Case 3 was hit, i.e., the depth of this subtree is
-//            // now the same as before the delete.
-//            //
-//
-//            if (MiRebalanceNode(P))
-//            {
-//                break;
-//            }
-//
-//            P = SANITIZE_PARENT_NODE(P->u1.Parent);
-//        }
-//
-//        a = -1;
-//        if (MiIsRightChild(P))
-//        {
-//            a = 1;
-//        }
-//
-//        P = SANITIZE_PARENT_NODE(P->u1.Parent);
-//    }
-//
-//    //
-//    // Finally, if we actually deleted a predecessor/successor of the
-//    // NodeToDelete, we will link him back into the tree to replace
-//    // NodeToDelete before returning.  Note that NodeToDelete did have
-//    // both child links filled in, but that may no longer be the case
-//    // at this point.
-//    //
-//
-//    if (NodeToDelete != EasyDelete)
-//    {
-//
-//        //
-//        // Note carefully - VADs are of differing sizes therefore it is not safe
-//        // to just overlay the EasyDelete node with the NodeToDelete like the
-//        // rtl avl code does.
-//        //
-//        // Copy just the links, preserving the rest of the original EasyDelete
-//        // VAD.
-//        //
-//
-//        EasyDelete->u1.Parent = NodeToDelete->u1.Parent;
-//        EasyDelete->LeftChild = NodeToDelete->LeftChild;
-//        EasyDelete->RightChild = NodeToDelete->RightChild;
-//
-//        if (MiIsLeftChild(NodeToDelete))
-//        {
-//            Parent = SANITIZE_PARENT_NODE(EasyDelete->u1.Parent);
-//            Parent->LeftChild = EasyDelete;
-//        }
-//        else
-//        {
-//            Parent = SANITIZE_PARENT_NODE(EasyDelete->u1.Parent);
-//            Parent->RightChild = EasyDelete;
-//        }
-//        if (EasyDelete->LeftChild != NULL)
-//        {
-//            EasyDelete->LeftChild->u1.Parent = MI_MAKE_PARENT(EasyDelete,
-//                EasyDelete->LeftChild->u1.Balance);
-//        }
-//        if (EasyDelete->RightChild != NULL)
-//        {
-//            EasyDelete->RightChild->u1.Parent = MI_MAKE_PARENT(EasyDelete,
-//                EasyDelete->RightChild->u1.Balance);
-//        }
-//    }
-//
-//    return;
+    PMMADDRESS_NODE Parent;
+    PMMADDRESS_NODE EasyDelete;
+    PMMADDRESS_NODE P;
+    SCHAR a;
+
+    //
+    // If the NodeToDelete has at least one NULL child pointer, then we can
+    // delete it directly.
+    //
+
+    if ((NodeToDelete->LeftChild == NULL) ||
+         (NodeToDelete->RightChild == NULL)) {
+
+        EasyDelete = NodeToDelete;
+    }
+
+    //
+    // Otherwise, we may as well pick the longest side to delete from (if one is
+    // is longer), as that reduces the probability that we will have to
+    // rebalance.
+    //
+
+    else if ((SCHAR)NodeToDelete->u1.Balance >= 0) {
+
+        //
+        // Pick up the subtree successor.
+        //
+
+        EasyDelete = NodeToDelete->RightChild;
+        while (EasyDelete->LeftChild != NULL) {
+            EasyDelete = EasyDelete->LeftChild;
+        }
+    }
+    else {
+
+        //
+        // Pick up the subtree predecessor.
+        //
+
+        EasyDelete = NodeToDelete->LeftChild;
+        while (EasyDelete->RightChild != NULL) {
+            EasyDelete = EasyDelete->RightChild;
+        }
+    }
+
+    //
+    // Rebalancing must know which side of the first parent the delete occurred
+    // on.  Assume it is the left side and otherwise correct below.
+    //
+
+    a = -1;
+
+    //
+    // Now we can do the simple deletion for the no left child case.
+    //
+
+    if (EasyDelete->LeftChild == NULL) {
+
+        Parent = SANITIZE_PARENT_NODE( EasyDelete->u1.Parent );
+
+        if (MiIsLeftChild( EasyDelete )) {
+            Parent->LeftChild = EasyDelete->RightChild;
+        }
+        else {
+            Parent->RightChild = EasyDelete->RightChild;
+            a = 1;
+        }
+
+        if (EasyDelete->RightChild != NULL) {
+            EasyDelete->RightChild->u1.Parent = MI_MAKE_PARENT( Parent, EasyDelete->RightChild->u1.Balance );
+        }
+
+        //
+        // Now we can do the simple deletion for the no right child case,
+        // plus we know there is a left child.
+        //
+
+    }
+    else {
+
+        Parent = SANITIZE_PARENT_NODE( EasyDelete->u1.Parent );
+
+        if (MiIsLeftChild( EasyDelete )) {
+            Parent->LeftChild = EasyDelete->LeftChild;
+        }
+        else {
+            Parent->RightChild = EasyDelete->LeftChild;
+            a = 1;
+        }
+
+        EasyDelete->LeftChild->u1.Parent = MI_MAKE_PARENT( Parent,
+                                                           EasyDelete->LeftChild->u1.Balance );
+    }
+
+    //
+    // For delete rebalancing, set the balance at the root to 0 to properly
+    // terminate the rebalance without special tests, and to be able to detect
+    // if the depth of the tree actually decreased.
+    //
+
+#if defined( _WIN81_ ) || defined ( _WIN10_ )
+    Table->BalancedRoot->u1.Balance = 0;
+#else
+    Table->BalancedRoot.u1.Balance = 0;
+#endif
+    P = SANITIZE_PARENT_NODE( EasyDelete->u1.Parent );
+
+    //
+    // Loop until the tree is balanced.
+    //
+
+    for (;;) {
+
+        //
+        // First handle the case where the tree became more balanced.  Zero
+        // the balance factor, calculate a for the next loop and move on to
+        // the parent.
+        //
+
+        if ((SCHAR)P->u1.Balance == a) {
+
+            P->u1.Balance = 0;
+
+            //
+            // If this node is curently balanced, we can show it is now unbalanced
+            // and terminate the scan since the subtree length has not changed.
+            // (This may be the root, since we set Balance to 0 above!)
+            //
+
+        }
+        else if (P->u1.Balance == 0)
+        {
+            COUNT_BALANCE_MAX( (SCHAR)-a );
+            P->u1.Balance = -a;
+
+            //
+            // If we shortened the depth all the way back to the root, then
+            // the tree really has one less level.
+            //
+
+#if !defined( _WIN81_ ) && !defined ( _WIN10_ )
+            if (Table->BalancedRoot.u1.Balance != 0) {
+                Table->DepthOfTree -= 1;
+            }
+#endif
+
+            break;
+
+            //
+            // Otherwise we made the short side 2 levels less than the long side,
+            // and rebalancing is required.  On return, some node has been promoted
+            // to above node P.  If Case 3 from Knuth was not encountered, then we
+            // want to effectively resume rebalancing from P's original parent which
+            // is effectively its grandparent now.
+            //
+
+        }
+        else
+        {
+
+            //
+            // We are done if Case 3 was hit, i.e., the depth of this subtree is
+            // now the same as before the delete.
+            //
+
+            if (MiRebalanceNode( P ))
+            {
+                break;
+            }
+
+            P = SANITIZE_PARENT_NODE( P->u1.Parent );
+        }
+
+        a = -1;
+        if (MiIsRightChild( P ))
+        {
+            a = 1;
+        }
+
+        P = SANITIZE_PARENT_NODE( P->u1.Parent );
+    }
+
+    //
+    // Finally, if we actually deleted a predecessor/successor of the
+    // NodeToDelete, we will link him back into the tree to replace
+    // NodeToDelete before returning.  Note that NodeToDelete did have
+    // both child links filled in, but that may no longer be the case
+    // at this point.
+    //
+
+    if (NodeToDelete != EasyDelete)
+    {
+
+        //
+        // Note carefully - VADs are of differing sizes therefore it is not safe
+        // to just overlay the EasyDelete node with the NodeToDelete like the
+        // rtl avl code does.
+        //
+        // Copy just the links, preserving the rest of the original EasyDelete
+        // VAD.
+        //
+
+        EasyDelete->u1.Parent = NodeToDelete->u1.Parent;
+        EasyDelete->LeftChild = NodeToDelete->LeftChild;
+        EasyDelete->RightChild = NodeToDelete->RightChild;
+
+        if (MiIsLeftChild( NodeToDelete ))
+        {
+            Parent = SANITIZE_PARENT_NODE( EasyDelete->u1.Parent );
+            Parent->LeftChild = EasyDelete;
+        }
+        else
+        {
+            Parent = SANITIZE_PARENT_NODE( EasyDelete->u1.Parent );
+            Parent->RightChild = EasyDelete;
+        }
+        if (EasyDelete->LeftChild != NULL)
+        {
+            EasyDelete->LeftChild->u1.Parent = MI_MAKE_PARENT( EasyDelete,
+                                                               EasyDelete->LeftChild->u1.Balance );
+        }
+        if (EasyDelete->RightChild != NULL)
+        {
+            EasyDelete->RightChild->u1.Parent = MI_MAKE_PARENT( EasyDelete,
+                                                                EasyDelete->RightChild->u1.Balance );
+        }
+    }
+
+    return;
 }
 
 TABLE_SEARCH_RESULT
 MiFindNodeOrParent(
     IN PMM_AVL_TABLE Table,
     IN ULONG_PTR StartingVpn,
-    OUT PMMADDRESS_NODE* NodeOrParent
-)
+    OUT PMMADDRESS_NODE *NodeOrParent
+    )
 
 /*++
 
@@ -847,7 +847,7 @@ MiFindNodeOrParent(
         return TableEmptyTree;
     }
 
-    NodeToExamine = (PMMADDRESS_NODE)GET_VAD_ROOT(Table);
+    NodeToExamine = (PMMADDRESS_NODE)GET_VAD_ROOT( Table );
 
     for (;;) {
 

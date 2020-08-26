@@ -10,8 +10,8 @@ ZwQuerySystemInformation(
     IN SYSTEM_INFORMATION_CLASS SystemInformationClass,
     OUT PVOID SystemInformation,
     IN ULONG SystemInformationLength,
-    OUT PULONG ReturnLength OPTIONAL
-);
+    OUT PULONG ReturnLength OPTIONAL 
+    );
 
 NTSYSAPI
 NTSTATUS
@@ -20,10 +20,10 @@ ZwSetSystemInformation(
     IN SYSTEM_INFORMATION_CLASS SystemInformationClass,
     IN PVOID SystemInformation,
     IN ULONG SystemInformationLength
-);
+    );
 
 NTSYSAPI
-NTSTATUS
+NTSTATUS 
 NTAPI
 ZwQueryInformationProcess(
     IN  HANDLE ProcessHandle,
@@ -31,7 +31,7 @@ ZwQueryInformationProcess(
     OUT PVOID ProcessInformation,
     IN  ULONG ProcessInformationLength,
     IN  PULONG ReturnLength
-);
+    );
 
 NTSYSAPI
 NTSTATUS
@@ -42,7 +42,7 @@ ZwQueryInformationThread(
     OUT PVOID ThreadInformation,
     IN ULONG ThreadInformationLength,
     OUT PULONG ReturnLength OPTIONAL
-);
+    );
 
 NTSYSAPI
 NTSTATUS
@@ -53,11 +53,11 @@ ZwQueryVirtualMemory(
     IN MEMORY_INFORMATION_CLASS_EX MemoryInformationClass,
     OUT PVOID  Buffer,
     IN SIZE_T  Length,
-    OUT PSIZE_T ResultLength
-);
+    OUT PSIZE_T ResultLength 
+    );
 
-NTSTATUS
-NTAPI
+NTSTATUS 
+NTAPI 
 ZwCreateThreadEx(
     OUT PHANDLE hThread,
     IN ACCESS_MASK DesiredAccess,
@@ -70,14 +70,14 @@ ZwCreateThreadEx(
     IN SIZE_T SizeOfStackCommit,
     IN SIZE_T SizeOfStackReserve,
     IN PNT_PROC_THREAD_ATTRIBUTE_LIST AttributeList
-);
+    );
 
-NTSTATUS
-NTAPI
-ZwTerminateThread(
+NTSTATUS 
+NTAPI 
+ZwTerminateThread( 
     IN HANDLE ThreadHandle,
-    IN NTSTATUS ExitStatus
-);
+    IN NTSTATUS ExitStatus 
+    );
 
 
 
@@ -91,59 +91,59 @@ MmCopyVirtualMemory(
     OUT PVOID ToAddress,
     IN SIZE_T BufferSize,
     IN KPROCESSOR_MODE PreviousMode,
-    OUT PSIZE_T NumberOfBytesCopied
-);
+    OUT PSIZE_T NumberOfBytesCopied 
+    );
 
 NTKERNELAPI
-PPEB
+PPEB 
 NTAPI
-PsGetProcessPeb(IN PEPROCESS Process);
-
-NTKERNELAPI
-PVOID
-NTAPI
-PsGetThreadTeb(IN PETHREAD Thread);
+PsGetProcessPeb( IN PEPROCESS Process );
 
 NTKERNELAPI
 PVOID
 NTAPI
-PsGetProcessWow64Process(IN PEPROCESS Process);
+PsGetThreadTeb( IN PETHREAD Thread );
 
 NTKERNELAPI
 PVOID
 NTAPI
-PsGetCurrentProcessWow64Process();
+PsGetProcessWow64Process( IN PEPROCESS Process );
+
+NTKERNELAPI
+PVOID
+NTAPI
+PsGetCurrentProcessWow64Process( );
 
 NTKERNELAPI
 BOOLEAN
 NTAPI
-KeTestAlertThread(IN KPROCESSOR_MODE AlertMode);
+KeTestAlertThread( IN KPROCESSOR_MODE AlertMode );
 
 NTKERNELAPI
 BOOLEAN
 NTAPI
-PsIsProtectedProcess(IN PEPROCESS Process);
+PsIsProtectedProcess( IN PEPROCESS Process );
 
-typedef VOID(NTAPI* PKNORMAL_ROUTINE)(
-    PVOID NormalContext,
-    PVOID SystemArgument1,
-    PVOID SystemArgument2
+typedef VOID( NTAPI *PKNORMAL_ROUTINE )(
+        PVOID NormalContext,
+        PVOID SystemArgument1,
+        PVOID SystemArgument2
     );
 
-typedef VOID(NTAPI* PKKERNEL_ROUTINE)(
-    PRKAPC Apc,
-    PKNORMAL_ROUTINE* NormalRoutine,
-    PVOID* NormalContext,
-    PVOID* SystemArgument1,
-    PVOID* SystemArgument2
+typedef VOID( NTAPI* PKKERNEL_ROUTINE)(
+        PRKAPC Apc,
+        PKNORMAL_ROUTINE *NormalRoutine,
+        PVOID *NormalContext,
+        PVOID *SystemArgument1,
+        PVOID *SystemArgument2
     );
 
-typedef VOID(NTAPI* PKRUNDOWN_ROUTINE)(PRKAPC Apc);
+typedef VOID( NTAPI *PKRUNDOWN_ROUTINE )( PRKAPC Apc );
 
 NTKERNELAPI
-VOID
-NTAPI
-KeInitializeApc(
+VOID 
+NTAPI 
+KeInitializeApc( 
     IN PKAPC Apc,
     IN PKTHREAD Thread,
     IN KAPC_ENVIRONMENT ApcStateIndex,
@@ -152,7 +152,7 @@ KeInitializeApc(
     IN PKNORMAL_ROUTINE NormalRoutine,
     IN KPROCESSOR_MODE ApcMode,
     IN PVOID NormalContext
-);
+    );
 
 NTKERNELAPI
 BOOLEAN
@@ -162,12 +162,12 @@ KeInsertQueueApc(
     PVOID SystemArgument1,
     PVOID SystemArgument2,
     KPRIORITY Increment
-);
+    );
 
 NTSYSAPI
 PIMAGE_NT_HEADERS
 NTAPI
-RtlImageNtHeader(PVOID Base);
+RtlImageNtHeader( PVOID Base );
 
 NTSYSAPI
 PVOID
@@ -177,10 +177,10 @@ RtlImageDirectoryEntryToData(
     BOOLEAN MappedAsImage,
     USHORT DirectoryEntry,
     PULONG Size
-);
+    );
 
 
-typedef BOOLEAN(*EX_ENUMERATE_HANDLE_ROUTINE)(
+typedef BOOLEAN ( *EX_ENUMERATE_HANDLE_ROUTINE )(
 #if !defined(_WIN7_)
     IN PHANDLE_TABLE HandleTable,
 #endif
@@ -196,12 +196,12 @@ ExEnumHandleTable(
     IN EX_ENUMERATE_HANDLE_ROUTINE EnumHandleProcedure,
     IN PVOID EnumParameter,
     OUT PHANDLE Handle
-);
+    );
 
 NTKERNELAPI
 VOID
 FASTCALL
-ExfUnblockPushLock(
+ExfUnblockPushLock (
     IN OUT PEX_PUSH_LOCK PushLock,
     IN OUT PVOID WaitBlock
-);
+    );
