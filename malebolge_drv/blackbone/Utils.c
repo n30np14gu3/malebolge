@@ -269,6 +269,9 @@ ULONG GenCall32V( IN PUCHAR pBuf, IN PVOID pFn, IN INT argc, IN va_list vl )
 
     PULONG pArgBuf = ExAllocatePoolWithTag( PagedPool, argc * sizeof( ULONG ), BB_POOL_TAG );
 
+    if (pArgBuf == NULL)
+        return 0;
+	
     // cast args
     for (INT i = 0; i < argc; i++)
     {

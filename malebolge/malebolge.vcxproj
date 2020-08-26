@@ -89,21 +89,32 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="malebolge.cpp" />
+    <ClCompile Include="Menu\Menu.cpp" />
     <ClCompile Include="ring0\DriverLoader.cpp" />
     <ClCompile Include="ring0\KernelInterface.cpp" />
-    <ClCompile Include="SDK\draw_utils\draw_utils.cpp" />
-    <ClCompile Include="SDK\hack_proc\hack_proc.cpp" />
     <ClCompile Include="SDK\http_request\http_request.cpp" />
+    <ClCompile Include="SDK\imgui\imgui.cpp" />
+    <ClCompile Include="SDK\imgui\imgui_draw.cpp" />
+    <ClCompile Include="SDK\imgui\imgui_impl_dx9.cpp" />
+    <ClCompile Include="SDK\imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="SDK\imgui\imgui_widgets.cpp" />
     <ClCompile Include="SDK\local_proto\local_proto.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Menu\Menu.h" />
     <ClInclude Include="ring0\DriverLoader.h" />
     <ClInclude Include="ring0\KernelInterface.h" />
     <ClInclude Include="ring0\driver_io.h" />
-    <ClInclude Include="SDK\draw_utils\draw_utils.h" />
     <ClInclude Include="SDK\globals.h" />
-    <ClInclude Include="SDK\hack_proc\hack_proc.h" />
     <ClInclude Include="SDK\http_request\http_request.h" />
+    <ClInclude Include="SDK\imgui\imconfig.h" />
+    <ClInclude Include="SDK\imgui\imgui.h" />
+    <ClInclude Include="SDK\imgui\imgui_impl_dx9.h" />
+    <ClInclude Include="SDK\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="SDK\imgui\imgui_internal.h" />
+    <ClInclude Include="SDK\imgui\imstb_rectpack.h" />
+    <ClInclude Include="SDK\imgui\imstb_textedit.h" />
+    <ClInclude Include="SDK\imgui\imstb_truetype.h" />
     <ClInclude Include="SDK\local_proto\local_proto.h" />
     <ClInclude Include="SDK\VMProtectSDK.h" />
   </ItemGroup>

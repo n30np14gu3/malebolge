@@ -6,6 +6,7 @@
 #include "../SDK/globals.h"
 
 typedef BOOLEAN (_stdcall *pRtlDosPathNameToNtPathName_U)(PCWSTR DosFileName, PUNICODE_STRING NtFileName, PWSTR* FilePart, PVOID RelativeName);
+typedef void(_stdcall* pRtlFreeUnicodeString)(PUNICODE_STRING UnicodeString);
 
 KernelInterface::KernelInterface()
 {
@@ -23,10 +24,13 @@ KernelInterface::KernelInterface()
 	NoErrors = true;
 }
 
-void KernelInterface::Inject(const wchar_t* szDll)
+bool KernelInterface::Inject(const wchar_t* szDll) const
 {
+#ifdef NDEBUG
+	VMProtectBeginUltra("#KernelInterface::Inject");
+#endif
 	if(m_hDriver == INVALID_HANDLE_VALUE)
-		return;
+		return false;
 	
 	DWORD bytes = 0;
 	INJECT_DLL data = { IT_MMap };
@@ -34,19 +38,27 @@ void KernelInterface::Inject(const wchar_t* szDll)
 
 	HMODULE hNtdll = GetModuleHandle("ntdll.dll");
 	if(hNtdll == nullptr)
-		return;
+		return false;
 
 	pRtlDosPathNameToNtPathName_U pFunc = reinterpret_cast<pRtlDosPathNameToNtPathName_U>(GetProcAddress(hNtdll, "RtlDosPathNameToNtPathName_U"));
-	if(pFunc == nullptr)
-		return;
+	pRtlFreeUnicodeString pFreeFunc = reinterpret_cast<pRtlFreeUnicodeString>(GetProcAddress(hNtdll, "RtlFreeUnicodeString"));
+	
+	if(pFunc == nullptr || pFreeFunc == nullptr)
+		return false;
 
 	pFunc(szDll, &ustr, nullptr, nullptr);
+
+	if(ustr.Buffer == nullptr)
+		return false;
+	
 	wcscpy_s(data.FullDllPath, ustr.Buffer);
 
+	pFreeFunc(&ustr);
+	
 	data.pid = m_dwProcessId;
 	data.initRVA = 0;
 	data.wait = false;
-	data.unlink = false;
+	data.unlink = true;
 	data.erasePE = false;
 	data.flags = KNoFlags;
 	data.imageBase = 0;
@@ -54,9 +66,14 @@ void KernelInterface::Inject(const wchar_t* szDll)
 	data.asImage = false;
 
 	if(!DeviceIoControl(m_hDriver, IO_INJECT_DLL, &data, sizeof(data), nullptr, 0, &bytes, nullptr))
-		return;
+		return false;
 
 	memset(&data, 0, sizeof(data));
+
+#ifdef NDEBUG
+	VMProtectEnd();
+#endif
+	return true;
 }
 
 bool KernelInterface::Attach(bool update)
@@ -117,6 +134,16 @@ bool KernelInterface::GetModules()
 	Modules->bClient = req.bClient;
 	Modules->bEngine = req.bEngine;
 	return true;
+}
+
+bool KernelInterface::IsAlive() const
+{
+	if (m_hDriver == INVALID_HANDLE_VALUE)
+		return false;
+
+	DRIVER_ALIVE_REQUEST req{ -1 };
+	DeviceIoControl(m_hDriver, IO_DRIVER_ALIVE, &req, sizeof(req), &req, sizeof(req), nullptr, nullptr);
+	return !req.status;
 }
 
 KernelInterface::~KernelInterface()

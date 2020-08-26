@@ -143,6 +143,10 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 		BBInjectDll((PINJECT_DLL)Irp->AssociatedIrp.SystemBuffer);
 		break;
 		default:break;
+
+	case IO_DRIVER_ALIVE:
+		((PDRIVER_ALIVE_REQUEST)Irp->AssociatedIrp.SystemBuffer)->status = STATUS_SUCCESS;
+		break;
 	}	
 	Irp->IoStatus.Status = STATUS_SUCCESS;
 	Irp->IoStatus.Information = bytesIO;

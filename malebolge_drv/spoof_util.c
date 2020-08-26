@@ -37,24 +37,9 @@ DWORD Hash(PBYTE buffer, DWORD length) {
 	return h;
 }
 
-typedef struct _MM_COPY_ADDRESS {
-	union {
-		PVOID            VirtualAddress;
-		PHYSICAL_ADDRESS PhysicalAddress;
-	};
-} MM_COPY_ADDRESS, * PMMCOPY_ADDRESS;
+
 
 #define MM_COPY_MEMORY_VIRTUAL              0x2
-
-NTKERNELAPI
-NTSTATUS
-MmCopyMemory(
-	_In_ PVOID TargetAddress,
-	_In_ MM_COPY_ADDRESS SourceAddress,
-	_In_ SIZE_T NumberOfBytes,
-	_In_ ULONG Flags,
-	_Out_ PSIZE_T NumberOfBytesTransferred
-);
 
 PVOID SafeCopy(PVOID src, DWORD size) {
 	PCHAR buffer = (PCHAR)ExAllocatePool(NonPagedPool, size);

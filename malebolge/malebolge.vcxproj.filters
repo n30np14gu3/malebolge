@@ -22,11 +22,11 @@
     <Filter Include="ring0\Driver Loader">
       <UniqueIdentifier>{2f6d59f6-985b-407b-b989-529d1026271b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SDK\draw utils">
-      <UniqueIdentifier>{42457932-e61f-40cc-9cc6-0c839224df39}</UniqueIdentifier>
+    <Filter Include="Menu">
+      <UniqueIdentifier>{dd4fedd6-9dd5-4855-9baf-900b9f2b8ecc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SDK\hack proc">
-      <UniqueIdentifier>{2b61e98c-74f7-4a80-986d-add5837f1c42}</UniqueIdentifier>
+    <Filter Include="Menu\Events">
+      <UniqueIdentifier>{b74544a2-dab2-4c10-92fa-36c7427ba977}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -43,11 +43,23 @@
     <ClCompile Include="ring0\DriverLoader.cpp">
       <Filter>ring0\Driver Loader</Filter>
     </ClCompile>
-    <ClCompile Include="SDK\draw_utils\draw_utils.cpp">
-      <Filter>SDK\draw utils</Filter>
+    <ClCompile Include="SDK\imgui\imgui.cpp">
+      <Filter>SDK\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="SDK\hack_proc\hack_proc.cpp">
-      <Filter>SDK\hack proc</Filter>
+    <ClCompile Include="SDK\imgui\imgui_draw.cpp">
+      <Filter>SDK\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="SDK\imgui\imgui_impl_dx9.cpp">
+      <Filter>SDK\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="SDK\imgui\imgui_impl_win32.cpp">
+      <Filter>SDK\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="SDK\imgui\imgui_widgets.cpp">
+      <Filter>SDK\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="Menu\Menu.cpp">
+      <Filter>Menu</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -72,11 +84,32 @@
     <ClInclude Include="ring0\DriverLoader.h">
       <Filter>ring0\Driver Loader</Filter>
     </ClInclude>
-    <ClInclude Include="SDK\draw_utils\draw_utils.h">
-      <Filter>SDK\draw utils</Filter>
+    <ClInclude Include="SDK\imgui\imconfig.h">
+      <Filter>SDK\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="SDK\hack_proc\hack_proc.h">
-      <Filter>SDK\hack proc</Filter>
+    <ClInclude Include="SDK\imgui\imgui.h">
+      <Filter>SDK\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\imgui\imgui_impl_dx9.h">
+      <Filter>SDK\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\imgui\imgui_impl_win32.h">
+      <Filter>SDK\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\imgui\imgui_internal.h">
+      <Filter>SDK\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\imgui\imstb_rectpack.h">
+      <Filter>SDK\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\imgui\imstb_textedit.h">
+      <Filter>SDK\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\imgui\imstb_truetype.h">
+      <Filter>SDK\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu\Menu.h">
+      <Filter>Menu</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
