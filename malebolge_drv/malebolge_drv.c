@@ -106,10 +106,9 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath
 	}
 
 	PsSetLoadImageNotifyRoutine(ImageLoadCallback);
-	
+	spoof();
 #ifndef DEBUG
 	VMProtectEnd();
-	spoof();
 	EnableCallback();
 #endif
 	return STATUS_SUCCESS;
