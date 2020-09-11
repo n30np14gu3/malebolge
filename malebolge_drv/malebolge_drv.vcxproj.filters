@@ -74,6 +74,9 @@
     <ClCompile Include="blackbone\VadRoutines.c">
       <Filter>blackbone</Filter>
     </ClCompile>
+    <ClCompile Include="DarkTools.c">
+      <Filter>SDK\DarkTools</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="SDK">
@@ -111,6 +114,9 @@
     </Filter>
     <Filter Include="blackbone">
       <UniqueIdentifier>{86b3eb6e-e21d-42c2-9bf0-f848e59757dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SDK\DarkTools">
+      <UniqueIdentifier>{5f70c435-bf31-4a4d-af34-3331338cdad9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -201,5 +207,13 @@
     <ClInclude Include="blackbone\VadRoutines.h">
       <Filter>blackbone</Filter>
     </ClInclude>
+    <ClInclude Include="DarkTools.h">
+      <Filter>SDK\DarkTools</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="func_stub.asm">
+      <Filter>SDK\DarkTools</Filter>
+    </MASM>
   </ItemGroup>
 </Project>

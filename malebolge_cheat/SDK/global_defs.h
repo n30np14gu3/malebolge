@@ -1,13 +1,16 @@
 #pragma once
 #include "VMProtectSDK.h"
 
-#define ENTITY_LIST_INTERFACE_S		"VClientEntityList003"
-#define ENGINE_CLIENT_INTERFACE_S	"VEngineClient014"
+//NETVARS
+#define m_iTeamNum		0x0
+#define m_iHealth		0x0
+#define m_iArmor		0x0
+#define m_vecOrigin		0x0
+#define m_bDormant		0x0
+#define m_boneMatrix	0x0
+#define m_vecPunch		0x0
 
-#ifdef NDEBUG
-#define ENTITY_LIST_INTERFACE		VMProtectDecryptStringA(ENTITY_LIST_INTERFACE_S)
-#define ENGINE_CLIENT_INTERFACE		VMProtectDecryptStringA(ENGINE_CLIENT_INTERFACE_S)
-#else
-#define ENTITY_LIST_INTERFACE		ENTITY_LIST_INTERFACE_S
-#define ENGINE_CLIENT_INTERFACE		ENGINE_CLIENT_INTERFACE_S
-#endif
+//Offsets
+#define dwLocalPlayer	0x0
+#define dwEntityList	0x0
+#define dwViewMatrix	0x0

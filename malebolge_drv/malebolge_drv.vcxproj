@@ -42,6 +42,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
@@ -118,6 +119,7 @@
     <ClCompile Include="blackbone\VadRoutines.c" />
     <ClCompile Include="callback.c" />
     <ClCompile Include="CreateProcessCallback.c" />
+    <ClCompile Include="DarkTools.c" />
     <ClCompile Include="DriverUnload.c" />
     <ClCompile Include="ImageLoadCallback.c" />
     <ClCompile Include="IoCloseCall.c" />
@@ -151,6 +153,7 @@
     <ClInclude Include="blackbone\VadRoutines.h" />
     <ClInclude Include="callback.h" />
     <ClInclude Include="CreateProcessCallback.h" />
+    <ClInclude Include="DarkTools.h" />
     <ClInclude Include="driver_defs.h" />
     <ClInclude Include="driver_io.h" />
     <ClInclude Include="functions.h" />
@@ -161,7 +164,11 @@
     <ClInclude Include="spoof_util.h" />
     <ClInclude Include="VMProtectDDK.h" />
   </ItemGroup>
+  <ItemGroup>
+    <MASM Include="func_stub.asm" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
   </ImportGroup>
 </Project>

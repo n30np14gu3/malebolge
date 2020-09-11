@@ -113,14 +113,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Hooks\Hooks.h" />
-    <ClInclude Include="SDK\fnv.hpp" />
     <ClInclude Include="SDK\global_defs.h" />
-    <ClInclude Include="SDK\Netvars.hpp" />
-    <ClInclude Include="SDK\source_sdk\IClientEntity.hpp" />
-    <ClInclude Include="SDK\source_sdk\IClientEntityList.hpp" />
-    <ClInclude Include="SDK\source_sdk\IVEngineClient.hpp" />
-    <ClInclude Include="SDK\Vector.hpp" />
-    <ClInclude Include="SDK\VirtualMethod.hpp" />
     <ClInclude Include="SDK\VMProtectSDK.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
