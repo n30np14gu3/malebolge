@@ -57,11 +57,14 @@
     <LinkIncremental>false</LinkIncremental>
     <TargetExt>.sys</TargetExt>
     <TimeStampServer>http://timestamp.globalsign.com/scripts/timstamp.dll</TimeStampServer>
+    <LibraryPath>$(SolutionDir)additional_lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <TargetExt>.sys</TargetExt>
-    <LibraryPath>$(SolutionDir)vmp_sdk;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)vmp_sdk;$(SolutionDir)additional_lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -163,9 +166,6 @@
     <ClInclude Include="spoof_core.h" />
     <ClInclude Include="spoof_util.h" />
     <ClInclude Include="VMProtectDDK.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="func_stub.asm" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

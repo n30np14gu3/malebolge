@@ -211,9 +211,4 @@
       <Filter>SDK\DarkTools</Filter>
     </ClInclude>
   </ItemGroup>
-  <ItemGroup>
-    <MASM Include="func_stub.asm">
-      <Filter>SDK\DarkTools</Filter>
-    </MASM>
-  </ItemGroup>
 </Project>

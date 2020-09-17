@@ -17,63 +17,236 @@ NTSTATUS KernelCopy(PVOID Src, PVOID Dst, SIZE_T Size, PSIZE_T Ret)
 	return result;
 }
 
-BYTE PUSH_RAX_ADR[] = { 0x48, 0xB8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-BYTE JMP_RAX_RET[] = { 0xFF, 0xE0 };
-BYTE FUNC_BACKUP[12] = { 0x0 };
+static const UCHAR HkpDetour[] = {
+	0xff, 0x25, 0x00, 0x00, 0x00, 0x00
+};
 
-void HookFunction(PVOID Func, PVOID Hook, unsigned char* backup)
+#define FULL_DETOUR_SIZE			(sizeof(HkpDetour) + sizeof(PVOID))
+#define INTERLOCKED_EXCHANGE_SIZE	(16ul)
+#define HK_POOL_TAG					(' kh3')
+
+
+_IRQL_requires_max_(APC_LEVEL)
+static NTSTATUS HkpReplaceCode16Bytes(
+	_In_ PVOID	Address,
+	_In_ PUCHAR	Replacement
+)
 {
-	SIZE_T ret = 0;
-	*((PDWORD64)&PUSH_RAX_ADR[2]) = _byteswap_uint64((DWORD64)Hook);
-	
-	memcpy_s(FUNC_BACKUP, 12, Func, 12);
-	memcpy_s(backup, 12, FUNC_BACKUP, 12);
-	
-	KernelCopy(PUSH_RAX_ADR, Func, 10, &ret);
-	KernelCopy(JMP_RAX_RET, (PVOID)((DWORD64)Func + 10), 2, &ret);
+	//
+	// Check for proper alignment. cmpxchg16b works only with 16-byte aligned addresses.
+	//
+	if ((ULONG64)Address != ((ULONG64)Address & ~0xf))
+	{
+		return STATUS_DATATYPE_MISALIGNMENT;
+	}
+
+	//
+	// Create memory descriptor list to map read-only (or RX) memory as read-write.
+	//
+	PMDL Mdl = IoAllocateMdl(Address, INTERLOCKED_EXCHANGE_SIZE, FALSE, FALSE, NULL);
+	if (Mdl == NULL)
+	{
+		return STATUS_INSUFFICIENT_RESOURCES;
+	}
+
+	//
+	// Make memory pages resident in RAM and make sure they won't get paged out.
+	//
+	__try
+	{
+		MmProbeAndLockPages(Mdl, KernelMode, IoReadAccess);
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		IoFreeMdl(Mdl);
+
+		return STATUS_INVALID_ADDRESS;
+	}
+
+	//
+	// Create new mapping for read-only memory.
+	//
+	PLONG64 RwMapping = MmMapLockedPagesSpecifyCache(
+		Mdl,
+		KernelMode,
+		MmNonCached,
+		NULL,
+		FALSE,
+		NormalPagePriority
+	);
+
+	if (RwMapping == NULL)
+	{
+		MmUnlockPages(Mdl);
+		IoFreeMdl(Mdl);
+
+		return STATUS_INTERNAL_ERROR;
+	}
+
+	//
+	// Set new mapping page protection to read-write in order to modify it.
+	//
+	NTSTATUS Status = MmProtectMdlSystemAddress(Mdl, PAGE_READWRITE);
+	if (!NT_SUCCESS(Status))
+	{
+		MmUnmapLockedPages(RwMapping, Mdl);
+		MmUnlockPages(Mdl);
+		IoFreeMdl(Mdl);
+
+		return Status;
+	}
+
+	LONG64 PreviousContent[2];
+	PreviousContent[0] = RwMapping[0];
+	PreviousContent[1] = RwMapping[1];
+
+	//
+	// Replace 16 bytes of code using created read-write mapping.
+	// Interlocked compare and exchange (cmpxchg16b) is used to avoid concurrency issues.
+	//
+	InterlockedCompareExchange128(
+		RwMapping,
+		((PLONG64)Replacement)[1],
+		((PLONG64)Replacement)[0],
+		PreviousContent
+	);
+
+	//
+	// Unlock and unmap pages, free MDL. 
+	//
+	MmUnmapLockedPages(RwMapping, Mdl);
+	MmUnlockPages(Mdl);
+	IoFreeMdl(Mdl);
+
+	return STATUS_SUCCESS;
 }
 
-
-/// <summary>
-/// Place an inline hook on given address in any driver
-/// </summary>
-/// <param name="HookData">Pointer to a HOOK_DATA structure</param>
-/// <returns>Hook status code</returns>
-HOOK_STATUS PlaceDriverInlineHook(PHOOK_DATA HookData)
+_IRQL_requires_max_(APC_LEVEL)
+static VOID HkpPlaceDetour(
+	_In_ PVOID Address,
+	_In_ PVOID Destination
+)
 {
-	/*
-		mov rax, 0h
-		jmp rax
-		mov rax, 0h
-		call rax
-	*/
-	BYTE shellcode[24] = { 0x48, 0xB8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xE0, 0x48, 0xB8, 0x00, 0x00,
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xD0 };
+	//
+	// Save jump instruction and detour destination.
+	// This will create code as shown:
+	// +0	jmp QWORD PTR [rip+0x0]
+	// +6	0x................
+	//
+	
+	_disable();
+	__writecr0(__readcr0() & (~(1 << 16)));
+	RtlCopyMemory((PUCHAR)Address, HkpDetour, sizeof(HkpDetour));
+	RtlCopyMemory((PUCHAR)Address + sizeof(HkpDetour), &Destination, sizeof(PVOID));
+	__writecr0(__readcr0() | (1 << 16));
+	_enable();
+}
 
-	// Check if any of the given addresses are invalid
-	if (!MmIsAddressValid(HookData->Address) || !MmIsAddressValid(HookData->HookAddress) || !MmIsAddressValid(HookData->OriginalAssemblyAddress))
-		return HOOK_INVALID_PARAMETER;
+_IRQL_requires_max_(APC_LEVEL)
+NTSTATUS HkRestoreFunction(
+	_In_ PVOID	 HookedFunction,
+	_In_ PVOID	 OriginalTrampoline
+)
+{
+	PUCHAR OriginalBytes = (PUCHAR)OriginalTrampoline - INTERLOCKED_EXCHANGE_SIZE;
 
-	// Copy the addresses into the shellcode
-	RtlCopyMemory(shellcode + 0x02, &HookData->HookAddress, sizeof(HookData->HookAddress));
-	RtlCopyMemory(shellcode + 0x0E, &HookData->OriginalAssemblyAddress, sizeof(HookData->OriginalAssemblyAddress));
+	//
+	// If that will fail we are probably going to bugcheck anyway...
+	//
+	NTSTATUS Status = HkpReplaceCode16Bytes(HookedFunction, OriginalBytes);
 
-	if (HookData->DisableWP)
+	//
+	// Wait 10 ms to make sure no code will jump to trampoline after freeing.
+	//
+	LARGE_INTEGER DelayInterval;
+	DelayInterval.QuadPart = -100000;
+	KeDelayExecutionThread(KernelMode, FALSE, &DelayInterval);
+
+	//
+	// Free resources.
+	//
+	ExFreePoolWithTag(OriginalBytes, HK_POOL_TAG);
+
+	return Status;
+}
+
+_IRQL_requires_max_(APC_LEVEL)
+NTSTATUS HkDetourFunction(
+	_In_ PVOID	 TargetFunction,
+	_In_ PVOID	 Hook,
+	_In_ SIZE_T  CodeLength,
+	_Out_ PVOID* OriginalTrampoline
+)
+{
+	//
+	// Check if CodeLength is big enough to hold detour.
+	//
+	if (CodeLength < FULL_DETOUR_SIZE)
 	{
-		_disable();
-		__writecr0(__readcr0() & (~(1 << 16)));
+		return STATUS_INVALID_PARAMETER_3;
 	}
 
-	// Copy the shellcode to the destination
-	RtlCopyMemory(HookData->Address, &shellcode, sizeof(shellcode));
-
-	if (HookData->DisableWP)
+	//
+	// NonPagedPool is used to be compatibile with functions that run at high IRQL (>= DISPATCH_LEVEL).
+	//
+	PUCHAR Trampoline = ExAllocatePoolWithTag(
+		NonPagedPool,
+		INTERLOCKED_EXCHANGE_SIZE + FULL_DETOUR_SIZE + CodeLength,
+		HK_POOL_TAG
+	);
+	if (Trampoline == NULL)
 	{
-		__writecr0(__readcr0() | (1 << 16));
-		_enable();
+		return STATUS_INSUFFICIENT_RESOURCES;
 	}
 
-	HookData->ReturnAddress = (PDRIVER_DISPATCH)((DWORD64)HookData->Address + 0xC);
+	_disable();
+	__writecr0(__readcr0() & (~(1 << 16)));
+	//
+	// Save 16 original bytes to restore function later (needed for HkRestoreFunction).
+	//
+	RtlCopyMemory(Trampoline, TargetFunction, INTERLOCKED_EXCHANGE_SIZE);
+	__writecr0(__readcr0() | (1 << 16));
+	_enable();
+	//
+	// Create trampoline to original function containing original bytes and jump to function + CodeLength.
+	//
+	//
 
-	return HOOK_STATUS_SUCCESS;
+	_disable();
+	__writecr0(__readcr0() & (~(1 << 16)));
+	RtlCopyMemory(Trampoline + INTERLOCKED_EXCHANGE_SIZE, TargetFunction, CodeLength);
+	__writecr0(__readcr0() | (1 << 16));
+	_enable();
+	HkpPlaceDetour(Trampoline + INTERLOCKED_EXCHANGE_SIZE + CodeLength, (PVOID)((ULONG_PTR)TargetFunction + CodeLength));
+
+	//
+	// Generate detour bytes.
+	//
+	UCHAR DetourBytes[INTERLOCKED_EXCHANGE_SIZE];
+
+	HkpPlaceDetour(DetourBytes, Hook);
+	_disable();
+	__writecr0(__readcr0() & (~(1 << 16)));
+	RtlCopyMemory(
+		(PUCHAR)DetourBytes + FULL_DETOUR_SIZE,
+		(PUCHAR)TargetFunction + FULL_DETOUR_SIZE,
+		INTERLOCKED_EXCHANGE_SIZE - FULL_DETOUR_SIZE
+	);
+	__writecr0(__readcr0() | (1 << 16));
+	_enable();
+
+	//
+	// Apply detour to target function.
+	//
+	NTSTATUS Status = HkpReplaceCode16Bytes(TargetFunction, DetourBytes);
+	if (!NT_SUCCESS(Status))
+	{
+		ExFreePoolWithTag(Trampoline, HK_POOL_TAG);
+	}
+	else
+	{
+		*OriginalTrampoline = Trampoline + INTERLOCKED_EXCHANGE_SIZE;
+	}
+
+	return Status;
 }

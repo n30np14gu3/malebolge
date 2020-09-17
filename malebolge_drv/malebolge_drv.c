@@ -16,6 +16,7 @@
 #include "blackbone/Utils.h"
 
 #include <ntstrsafe.h>
+#include "DarkTools.h"
 
 ULONG RANDOM_SEED;
 
@@ -40,6 +41,19 @@ BOOLEAN DRIVER_INITED;
 
 ULONG TerminateProcess;
 
+PDRIVER_OBJECT g_Driver;
+
+NTSTATUS(*OriginalNtClose)(_In_ HANDLE Handle);
+
+NTSTATUS HookedNtClose(
+	_In_ HANDLE Handle
+)
+{
+	DbgPrintEx(0, 0, "Called NtClose.\n");
+
+	return OriginalNtClose(Handle);
+}
+
 
 NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath)
 {
@@ -49,36 +63,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath
 	UNREFERENCED_PARAMETER(pRegistryPath);
 	NTSTATUS status;
 
-	// Get OS Dependant offsets
-	InitializeDebuggerBlock();
-	status = BBInitDynamicData(&dynData);
-	if (!NT_SUCCESS(status))
-	{
-		if (status == STATUS_NOT_SUPPORTED)
-			DPRINT("BlackBone: %s: Unsupported OS version. Aborting\n", __FUNCTION__);
-
-		return status;
-	}
-
-	// Initialize some loader structures
-	status = BBInitLdrData((PKLDR_DATA_TABLE_ENTRY)pDriverObject->DriverSection);
-	if (!NT_SUCCESS(status))
-		return status;
-
-	//
-	// Globals init
-	//
-	InitializeListHead(&g_PhysProcesses);
-	RtlInitializeGenericTableAvl(&g_ProcessPageTables, &AvlCompare, &AvlAllocate, &AvlFree, NULL);
-	KeInitializeGuardedMutex(&g_globalLock);
-	
-	// Setup process termination notifier
-	status = PsSetCreateProcessNotifyRoutine(BBProcessNotify, FALSE);
-	if (!NT_SUCCESS(status))
-	{
-		DPRINT("BlackBone: %s: Failed to setup notify routine with staus 0x%X\n", __FUNCTION__, status);
-		return status;
-	}
+	g_Driver = pDriverObject;
 	
 	RtlSecureZeroMemory(&DeviceName, sizeof(DeviceName));
 	RtlSecureZeroMemory(&DosName, sizeof(DosName));
@@ -106,10 +91,44 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath
 	}
 
 	PsSetLoadImageNotifyRoutine(ImageLoadCallback);
-	spoof();
 #ifndef DEBUG
 	VMProtectEnd();
 	EnableCallback();
+	spoof();
 #endif
 	return STATUS_SUCCESS;
+}
+
+void EnableBB()
+{
+	// Get OS Dependant offsets
+	InitializeDebuggerBlock();
+	NTSTATUS status = BBInitDynamicData(&dynData);
+	if (!NT_SUCCESS(status))
+	{
+		if (status == STATUS_NOT_SUPPORTED)
+			DPRINT("BlackBone: %s: Unsupported OS version. Aborting\n", __FUNCTION__);
+
+		return;
+	}
+
+	// Initialize some loader structures
+	status = BBInitLdrData((PKLDR_DATA_TABLE_ENTRY)g_Driver->DriverSection);
+	if (!NT_SUCCESS(status))
+		return;
+
+	//
+	// Globals init
+	//
+	InitializeListHead(&g_PhysProcesses);
+	RtlInitializeGenericTableAvl(&g_ProcessPageTables, &AvlCompare, &AvlAllocate, &AvlFree, NULL);
+	KeInitializeGuardedMutex(&g_globalLock);
+
+	// Setup process termination notifier
+	status = PsSetCreateProcessNotifyRoutine(BBProcessNotify, FALSE);
+	if (!NT_SUCCESS(status))
+	{
+		DPRINT("BlackBone: %s: Failed to setup notify routine with staus 0x%X\n", __FUNCTION__, status);
+		return;
+	}
 }

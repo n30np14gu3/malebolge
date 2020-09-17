@@ -26,3 +26,5 @@ extern DWORD32 ENGINE_DLL_BASE;
 extern BOOLEAN DRIVER_INITED;
 
 extern ULONG TerminateProcess;
+
+extern PDRIVER_OBJECT g_Driver;

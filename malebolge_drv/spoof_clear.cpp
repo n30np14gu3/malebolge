@@ -1,7 +1,8 @@
 #include "spoof_clear.h"
 #include "ntstrsafe.h"
 #include "VMProtectDDK.h"
-#define POOLTAG 'MLB'
+
+#define POOLTAG 'MLB '
 
 struct piddbcache
 {

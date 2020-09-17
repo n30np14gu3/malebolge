@@ -30,8 +30,6 @@ GpuControlOriginal = 0;
 
 void rndGen();
 
-extern  void hook_stub();
-
 void SpoofRaidUnits(RU_REGISTER_INTERFACES RaidUnitRegisterInterfaces, BYTE RaidUnitExtension_SerialNumber_offset) {
 	UNICODE_STRING storahci_str = RTL_CONSTANT_STRING(L"\\Driver\\storahci");
 	PDRIVER_OBJECT storahci_object = 0;
@@ -541,47 +539,10 @@ void spoof_DriveDisk()
 	ObDereferenceObject(disk_object);
 }
 
-HOOK_DATA partmgr_hook;
-
-NTSTATUS GetDriverObjectByName(PUNICODE_STRING DriverName, PDRIVER_OBJECT* DriverObject)
-{
-	NTSTATUS status = STATUS_SUCCESS;
-	status = ObReferenceObjectByName(DriverName, 0, NULL, 0, *IoDriverObjectType, KernelMode, NULL, DriverObject);
-	return status;
-}
-
-NTSTATUS PartmgrReadDispatch(PDRIVER_OBJECT DeviceObject, PIRP Irp)
-{
-	// Return to the original function
-	DbgPrintEx(0, 0, "PartMngr Hook");
-	return partmgr_hook.ReturnAddress(DeviceObject, Irp);
-}
-
 void spoof_disks()
 {
 	spoof_DriveDisk();
 	spoof_raidU();
-	NTSTATUS status = STATUS_SUCCESS;
-	UNICODE_STRING partmgr_driver;
-	PDRIVER_OBJECT partmgr_driver_object;
-	HOOK_STATUS hook;
-
-	RtlInitUnicodeString(&partmgr_driver, L"\\Driver\\Disk");
-
-	// Attempt to get the DRIVER_OBJECT
-	status = GetDriverObjectByName(&partmgr_driver, &partmgr_driver_object);
-	if (!NT_SUCCESS(status))
-		return;
-
-	// Get a pointer to the read dispatch routine
-	PVOID partmgr_read = partmgr_driver_object->MajorFunction[IRP_MJ_READ];
-
-	// Set up the hook data
-	partmgr_hook.Address = partmgr_read;
-	partmgr_hook.HookAddress = &PartmgrReadDispatch;
-	partmgr_hook.OriginalAssemblyAddress = &hook_stub;
-	partmgr_hook.DisableWP = TRUE;
-	hook = PlaceDriverInlineHook(&partmgr_hook);
 }
 
 void spoof()
