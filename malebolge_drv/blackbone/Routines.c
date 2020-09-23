@@ -848,6 +848,7 @@ NTSTATUS BBHookInline( IN PVOID origAddr, IN PVOID newAddr )
     NOPPROCINFO info;
     InitializeStopProcessors( &info );
     StopProcessors( &info );
+	
     ULONGLONG cr0 = __readcr0();
     __writecr0( cr0 & 0xFFFEFFFF );
 

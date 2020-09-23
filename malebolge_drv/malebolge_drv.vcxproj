@@ -130,9 +130,11 @@
     <ClCompile Include="IoCreateCall.c" />
     <ClCompile Include="malebolge_drv.c" />
     <ClCompile Include="ProcessPreCallback.c" />
-    <ClCompile Include="spoof_clear.cpp" />
-    <ClCompile Include="spoof_core.c" />
-    <ClCompile Include="spoof_util.c" />
+    <ClCompile Include="spoofer\disks.cpp" />
+    <ClCompile Include="spoofer\log.cpp" />
+    <ClCompile Include="spoofer\spoofer.cpp" />
+    <ClCompile Include="spoofer\smbios.cpp" />
+    <ClCompile Include="spoofer\spoof_utils.cpp" />
     <ClCompile Include="ThreadPreCallback.c" />
   </ItemGroup>
   <ItemGroup>
@@ -162,9 +164,11 @@
     <ClInclude Include="functions.h" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="ImageLoadCallback.h" />
-    <ClInclude Include="spoof_clear.h" />
-    <ClInclude Include="spoof_core.h" />
-    <ClInclude Include="spoof_util.h" />
+    <ClInclude Include="spoofer\disks.h" />
+    <ClInclude Include="spoofer\log.h" />
+    <ClInclude Include="spoofer\shared.h" />
+    <ClInclude Include="spoofer\smbios.h" />
+    <ClInclude Include="spoofer\spoof_utils.h" />
     <ClInclude Include="VMProtectDDK.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

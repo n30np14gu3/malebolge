@@ -1,11 +1,10 @@
 #include "globals.h"
 #include "functions.h"
-#include "spoof_core.h"
-
 #include "callback.h"
 #include "ImageLoadCallback.h"
 #include "CreateProcessCallback.h"
 #include "blackbone/BlackBoneDrv.h"
+
 
 NTSTATUS UnloadDriver(PDRIVER_OBJECT pDriverObject)
 {
@@ -16,6 +15,7 @@ NTSTATUS UnloadDriver(PDRIVER_OBJECT pDriverObject)
 #ifndef DEBUG
 	VMProtectBeginUltra("#UnloadDriver");
 #endif
+
 	// Unregister notification
 	PsSetCreateProcessNotifyRoutine(BBProcessNotify, TRUE);
 
@@ -24,7 +24,7 @@ NTSTATUS UnloadDriver(PDRIVER_OBJECT pDriverObject)
 
 	// Cleanup process mapping info
 	BBCleanupProcessTable();
-	spoof_unload();
+	
 	DisableCallback();
 	PsRemoveLoadImageNotifyRoutine(ImageLoadCallback);
 	IoDeleteSymbolicLink(&DosName);

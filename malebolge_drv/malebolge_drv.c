@@ -1,7 +1,6 @@
 #include "globals.h"
 #include "driver_defs.h"
 #include "functions.h"
-#include "spoof_core.h"
 
 //Callbacks
 #include "callback.h"
@@ -17,6 +16,7 @@
 
 #include <ntstrsafe.h>
 #include "DarkTools.h"
+
 
 ULONG RANDOM_SEED;
 
@@ -43,17 +43,7 @@ ULONG TerminateProcess;
 
 PDRIVER_OBJECT g_Driver;
 
-NTSTATUS(*OriginalNtClose)(_In_ HANDLE Handle);
-
-NTSTATUS HookedNtClose(
-	_In_ HANDLE Handle
-)
-{
-	DbgPrintEx(0, 0, "Called NtClose.\n");
-
-	return OriginalNtClose(Handle);
-}
-
+extern void spoof();
 
 NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath)
 {
@@ -91,10 +81,11 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath
 	}
 
 	PsSetLoadImageNotifyRoutine(ImageLoadCallback);
+	EnableBB();
+	spoof();
 #ifndef DEBUG
 	VMProtectEnd();
 	EnableCallback();
-	spoof();
 #endif
 	return STATUS_SUCCESS;
 }
