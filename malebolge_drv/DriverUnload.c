@@ -4,18 +4,32 @@
 #include "ImageLoadCallback.h"
 #include "CreateProcessCallback.h"
 #include "blackbone/BlackBoneDrv.h"
+#include "DarkTools.h"
 
-
-NTSTATUS UnloadDriver(PDRIVER_OBJECT pDriverObject)
+void UnloadDriver(PDRIVER_OBJECT pDriverObject)
 {
-#if DEBUG
-	//PRINTF("Driver unloaded!");
-#endif
-
 #ifndef DEBUG
 	VMProtectBeginUltra("#UnloadDriver");
 #endif
 
+	DisableBB();
+	BBUnhook();
+	
+	DisableCallback();
+	PsRemoveLoadImageNotifyRoutine(ImageLoadCallback);
+	PsSetCreateProcessNotifyRoutine(CreateProcessCallback, TRUE);
+	IoDeleteSymbolicLink(&DosName);
+	IoDeleteDevice(pDriverObject->DeviceObject);
+
+	DPRINT("Driver unloaded!");
+	
+#ifndef DEBUG
+	VMProtectEnd();
+#endif
+}
+
+void DisableBB()
+{
 	// Unregister notification
 	PsSetCreateProcessNotifyRoutine(BBProcessNotify, TRUE);
 
@@ -24,14 +38,4 @@ NTSTATUS UnloadDriver(PDRIVER_OBJECT pDriverObject)
 
 	// Cleanup process mapping info
 	BBCleanupProcessTable();
-	
-	DisableCallback();
-	PsRemoveLoadImageNotifyRoutine(ImageLoadCallback);
-	IoDeleteSymbolicLink(&DosName);
-	IoDeleteDevice(pDriverObject->DeviceObject);
-
-#ifndef DEBUG
-	VMProtectEnd();
-#endif
-	return STATUS_SUCCESS;
 }

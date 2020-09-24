@@ -24,6 +24,3 @@
 #define SERVER_DLL	SERVER_DLL_S
 #define ENGINE_DLL	ENGINE_DLL_S
 #endif
-
-
-extern ULONG RANDOM_SEED;

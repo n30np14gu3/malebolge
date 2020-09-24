@@ -71,9 +71,6 @@
     <ClCompile Include="spoofer\disks.cpp">
       <Filter>spoofer</Filter>
     </ClCompile>
-    <ClCompile Include="spoofer\log.cpp">
-      <Filter>spoofer</Filter>
-    </ClCompile>
     <ClCompile Include="spoofer\smbios.cpp">
       <Filter>spoofer</Filter>
     </ClCompile>
@@ -211,6 +208,9 @@
       <Filter>spoofer</Filter>
     </ClInclude>
     <ClInclude Include="spoofer\spoof_utils.h">
+      <Filter>spoofer</Filter>
+    </ClInclude>
+    <ClInclude Include="spoofer\spoofer_signs.h">
       <Filter>spoofer</Filter>
     </ClInclude>
   </ItemGroup>

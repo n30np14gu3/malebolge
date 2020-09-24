@@ -8,7 +8,7 @@
 #define DPRINT(...)
 #endif
 
-#define BB_POOL_TAG 'MALB'
+#define BB_POOL_TAG 'M4LB'
 
 
 #define ObpAccessProtectCloseBit 0x2000000

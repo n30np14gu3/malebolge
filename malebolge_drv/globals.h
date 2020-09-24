@@ -6,6 +6,7 @@
 #include "VMProtectDDK.h"
 
 extern PDEVICE_OBJECT pDeviceObj;
+
 extern UNICODE_STRING DeviceName;
 extern UNICODE_STRING DosName;
 
@@ -24,7 +25,6 @@ extern DWORD32 ENGINE_DLL_BASE;
 
 //DATA INIT
 extern BOOLEAN DRIVER_INITED;
-
-extern ULONG TerminateProcess;
+extern BOOLEAN BB_INITED;
 
 extern PDRIVER_OBJECT g_Driver;

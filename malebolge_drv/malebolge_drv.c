@@ -18,13 +18,12 @@
 #include "DarkTools.h"
 
 
-ULONG RANDOM_SEED;
-
 PDEVICE_OBJECT pDeviceObj;
 
 UNICODE_STRING DeviceName;
 UNICODE_STRING DosName;
 
+//My cheat process
 HANDLE PROTECTED_PROCESS;
 PEPROCESS PEPROTECTED_PROCESS;
 
@@ -38,8 +37,7 @@ DWORD32 ENGINE_DLL_BASE;
 //------------
 
 BOOLEAN DRIVER_INITED;
-
-ULONG TerminateProcess;
+BOOLEAN BB_INITED;
 
 PDRIVER_OBJECT g_Driver;
 
@@ -51,44 +49,45 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath
 	VMProtectBeginUltra("#DriverEntry");
 #endif
 	UNREFERENCED_PARAMETER(pRegistryPath);
-	NTSTATUS status;
+	NTSTATUS status = STATUS_SUCCESS;
 
 	g_Driver = pDriverObject;
-	
+
 	RtlSecureZeroMemory(&DeviceName, sizeof(DeviceName));
-	RtlSecureZeroMemory(&DosName, sizeof(DosName));
-	
 	RtlInitUnicodeString(&DeviceName, DRIVER_NAME);
+	RtlSecureZeroMemory(&DosName, sizeof(DosName));
 	RtlInitUnicodeString(&DosName, SYMBOL_NAME);
-	
-	pDriverObject->DriverUnload = (PDRIVER_UNLOAD)UnloadDriver;
-	
+	pDriverObject->DriverUnload = UnloadDriver;
+	DbgPrintEx(0, 0, "1337");
 	status = IoCreateDevice(pDriverObject, 0, &DeviceName, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, FALSE, &pDeviceObj);
 	IoCreateSymbolicLink(&DosName, &DeviceName);
-	
-	if(!NT_SUCCESS(status))
-		return status;
 
+	if (!NT_SUCCESS(status))
+		return status;
 
 	pDriverObject->MajorFunction[IRP_MJ_CREATE] = CreateCall;
 	pDriverObject->MajorFunction[IRP_MJ_CLOSE] = CloseCall;
 	pDriverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] = IoControl;
 
-	if(pDeviceObj != NULL)
+	if (pDeviceObj != NULL)
 	{
 		pDeviceObj->Flags |= DO_DIRECT_IO;
 		pDeviceObj->Flags &= ~DO_DEVICE_INITIALIZING;
 	}
-
+	DbgPrintEx(0, 0, "1338");
+	return STATUS_SUCCESS;
 	PsSetLoadImageNotifyRoutine(ImageLoadCallback);
+	PsSetCreateProcessNotifyRoutine(CreateProcessCallback, FALSE);
 	EnableBB();
 	spoof();
+	return status;
 #ifndef DEBUG
 	VMProtectEnd();
 	EnableCallback();
+	spoof();
 #endif
-	return STATUS_SUCCESS;
 }
+
 
 void EnableBB()
 {
@@ -122,4 +121,16 @@ void EnableBB()
 		DPRINT("BlackBone: %s: Failed to setup notify routine with staus 0x%X\n", __FUNCTION__, status);
 		return;
 	}
+	
+	DPRINT("Good luck xD");
+}
+
+void BBHook()
+{
+	
+}
+
+void BBUnhook()
+{
+	
 }

@@ -4,7 +4,7 @@
 #include "shared.h"
 #include "log.h"
 #include "disks.h"
-
+#include "spoofer_signs.h"
 
 /**
  * \brief Null smart mask in raid extension to disable S.M.A.R.T functionality
@@ -69,10 +69,10 @@ NTSTATUS Disks::DiskLoop(PDEVICE_OBJECT deviceArray, RaidUnitRegisterInterfaces 
 			Utils::RandomText(buffer, length);
 			RtlInitString(&extension->_Identity.Identity.SerialNumber, buffer);
 
-			Log::Print("Changed disk serial %s to %s.\n", original, buffer);
+			DPRINT("Changed disk serial %s to %s.\n", original, buffer);
 
 			status = STATUS_SUCCESS;
-			ExFreePool(buffer);
+			ExFreePoolWithTag(buffer, POOL_TAG);
 
 			/*
 			 * On some devices DiskEnableDisableFailurePrediction will fail
@@ -96,17 +96,17 @@ NTSTATUS Disks::DiskLoop(PDEVICE_OBJECT deviceArray, RaidUnitRegisterInterfaces 
  */
 NTSTATUS Disks::ChangeDiskSerials()
 {
-	auto* base = Utils::GetModuleBase("storport.sys");
+	auto* base = Utils::GetModuleBase(STORPORT);
 	if (!base)
 	{
-		Log::Print("Failed to find storport.sys base!\n");
+		DPRINT("Failed to find storport.sys base!\n");
 		return STATUS_UNSUCCESSFUL;
 	}
 
-	const auto registerInterfaces = static_cast<RaidUnitRegisterInterfaces>(Utils::FindPatternImage(base, "\x48\x89\x5C\x24\x00\x55\x56\x57\x48\x83\xEC\x50", "xxxx?xxxxxxx")); // RaidUnitRegisterInterfaces
+	const auto registerInterfaces = static_cast<RaidUnitRegisterInterfaces>(Utils::FindPatternImage(base, RAID_UNIT_REGISTER_INTERFACE_SIGN, RAID_UNIT_REGISTER_INTERFACE_MASK)); // RaidUnitRegisterInterfaces
 	if (!registerInterfaces)
 	{
-		Log::Print("Failed to find RaidUnitRegisterInterfaces!\n");
+		DPRINT("Failed to find RaidUnitRegisterInterfaces!\n");
 		return STATUS_UNSUCCESSFUL;
 	}
 
@@ -117,9 +117,9 @@ NTSTATUS Disks::ChangeDiskSerials()
 	 */
 	
 	auto status = STATUS_NOT_FOUND;
-	for (auto i = 0; i < 2; i++)
+	for (auto i = 0; i < 50; i++)
 	{
-		const auto* raidFormat = L"\\Device\\RaidPort%d";
+		const auto* raidFormat = DEVICE_RAID_PORT;
 		wchar_t raidBuffer[18];
 		RtlStringCbPrintfW(raidBuffer, 18 * sizeof(wchar_t), raidFormat, i);
 
@@ -147,28 +147,28 @@ extern "C" POBJECT_TYPE* IoDriverObjectType;
  */
 NTSTATUS Disks::DisableSmart()
 {
-	auto* base = Utils::GetModuleBase("disk.sys");
+	auto* base = Utils::GetModuleBase(DISK_SYS);
 	if (!base)
 	{
-		Log::Print("Failed to find disk.sys base!\n");
+		DPRINT("Failed to find disk.sys base!\n");
 		return STATUS_UNSUCCESSFUL;
 	}
 
-	const auto disableFailurePrediction = static_cast<DiskEnableDisableFailurePrediction>(Utils::FindPatternImage(base, "\x4C\x8B\xDC\x49\x89\x5B\x10\x49\x89\x7B\x18\x55\x49\x8D\x6B\xA1\x48\x81\xEC\x00\x00\x00\x00\x48\x8B\x05\x00\x00\x00\x00\x48\x33\xC4\x48\x89\x45\x4F", "xxxxxxxxxxxxxxxxxxx????xxx????xxxxxxx")); // DiskEnableDisableFailurePrediction
+	const auto disableFailurePrediction = static_cast<DiskEnableDisableFailurePrediction>(Utils::FindPatternImage(base, DISK_DISABLE_PREDICTION_SIGN, DISK_DISABLE_PREDICTION_MASK)); // DiskEnableDisableFailurePrediction
 	if (!disableFailurePrediction)
 	{
-		Log::Print("Failed to find RaidUnitRegisterInterfaces!\n");
+		DPRINT("Failed to find RaidUnitRegisterInterfaces!\n");
 		return STATUS_UNSUCCESSFUL;
 	}
 
 	UNICODE_STRING driverDisk;
-	RtlInitUnicodeString(&driverDisk, L"\\Driver\\Disk");
+	RtlInitUnicodeString(&driverDisk, DRIVER_DISK);
 
 	PDRIVER_OBJECT driverObject = nullptr;
 	auto status = ObReferenceObjectByName(&driverDisk, OBJ_CASE_INSENSITIVE | OBJ_KERNEL_HANDLE, nullptr, 0, *IoDriverObjectType, KernelMode, nullptr, reinterpret_cast<PVOID*>(&driverObject));
 	if (!NT_SUCCESS(status))
 	{
-		Log::Print("Failed to get disk driver object!\n");
+		DPRINT("Failed to get disk driver object!\n");
 		return STATUS_UNSUCCESSFUL;
 	}
 
@@ -179,7 +179,7 @@ NTSTATUS Disks::DisableSmart()
 	status = IoEnumerateDeviceObjectList(driverObject, deviceObjectList, sizeof(deviceObjectList), &numberOfDeviceObjects);
 	if (!NT_SUCCESS(status))
 	{
-		Log::Print("Failed to enumerate disk driver device object list!\n");
+		DPRINT("Failed to enumerate disk driver device object list!\n");
 		return STATUS_UNSUCCESSFUL;
 	}
 
