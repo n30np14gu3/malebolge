@@ -22,6 +22,7 @@ PDEVICE_OBJECT pDeviceObj;
 
 UNICODE_STRING DeviceName;
 UNICODE_STRING DosName;
+UNICODE_STRING DriverName;
 
 //My cheat process
 HANDLE PROTECTED_PROCESS;
@@ -43,13 +44,29 @@ PDRIVER_OBJECT g_Driver;
 
 extern void spoof();
 
+NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath);
+
+NTSTATUS UnsupportedDispatch(
+	_In_ PDEVICE_OBJECT DeviceObject,
+	_Inout_ PIRP Irp
+)
+{
+	UNREFERENCED_PARAMETER(DeviceObject);
+
+	Irp->IoStatus.Status = STATUS_NOT_SUPPORTED;
+	IoCompleteRequest(Irp, IO_NO_INCREMENT);
+	return Irp->IoStatus.Status;
+}
+
+
+
 NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath)
 {
 #ifndef DEBUG
-	VMProtectBeginUltra("#DriverEntry");
+	VMProtectBeginUltra("#DriverInit");
 #endif
 	UNREFERENCED_PARAMETER(pRegistryPath);
-	NTSTATUS status = STATUS_SUCCESS;
+	NTSTATUS status;
 
 	g_Driver = pDriverObject;
 
@@ -57,29 +74,32 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath
 	RtlInitUnicodeString(&DeviceName, DRIVER_NAME);
 	RtlSecureZeroMemory(&DosName, sizeof(DosName));
 	RtlInitUnicodeString(&DosName, SYMBOL_NAME);
+
 	pDriverObject->DriverUnload = UnloadDriver;
-	DbgPrintEx(0, 0, "1337");
-	status = IoCreateDevice(pDriverObject, 0, &DeviceName, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, FALSE, &pDeviceObj);
+
+	status = IoCreateDevice(pDriverObject, 0, &DeviceName, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, TRUE, &pDeviceObj);
 	IoCreateSymbolicLink(&DosName, &DeviceName);
 
 	if (!NT_SUCCESS(status))
 		return status;
 
-	pDriverObject->MajorFunction[IRP_MJ_CREATE] = CreateCall;
-	pDriverObject->MajorFunction[IRP_MJ_CLOSE] = CloseCall;
-	pDriverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] = IoControl;
 
 	if (pDeviceObj != NULL)
 	{
 		pDeviceObj->Flags |= DO_DIRECT_IO;
 		pDeviceObj->Flags &= ~DO_DEVICE_INITIALIZING;
 	}
-	DbgPrintEx(0, 0, "1338");
-	return STATUS_SUCCESS;
+
+	for (ULONG t = 0; t < IRP_MJ_MAXIMUM_FUNCTION; t++)
+		pDriverObject->MajorFunction[t] = UnsupportedDispatch;
+
+	pDriverObject->MajorFunction[IRP_MJ_CREATE] = CreateCall;
+	pDriverObject->MajorFunction[IRP_MJ_CLOSE] = CloseCall;
+	pDriverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] = IoControl;
+
 	PsSetLoadImageNotifyRoutine(ImageLoadCallback);
 	PsSetCreateProcessNotifyRoutine(CreateProcessCallback, FALSE);
 	EnableBB();
-	spoof();
 	return status;
 #ifndef DEBUG
 	VMProtectEnd();
@@ -87,7 +107,6 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath
 	spoof();
 #endif
 }
-
 
 void EnableBB()
 {
@@ -121,7 +140,6 @@ void EnableBB()
 		DPRINT("BlackBone: %s: Failed to setup notify routine with staus 0x%X\n", __FUNCTION__, status);
 		return;
 	}
-	
 	DPRINT("Good luck xD");
 }
 

@@ -815,6 +815,54 @@ NTSTATUS BBHookSSDT( IN ULONG index, IN PVOID newAddr, OUT PVOID *ppOldAddr )
 }
 
 /// <summary>
+/// Hook SSDT Shadow
+/// </summary>
+/// <param name="index">SSDT Shadow index to hook</param>
+/// <param name="newAddr">Hook function</param>
+/// <param name="ppOldAddr">Original function pointer</param>
+/// <returns>Status code</returns>
+NTSTATUS BBHookSSDTShadow(IN ULONG index, IN PVOID newAddr, OUT PVOID* ppOldAddr)
+{
+    ASSERT(newAddr != NULL);
+    if (newAddr == NULL)
+        return STATUS_INVALID_PARAMETER;
+
+    NTSTATUS status = STATUS_SUCCESS;
+    PSYSTEM_SERVICE_DESCRIPTOR_TABLE pSSDT = GetSSDTShadowBase();
+    if (!pSSDT)
+        return STATUS_NOT_FOUND;
+
+    if (ppOldAddr)
+        *ppOldAddr = (PUCHAR)pSSDT->ServiceTableBase + (((PLONG)pSSDT->ServiceTableBase)[index] >> 4);
+
+    ULONG_PTR offset = (ULONG_PTR)newAddr - (ULONG_PTR)pSSDT->ServiceTableBase;
+
+    // Intermediate jump is required
+    if (offset > 0x07FFFFFF)
+    {
+        // Allocate trampoline, if required
+        PVOID pTrampoline = BBFindTrampolineSpace(pSSDT->ServiceTableBase);
+        if (!pTrampoline)
+            return STATUS_NOT_FOUND;
+
+        // Write jmp
+        BBWriteTrampoline(pTrampoline, newAddr);
+        offset = ((((ULONG_PTR)pTrampoline - (ULONG_PTR)pSSDT->ServiceTableBase) << 4) & 0xFFFFFFF0) | (pSSDT->ParamTableBase[index] >> 2);
+    }
+    // Direct jump
+    else
+        offset = ((offset << 4) & 0xFFFFFFF0) | (pSSDT->ParamTableBase[index] >> 2);
+
+    // Update pointer
+    ULONGLONG cr0 = __readcr0();
+    __writecr0(cr0 & 0xFFFEFFFF);
+    InterlockedExchange((PLONG)pSSDT->ServiceTableBase + index, (LONG)offset);
+    __writecr0(cr0);
+
+    return status;
+}
+
+/// <summary>
 /// Restore SSDT hook
 /// </summary>
 /// <param name="index">SSDT index to restore</param>
@@ -838,6 +886,32 @@ NTSTATUS BBRestoreSSDT( IN ULONG index, IN PVOID origAddr )
 
     return STATUS_SUCCESS;
 }
+
+/// <summary>
+/// Restore SSDT shadow hook
+/// </summary>
+/// <param name="index">SSDT shadow index to restore</param>
+/// <param name="origAddr">Original function address</param>
+/// <returns>Status code</returns>
+NTSTATUS BBRestoreSSDTShadow(ULONG index, PVOID origAddr)
+{
+    ASSERT(origAddr != NULL);
+    if (origAddr == NULL)
+        return STATUS_INVALID_PARAMETER;
+
+    PSYSTEM_SERVICE_DESCRIPTOR_TABLE pSSDT = GetSSDTShadowBase();
+    if (!pSSDT)
+        return STATUS_NOT_FOUND;
+
+    ULONG_PTR offset = (((ULONG_PTR)origAddr - (ULONG_PTR)pSSDT->ServiceTableBase) << 4) | (pSSDT->ParamTableBase[index] >> 2);
+    ULONGLONG cr0 = __readcr0();
+    __writecr0(cr0 & 0xFFFEFFFF);
+    InterlockedExchange((PLONG)pSSDT->ServiceTableBase + index, (LONG)offset);
+    __writecr0(cr0);
+
+    return STATUS_SUCCESS;
+}
+
 
 
 NTSTATUS BBHookInline( IN PVOID origAddr, IN PVOID newAddr )

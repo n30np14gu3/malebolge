@@ -17,6 +17,8 @@ extern DYNAMIC_DATA dynData;
 PVOID g_KernelBase = NULL;
 ULONG g_KernelSize = 0;
 PSYSTEM_SERVICE_DESCRIPTOR_TABLE g_SSDT = NULL;
+PSYSTEM_SERVICE_DESCRIPTOR_TABLE g_SSDT_SHADOW = NULL;
+
 KDDEBUGGER_DATA64 g_KdBlock = {0};
 
 MMPTE ValidKernelPte =
@@ -218,12 +220,53 @@ PSYSTEM_SERVICE_DESCRIPTOR_TABLE GetSSDTBase()
             if (NT_SUCCESS( status ))
             {
                 g_SSDT = (PSYSTEM_SERVICE_DESCRIPTOR_TABLE)((PUCHAR)pFound + *(PULONG)((PUCHAR)pFound + 3) + 7);
-                //DPRINT( "BlackBone: %s: KeSystemServiceDescriptorTable = 0x%p\n", __FUNCTION__, g_SSDT );
+            	DPRINT( "BlackBone: %s: KeSystemServiceDescriptorTable = 0x%p\n", __FUNCTION__, g_SSDT );
                 return g_SSDT;
             }
         }
     }
    
+    return NULL;
+}
+
+PSYSTEM_SERVICE_DESCRIPTOR_TABLE GetSSDTShadowBase()
+{
+    PUCHAR ntosBase = GetKernelBase(NULL);
+
+    // Already found
+    if (g_SSDT_SHADOW != NULL)
+        return g_SSDT_SHADOW;
+
+    if (!ntosBase)
+        return NULL;
+
+    PIMAGE_NT_HEADERS pHdr = RtlImageNtHeader(ntosBase);
+    PIMAGE_SECTION_HEADER pFirstSec = (PIMAGE_SECTION_HEADER)(pHdr + 1);
+    for (PIMAGE_SECTION_HEADER pSec = pFirstSec; pSec < pFirstSec + pHdr->FileHeader.NumberOfSections; pSec++)
+    {
+        // Non-paged, non-discardable, readable sections
+        // Probably still not fool-proof enough...
+        if (pSec->Characteristics & IMAGE_SCN_MEM_NOT_PAGED &&
+            pSec->Characteristics & IMAGE_SCN_MEM_EXECUTE &&
+            !(pSec->Characteristics & IMAGE_SCN_MEM_DISCARDABLE) &&
+            (*(PULONG)pSec->Name != 'TINI') &&
+            (*(PULONG)pSec->Name != 'EGAP'))
+        {
+            PVOID pFound = NULL;
+
+            // KiSystemServiceRepeat pattern
+            UCHAR pattern[] = "\x4c\x8d\x15\xcc\xcc\xcc\xcc\x4c\x8d\x1d\xcc\xcc\xcc\xcc\xf7";
+            NTSTATUS status = BBSearchPattern(pattern, 0xCC, sizeof(pattern) - 1, ntosBase + pSec->VirtualAddress, pSec->Misc.VirtualSize, &pFound);
+            if (NT_SUCCESS(status))
+            {
+                pFound = (PUCHAR)pFound + 7;
+                g_SSDT_SHADOW = (PSYSTEM_SERVICE_DESCRIPTOR_TABLE)((PUCHAR)pFound + *(PULONG)((PUCHAR)pFound + 3) + 7);
+                DPRINT("BlackBone: %s: KeServiceDescriptorTableShadow = 0x%p\n", __FUNCTION__, g_SSDT_SHADOW);
+                return g_SSDT_SHADOW;
+            }
+        }
+    }
+
     return NULL;
 }
 

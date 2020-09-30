@@ -113,12 +113,29 @@ NTSTATUS BBUnlinkHandleTable( IN PUNLINK_HTABLE pUnlink );
 NTSTATUS BBHookSSDT( IN ULONG index, IN PVOID newAddr, OUT PVOID *ppOldAddr );
 
 /// <summary>
+/// Hook SSDT Shadow
+/// </summary>
+/// <param name="index">SSDT Shadow index to hook</param>
+/// <param name="newAddr">Hook function</param>
+/// <param name="ppOldAddr">Original function pointer</param>
+/// <returns>Status code</returns>
+NTSTATUS BBHookSSDTShadow(IN ULONG index, IN PVOID newAddr, OUT PVOID* ppOldAddr);
+
+/// <summary>
 /// Restore SSDT hook
 /// </summary>
 /// <param name="index">SSDT index to restore</param>
 /// <param name="origAddr">Original function address</param>
 /// <returns>Status code</returns>
 NTSTATUS BBRestoreSSDT( IN ULONG index, IN PVOID origAddr );
+
+/// <summary>
+/// Restore SSDT Shadow hook
+/// </summary>
+/// <param name="index">SSDT index to restore</param>
+/// <param name="origAddr">Original function address</param>
+/// <returns>Status code</returns>
+NTSTATUS BBRestoreSSDTShadow(IN ULONG index, IN PVOID origAddr);
 
 NTSTATUS BBHookInline( IN PVOID origAddr, IN PVOID newAddr );
 

@@ -315,6 +315,12 @@ PVOID GetKernelBase( OUT PULONG pSize );
 PSYSTEM_SERVICE_DESCRIPTOR_TABLE GetSSDTBase();
 
 /// <summary>
+/// Gets SSDT Shadow base - KeServiceDescriptorTableShadow
+/// </summary>
+/// <returns>SSDT base, NULL if not found</returns>
+PSYSTEM_SERVICE_DESCRIPTOR_TABLE GetSSDTShadowBase();
+
+/// <summary>
 /// Gets the SSDT entry address by index.
 /// </summary>
 /// <param name="index">Service index</param>
