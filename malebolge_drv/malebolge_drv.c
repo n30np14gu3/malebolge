@@ -77,7 +77,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath
 
 	pDriverObject->DriverUnload = UnloadDriver;
 
-	status = IoCreateDevice(pDriverObject, 0, &DeviceName, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, TRUE, &pDeviceObj);
+	status = IoCreateDevice(pDriverObject, 0, &DeviceName, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, FALSE, &pDeviceObj);
 	IoCreateSymbolicLink(&DosName, &DeviceName);
 
 	if (!NT_SUCCESS(status))
@@ -100,6 +100,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath
 	PsSetLoadImageNotifyRoutine(ImageLoadCallback);
 	PsSetCreateProcessNotifyRoutine(CreateProcessCallback, FALSE);
 	EnableBB();
+	spoof();
 	return status;
 #ifndef DEBUG
 	VMProtectEnd();

@@ -148,7 +148,7 @@ PVOID GetKernelBase( OUT PULONG pSize )
         return NULL;
 
     // Protect from UserMode AV
-    status = ZwQuerySystemInformation( SystemModuleInformation, 0, bytes, &bytes );
+    ZwQuerySystemInformation( SystemModuleInformation, 0, bytes, &bytes );
     if (bytes == 0)
     {
         DPRINT( "BlackBone: %s: Invalid SystemModuleInformation size\n", __FUNCTION__ );

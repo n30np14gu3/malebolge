@@ -117,7 +117,7 @@ NTSTATUS Disks::ChangeDiskSerials()
 	 */
 	
 	auto status = STATUS_NOT_FOUND;
-	for (auto i = 0; i < 50; i++)
+	for (auto i = 0; i < 8; i++)
 	{
 		const auto* raidFormat = DEVICE_RAID_PORT;
 		wchar_t raidBuffer[18];
