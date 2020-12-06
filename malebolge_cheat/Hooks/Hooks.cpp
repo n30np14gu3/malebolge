@@ -3,13 +3,7 @@
 #include "../SDK/global_defs.h"
 #include "Hooks.h"
 
-Hooks::Hooks(HMODULE module)
+Hooks::Hooks(HMODULE _module)
 {
-#ifdef NDEBUG
-    VMProtectBeginUltra("#Hooks::Hooks");
-#endif
 	
-#ifdef NDEBUG
-    VMProtectEnd();
-#endif
 }

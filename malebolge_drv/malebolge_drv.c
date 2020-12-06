@@ -59,7 +59,6 @@ NTSTATUS UnsupportedDispatch(
 }
 
 
-
 NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath)
 {
 #ifndef DEBUG
@@ -100,7 +99,6 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath
 	PsSetLoadImageNotifyRoutine(ImageLoadCallback);
 	PsSetCreateProcessNotifyRoutine(CreateProcessCallback, FALSE);
 	EnableBB();
-	spoof();
 	return status;
 #ifndef DEBUG
 	VMProtectEnd();
@@ -125,7 +123,10 @@ void EnableBB()
 	// Initialize some loader structures
 	status = BBInitLdrData((PKLDR_DATA_TABLE_ENTRY)g_Driver->DriverSection);
 	if (!NT_SUCCESS(status))
+	{
+		DPRINT("BlackBone: %s: Failed to BBInitLdrData with staus 0x%X\n", __FUNCTION__, status);
 		return;
+	}
 
 	//
 	// Globals init
@@ -143,6 +144,7 @@ void EnableBB()
 	}
 	DPRINT("Good luck xD");
 }
+
 
 void BBHook()
 {

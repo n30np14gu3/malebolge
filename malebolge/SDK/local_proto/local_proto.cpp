@@ -6,3 +6,15 @@
 #include "../VMProtectSDK.h"
 #include "local_proto.h"
 
+//-----------------
+//|  packet_size  |
+//|---------------|
+//|  packet_data  |
+//-----------------
+
+
+local_proto::local_proto(u_short port)
+{
+	
+}
+

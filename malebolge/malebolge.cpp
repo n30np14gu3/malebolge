@@ -10,8 +10,6 @@ int WINAPI wWinMain(
 )
 {
     KernelInterface ring0;
-	while(!ring0.Attach(true)) { }
-	while(!ring0.GetModules()) { }
     Menu menu(__TIME__, &ring0);
     return 0;
 }

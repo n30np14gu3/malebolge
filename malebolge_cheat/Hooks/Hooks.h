@@ -4,7 +4,7 @@
 class Hooks
 {
 public:
-	Hooks(HMODULE module);
+	Hooks(HMODULE _module);
 };
 
 inline std::unique_ptr<Hooks> hooks;
