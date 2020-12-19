@@ -35,8 +35,6 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 	switch(controlCode)
 	{
 	case IO_INIT_CHEAT_DATA:		
-		if (DRIVER_INITED)
-			break;
 		InitCheatData(Irp);
 		bytesIO = sizeof(KERNEL_INIT_DATA_REQUEST);
 		break;
@@ -146,13 +144,20 @@ void InitCheatData(PIRP Irp)
 #endif
 	PKERNEL_INIT_DATA_REQUEST pInitData;
 	pInitData = (PKERNEL_INIT_DATA_REQUEST)Irp->AssociatedIrp.SystemBuffer;
+	if(!DRIVER_INITED)
+	{
+		GAME_PROCESS = (HANDLE)pInitData->CsgoId;
+		PROTECTED_PROCESS = (HANDLE)pInitData->CheatId;
 
-	GAME_PROCESS = (HANDLE)pInitData->CsgoId;
-	PROTECTED_PROCESS = (HANDLE)pInitData->CheatId;
+		pInitData->Result = PsLookupProcessByProcessId(GAME_PROCESS, &PEGAME_PROCESS);
+		pInitData->Result |= PsLookupProcessByProcessId(PROTECTED_PROCESS, &PEPROTECTED_PROCESS);
+		DRIVER_INITED = NT_SUCCESS(pInitData->Result);
+	}
+	else
+	{
+		pInitData->Result = STATUS_SUCCESS;
+	}
 
-	pInitData->Result = PsLookupProcessByProcessId(GAME_PROCESS, &PEGAME_PROCESS);
-	pInitData->Result |= PsLookupProcessByProcessId(PROTECTED_PROCESS, &PEPROTECTED_PROCESS);
-	DRIVER_INITED = NT_SUCCESS(pInitData->Result);
 #ifndef DBG
 	VMProtectEnd();
 #endif

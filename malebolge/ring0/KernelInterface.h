@@ -21,6 +21,7 @@ public:
 	bool IsAlive() const;
 	void WaitForProcessClose();
 	DWORD GetErrorCode() const;
+	void EnableBB();
 	~KernelInterface();
 private:
 	HANDLE m_hDriver;

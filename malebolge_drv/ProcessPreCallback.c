@@ -21,11 +21,11 @@ OB_PREOP_CALLBACK_STATUS ProcessPreCallback(PVOID RegistrationContext, POB_PRE_O
 
 		if (OperationInformation->Operation == OB_OPERATION_HANDLE_CREATE)
 		{
-			OperationInformation->Parameters->CreateHandleInformation.DesiredAccess = (SYNCHRONIZE);
+			OperationInformation->Parameters->CreateHandleInformation.DesiredAccess = SYNCHRONIZE;
 		}
 		else
 		{
-			OperationInformation->Parameters->DuplicateHandleInformation.DesiredAccess = (SYNCHRONIZE);
+			OperationInformation->Parameters->DuplicateHandleInformation.DesiredAccess = SYNCHRONIZE;
 		}
 		return OB_PREOP_SUCCESS;
 	}

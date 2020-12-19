@@ -98,13 +98,12 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath
 
 	PsSetLoadImageNotifyRoutine(ImageLoadCallback);
 	PsSetCreateProcessNotifyRoutine(CreateProcessCallback, FALSE);
-	EnableBB();
-	return status;
 #ifndef DEBUG
 	VMProtectEnd();
 	EnableCallback();
 	spoof();
 #endif
+	return status;
 }
 
 void EnableBB()
@@ -143,6 +142,7 @@ void EnableBB()
 		return;
 	}
 	DPRINT("Good luck xD");
+	BB_INITED = TRUE;
 }
 
 

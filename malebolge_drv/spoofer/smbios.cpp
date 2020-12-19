@@ -46,7 +46,7 @@ void Smbios::RandomizeString(char* string)
 /**
  * \brief Modify information in the table of given header
  * \param header Table header (only 0-3 implemented)
- * \return 
+ * \return
  */
 NTSTATUS Smbios::ProcessTable(SMBIOS_HEADER* header)
 {
@@ -99,7 +99,7 @@ NTSTATUS Smbios::ProcessTable(SMBIOS_HEADER* header)
 		auto* serialNumber = GetString(header, type3->SerialNumber);
 		RandomizeString(serialNumber);
 	}
-	
+
 	return STATUS_SUCCESS;
 }
 
@@ -107,7 +107,7 @@ NTSTATUS Smbios::ProcessTable(SMBIOS_HEADER* header)
  * \brief Loop through SMBIOS tables with provided first table header
  * \param mapped Header of the first table
  * \param size Size of all tables including strings
- * \return 
+ * \return
  */
 NTSTATUS Smbios::LoopTables(void* mapped, ULONG size)
 {
@@ -117,17 +117,17 @@ NTSTATUS Smbios::LoopTables(void* mapped, ULONG size)
 		auto* header = static_cast<SMBIOS_HEADER*>(mapped);
 		if (header->Type == 127 && header->Length == 4)
 			break;
-		
+
 		ProcessTable(header);
 		auto* end = static_cast<char*>(mapped) + header->Length;
 		while (0 != (*end | *(end + 1))) end++;
 		end += 2;
 		if (end >= endAddress)
-			break;	
+			break;
 
 		mapped = end;
 	}
-	
+
 	return STATUS_SUCCESS;
 }
 
@@ -138,14 +138,14 @@ NTSTATUS Smbios::LoopTables(void* mapped, ULONG size)
  */
 NTSTATUS Smbios::ChangeSmbiosSerials()
 {
-	auto* base = Utils::GetModuleBase(NTOSKRNL);
+	auto* base = Utils::GetModuleBase("ntoskrnl.exe");
 	if (!base)
 	{
 		DPRINT("Failed to find ntoskrnl.sys base!\n");
 		return STATUS_UNSUCCESSFUL;
 	}
 
-	auto* physicalAddress = static_cast<PPHYSICAL_ADDRESS>(Utils::FindPatternImage(base, SMBIOS_SIGN1, SMBIOS_MASK1)); // WmipFindSMBiosStructure -> WmipSMBiosTablePhysicalAddress
+	auto* physicalAddress = static_cast<PPHYSICAL_ADDRESS>(Utils::FindPatternImage(base, "\x48\x8B\x0D\x00\x00\x00\x00\x48\x85\xC9\x74\x00\x8B\x15", "xxx????xxxx?xx")); // WmipFindSMBiosStructure -> WmipSMBiosTablePhysicalAddress
 	if (!physicalAddress)
 	{
 		DPRINT("Failed to find SMBIOS physical address!\n");
@@ -159,7 +159,7 @@ NTSTATUS Smbios::ChangeSmbiosSerials()
 		return STATUS_UNSUCCESSFUL;
 	}
 
-	auto* sizeScan = Utils::FindPatternImage(base, SMBIOS_SIGN2, SMBIOS_MASK2);  // WmipFindSMBiosStructure -> WmipSMBiosTableLength
+	auto* sizeScan = Utils::FindPatternImage(base, "\x8B\x1D\x00\x00\x00\x00\x48\x8B\xD0\x44\x8B\xC3\x48\x8B\xCD\xE8\x00\x00\x00\x00\x8B\xD3\x48\x8B", "xx????xxxxxxxxxx????xxxx");  // WmipFindSMBiosStructure -> WmipSMBiosTableLength
 	if (!sizeScan)
 	{
 		DPRINT("Failed to find SMBIOS size!\n");
@@ -179,10 +179,10 @@ NTSTATUS Smbios::ChangeSmbiosSerials()
 		DPRINT("Failed to map SMBIOS structures!\n");
 		return STATUS_UNSUCCESSFUL;
 	}
-	
+
 	LoopTables(mapped, size);
-	
+
 	MmUnmapIoSpace(mapped, size);
-	
+
 	return STATUS_SUCCESS;
 }

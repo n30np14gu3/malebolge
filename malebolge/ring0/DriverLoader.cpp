@@ -5,27 +5,16 @@
 #include "DriverLoader.h"
 
 DriverLoader::DriverLoader(const std::string& driverPath, const std::string& driverName)
-{
-#ifndef _DEBUG
-	VMProtectBeginUltra("#DriverLoader");
-#endif
-	
+{	
 	m_sDriverName = driverName;
 	m_sDriverPath = "";
 
 	if (std::filesystem::exists(driverPath))
 		m_sDriverPath = driverPath;
-
-#ifndef _DEBUG
-	VMProtectEnd();
-#endif
 }
 
 bool DriverLoader::LoadDriver() const
 {
-#ifndef _DEBUG
-	VMProtectBeginUltra("#LoadDriver");
-#endif
 	const SC_HANDLE scm = OpenSCManagerA(nullptr, nullptr, SC_MANAGER_CREATE_SERVICE);
 	if (!scm)
 		return false;
@@ -59,17 +48,11 @@ bool DriverLoader::LoadDriver() const
 	const bool result = StartService(sh, 0, nullptr);
 	CloseHandle(scm);
 	CloseHandle(sh);
-#ifndef _DEBUG
-	VMProtectEnd();
-#endif
 	return result;
 }
 
 bool DriverLoader::UnloadDriver() const
 {
-#ifndef _DEBUG
-	VMProtectBeginUltra("#UnloadDriver");
-#endif
 	const SC_HANDLE sc_manager_handle = OpenSCManager(nullptr, nullptr, SC_MANAGER_CREATE_SERVICE);
 
 	if (!sc_manager_handle)
@@ -88,9 +71,5 @@ bool DriverLoader::UnloadDriver() const
 
 	CloseServiceHandle(service_handle);
 	CloseServiceHandle(sc_manager_handle);
-
-#ifndef _DEBUG
-	VMProtectEnd();
-#endif
 	return result;
 }

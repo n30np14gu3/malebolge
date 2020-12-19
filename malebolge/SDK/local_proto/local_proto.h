@@ -5,7 +5,7 @@
 #ifndef NDEBUG
 #define LOCAL_IP LOCAL_IP_S
 #else
-#define LOCAL_IP 	VMProtectDecryptStringA(LOCAL_IP_S)
+#define LOCAL_IP LOCAL_IP_S
 #endif
 
 

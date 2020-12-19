@@ -26,9 +26,6 @@ KernelInterface::KernelInterface()
 
 bool KernelInterface::Inject(const wchar_t* szDll) const
 {
-#ifdef NDEBUG
-	VMProtectBeginUltra("#KernelInterface::Inject");
-#endif
 	if(m_hDriver == INVALID_HANDLE_VALUE)
 		return false;
 	
@@ -70,9 +67,6 @@ bool KernelInterface::Inject(const wchar_t* szDll) const
 
 	memset(&data, 0, sizeof(data));
 
-#ifdef NDEBUG
-	VMProtectEnd();
-#endif
 	return true;
 }
 
@@ -96,7 +90,7 @@ bool KernelInterface::Attach(bool update)
 	if (m_hDriver == INVALID_HANDLE_VALUE)
 		return false;
 
-	const BOOL result = DeviceIoControl(m_hDriver, !update ? IO_INIT_CHEAT_DATA : IO_UPDATE_CHEAT_DATA, &req, sizeof(req), &req, sizeof(req), nullptr, nullptr);
+	const BOOL result = DeviceIoControl(m_hDriver, IO_INIT_CHEAT_DATA, &req, sizeof(req), &req, sizeof(req), nullptr, nullptr);
 	if (!result)
 	{
 		m_dwErrorCode = GetLastError();
@@ -156,6 +150,16 @@ KernelInterface::~KernelInterface()
 DWORD KernelInterface::GetErrorCode() const
 {
 	return m_dwErrorCode;
+}
+
+void KernelInterface::EnableBB()
+{
+	if(!m_hDriver)
+		return;
+
+	BOOL result = FALSE;
+	DeviceIoControl(m_hDriver, IO_ENABLE_BB, &result, sizeof(result), &result, sizeof(result), nullptr, nullptr);
+	
 }
 
 void KernelInterface::WaitForProcessClose()

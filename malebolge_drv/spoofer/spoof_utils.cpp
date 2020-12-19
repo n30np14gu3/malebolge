@@ -13,7 +13,7 @@ PVOID Utils::GetModuleBase(const char* moduleName)
 {
 	PVOID address = nullptr;
 	ULONG size = 0;
-	
+
 	auto status = ZwQuerySystemInformation(SystemModuleInformation, &size, 0, &size);
 	if (status != STATUS_INFO_LENGTH_MISMATCH)
 		return nullptr;
@@ -35,7 +35,7 @@ PVOID Utils::GetModuleBase(const char* moduleName)
 			break;
 		}
 	}
-	
+
 end:
 	ExFreePool(moduleList);
 	return address;
@@ -48,13 +48,13 @@ end:
  * \param base Address to check
  * \param pattern Byte pattern to match
  * \param mask Mask containing unknown bytes
- * \return 
+ * \return
  */
 bool Utils::CheckMask(const char* base, const char* pattern, const char* mask)
 {
-	for (; *mask; ++base, ++pattern, ++mask) 
+	for (; *mask; ++base, ++pattern, ++mask)
 	{
-		if ('x' == *mask && *base != *pattern) 
+		if ('x' == *mask && *base != *pattern)
 		{
 			return false;
 		}
@@ -74,7 +74,7 @@ bool Utils::CheckMask(const char* base, const char* pattern, const char* mask)
 PVOID Utils::FindPattern(PVOID base, int length, const char* pattern, const char* mask)
 {
 	length -= static_cast<int>(strlen(mask));
-	for (auto i = 0; i <= length; ++i) 
+	for (auto i = 0; i <= length; ++i)
 	{
 		const auto* data = static_cast<char*>(base);
 		const auto* address = &data[i];
@@ -98,14 +98,14 @@ PVOID Utils::FindPatternImage(PVOID base, const char* pattern, const char* mask)
 
 	auto* headers = reinterpret_cast<PIMAGE_NT_HEADERS>(static_cast<char*>(base) + static_cast<PIMAGE_DOS_HEADER>(base)->e_lfanew);
 	auto* sections = IMAGE_FIRST_SECTION(headers);
-	
-	for (auto i = 0; i < headers->FileHeader.NumberOfSections; ++i) 
+
+	for (auto i = 0; i < headers->FileHeader.NumberOfSections; ++i)
 	{
 		auto* section = &sections[i];
-		if ('EGAP' == *reinterpret_cast<PINT>(section->Name) || memcmp(section->Name, ".text", 5) == 0) 
+		if ('EGAP' == *reinterpret_cast<PINT>(section->Name) || memcmp(section->Name, ".text", 5) == 0)
 		{
 			match = FindPattern(static_cast<char*>(base) + section->VirtualAddress, section->Misc.VirtualSize, pattern, mask);
-			if (match) 
+			if (match)
 				break;
 		}
 	}
@@ -134,5 +134,6 @@ void Utils::RandomText(char* text, const int length)
 	{
 		auto key = RtlRandomEx(&seed) % static_cast<int>(sizeof(alphanum) - 1);
 		text[n] = alphanum[key];
+
 	}
 }

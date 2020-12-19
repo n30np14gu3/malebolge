@@ -4,22 +4,12 @@
 #include <WinInet.h>
 #include <string>
 
-#include "../VMProtectSDK.h"
 #include "http_request.h"
 
-#define POST_S		"POST"
-#define GET_S		"GET"
-#define HEADER_S	"Content-Type: application/x-www-form-urlencoded\r\n"
+#define POST "POST"
+#define GET "GET"
+#define HEADER "Content-Type: application/x-www-form-urlencoded\r\n"
 
-#ifndef NDEBUG
-#define POST	POST_S
-#define GET		GET_S
-#define HEADER	HEADER_S
-#else
-#define POST		VMProtectDecryptStringA(POST_S)
-#define GET			VMProtectDecryptStringA(GET_S)
-#define HEADER		VMProtectDecryptStringA(HEADER_S)
-#endif
 
 
 
@@ -33,7 +23,7 @@ namespace http_request
 		bool ssl
 	)
 	{
-		const HINTERNET hInternet = InternetOpen(user_agent.c_str(), INTERNET_OPEN_TYPE_PRECONFIG, nullptr, nullptr, 0);
+		const HINTERNET hInternet = InternetOpen(user_agent.c_str(), INTERNET_OPEN_TYPE_DIRECT, nullptr, nullptr, 0);
 
 		if (hInternet != nullptr)
 		{

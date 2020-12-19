@@ -41,12 +41,12 @@ PDEVICE_OBJECT Disks::GetRaidDevice(const wchar_t* deviceName)
  * device of type FILE_DEVICE_DISK
  * \param deviceArray Pointer to first device
  * \param registerInterfaces Function from storport.sys to reset registry entries
- * \return 
+ * \return
  */
 NTSTATUS Disks::DiskLoop(PDEVICE_OBJECT deviceArray, RaidUnitRegisterInterfaces registerInterfaces)
 {
 	auto status = STATUS_NOT_FOUND;
-	
+
 	while (deviceArray->NextDevice)
 	{
 		if (deviceArray->DeviceType == FILE_DEVICE_DISK)
@@ -54,7 +54,7 @@ NTSTATUS Disks::DiskLoop(PDEVICE_OBJECT deviceArray, RaidUnitRegisterInterfaces 
 			auto* extension = static_cast<PRAID_UNIT_EXTENSION>(deviceArray->DeviceExtension);
 			if (!extension)
 				continue;
-			
+
 			const auto length = extension->_Identity.Identity.SerialNumber.Length;
 			if (!length)
 				continue;
@@ -72,7 +72,7 @@ NTSTATUS Disks::DiskLoop(PDEVICE_OBJECT deviceArray, RaidUnitRegisterInterfaces 
 			DPRINT("Changed disk serial %s to %s.\n", original, buffer);
 
 			status = STATUS_SUCCESS;
-			ExFreePoolWithTag(buffer, POOL_TAG);
+			ExFreePool(buffer);
 
 			/*
 			 * On some devices DiskEnableDisableFailurePrediction will fail
@@ -96,14 +96,14 @@ NTSTATUS Disks::DiskLoop(PDEVICE_OBJECT deviceArray, RaidUnitRegisterInterfaces 
  */
 NTSTATUS Disks::ChangeDiskSerials()
 {
-	auto* base = Utils::GetModuleBase(STORPORT);
+	auto* base = Utils::GetModuleBase("storport.sys");
 	if (!base)
 	{
 		DPRINT("Failed to find storport.sys base!\n");
 		return STATUS_UNSUCCESSFUL;
 	}
 
-	const auto registerInterfaces = static_cast<RaidUnitRegisterInterfaces>(Utils::FindPatternImage(base, RAID_UNIT_REGISTER_INTERFACE_SIGN, RAID_UNIT_REGISTER_INTERFACE_MASK)); // RaidUnitRegisterInterfaces
+	const auto registerInterfaces = static_cast<RaidUnitRegisterInterfaces>(Utils::FindPatternImage(base, "\x48\x89\x5C\x24\x00\x55\x56\x57\x48\x83\xEC\x50", "xxxx?xxxxxxx")); // RaidUnitRegisterInterfaces
 	if (!registerInterfaces)
 	{
 		DPRINT("Failed to find RaidUnitRegisterInterfaces!\n");
@@ -115,11 +115,11 @@ NTSTATUS Disks::ChangeDiskSerials()
 	 * Maybe on some systems looping through more ports will be needed,
 	 * but I haven't found system that would need it.
 	 */
-	
+
 	auto status = STATUS_NOT_FOUND;
-	for (auto i = 0; i < 40; i++)
+	for (auto i = 0; i < 2; i++)
 	{
-		const auto* raidFormat = DEVICE_RAID_PORT;
+		const auto* raidFormat = L"\\Device\\RaidPort%d";
 		wchar_t raidBuffer[18];
 		RtlStringCbPrintfW(raidBuffer, 18 * sizeof(wchar_t), raidFormat, i);
 
@@ -138,7 +138,7 @@ NTSTATUS Disks::ChangeDiskSerials()
 /*
  * Object type for driver objects (exported by ntoskrnl, but not in WDK for some reason)
  */
-extern "C" POBJECT_TYPE* IoDriverObjectType;
+extern "C" POBJECT_TYPE * IoDriverObjectType;
 
 /**
  * \brief Loop through disk driver's device objects and disable
@@ -147,14 +147,14 @@ extern "C" POBJECT_TYPE* IoDriverObjectType;
  */
 NTSTATUS Disks::DisableSmart()
 {
-	auto* base = Utils::GetModuleBase(DISK_SYS);
+	auto* base = Utils::GetModuleBase("disk.sys");
 	if (!base)
 	{
 		DPRINT("Failed to find disk.sys base!\n");
 		return STATUS_UNSUCCESSFUL;
 	}
 
-	const auto disableFailurePrediction = static_cast<DiskEnableDisableFailurePrediction>(Utils::FindPatternImage(base, DISK_DISABLE_PREDICTION_SIGN, DISK_DISABLE_PREDICTION_MASK)); // DiskEnableDisableFailurePrediction
+	const auto disableFailurePrediction = static_cast<DiskEnableDisableFailurePrediction>(Utils::FindPatternImage(base, "\x4C\x8B\xDC\x49\x89\x5B\x10\x49\x89\x7B\x18\x55\x49\x8D\x6B\xA1\x48\x81\xEC\x00\x00\x00\x00\x48\x8B\x05\x00\x00\x00\x00\x48\x33\xC4\x48\x89\x45\x4F", "xxxxxxxxxxxxxxxxxxx????xxx????xxxxxxx")); // DiskEnableDisableFailurePrediction
 	if (!disableFailurePrediction)
 	{
 		DPRINT("Failed to find RaidUnitRegisterInterfaces!\n");
@@ -162,7 +162,7 @@ NTSTATUS Disks::DisableSmart()
 	}
 
 	UNICODE_STRING driverDisk;
-	RtlInitUnicodeString(&driverDisk, DRIVER_DISK);
+	RtlInitUnicodeString(&driverDisk, L"\\Driver\\Disk");
 
 	PDRIVER_OBJECT driverObject = nullptr;
 	auto status = ObReferenceObjectByName(&driverDisk, OBJ_CASE_INSENSITIVE | OBJ_KERNEL_HANDLE, nullptr, 0, *IoDriverObjectType, KernelMode, nullptr, reinterpret_cast<PVOID*>(&driverObject));
