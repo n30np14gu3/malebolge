@@ -4,7 +4,6 @@
 #include <comdef.h>
 #include "KernelInterface.h"
 #include "../SDK/globals.h"
-#include "../themida_sdk/ThemidaSDK.h"
 
 
 typedef BOOLEAN (WINAPI* pRtlDosPathNameToNtPathName_U)(PCWSTR DosFileName, PUNICODE_STRING NtFileName, PWSTR* FilePart, PVOID RelativeName);
@@ -39,15 +38,12 @@ bool KernelInterface::Inject(const wchar_t* szDll) const
 	DWORD bytes = 0;
 	INJECT_DLL data = { IT_MMap };
 	UNICODE_STRING ustr = { 0 };
-
-	StrEncryptStart();
 	HMODULE hNtdll = GetModuleHandle(S_ntdll);
 	if(hNtdll == nullptr)
 		return false;
 
 	pRtlDosPathNameToNtPathName_U pFunc = reinterpret_cast<pRtlDosPathNameToNtPathName_U>(GetProcAddress(hNtdll, S_RtlDosPathNameToNtPathName_U));
 	pRtlFreeUnicodeString pFreeFunc = reinterpret_cast<pRtlFreeUnicodeString>(GetProcAddress(hNtdll, S_RtlFreeUnicodeString));
-	StrEncryptEnd();
 	
 	if(pFunc == nullptr || pFreeFunc == nullptr)
 		return false;

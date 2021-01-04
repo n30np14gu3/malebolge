@@ -25,6 +25,9 @@
     <Filter Include="themida_sdk">
       <UniqueIdentifier>{ed10a574-22f4-47de-9300-327517654cb5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="nuklear">
+      <UniqueIdentifier>{f24403a9-c5a5-4b09-9706-e242252ad92f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="malebolge.cpp" />
@@ -80,6 +83,12 @@
     </ClInclude>
     <ClInclude Include="themida_sdk\SecureEngineCustomVMs_VC_inline.h">
       <Filter>themida_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="nuklear\nuklear.h">
+      <Filter>nuklear</Filter>
+    </ClInclude>
+    <ClInclude Include="nuklear\nuklear_d3d9.h">
+      <Filter>nuklear</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
