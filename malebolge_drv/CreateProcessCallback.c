@@ -5,7 +5,7 @@ void CreateProcessCallback(HANDLE ParentId, HANDLE ProcessId, BOOLEAN Create)
 {
 	if(!Create)
 	{
-		//Game closed
+		//Game or client closed
 		if (ProcessId == PROTECTED_PROCESS || ProcessId == GAME_PROCESS)
 			DRIVER_INITED = FALSE;
 	}

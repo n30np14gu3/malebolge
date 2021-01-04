@@ -1,8 +1,6 @@
 #include <Windows.h>
-#include "Menu/Menu.h"
-#include "ring0/KernelInterface.h"
 #include <string>
-#include "SDK/http_request/http_request.h"
+#include "themida_sdk/ThemidaSDK.h"
 
 int WINAPI wWinMain(
     _In_ HINSTANCE hInstance,
@@ -11,10 +9,5 @@ int WINAPI wWinMain(
     _In_ int nShowCmd
 )
 {
-    KernelInterface ring0;
-	while(!ring0.Attach()) { }
-	while(!ring0.GetModules()) { }
-    ring0.EnableBB();
-    Menu menu(__TIME__, &ring0);
     return 0;
 }

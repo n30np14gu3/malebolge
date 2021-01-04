@@ -4,14 +4,8 @@
     <Filter Include="SDK">
       <UniqueIdentifier>{c5fd8c74-2093-4955-b6cc-b25f0ba08283}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SDK\imgui">
-      <UniqueIdentifier>{68b3ea18-7607-48cb-a91d-babb8e78c64c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="SDK\local_proto">
       <UniqueIdentifier>{a1d5bfce-c6e7-42aa-b8f6-ca4d7ca583d8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SDK\http_request">
-      <UniqueIdentifier>{5f01df2d-3d24-4a8f-97d2-4c8a36ab4945}</UniqueIdentifier>
     </Filter>
     <Filter Include="ring0">
       <UniqueIdentifier>{1c8f45e8-97a0-4bec-abb8-07d29c0b7af1}</UniqueIdentifier>
@@ -37,29 +31,11 @@
     <ClCompile Include="SDK\local_proto\local_proto.cpp">
       <Filter>SDK\local_proto</Filter>
     </ClCompile>
-    <ClCompile Include="SDK\http_request\http_request.cpp">
-      <Filter>SDK\http_request</Filter>
-    </ClCompile>
     <ClCompile Include="ring0\KernelInterface.cpp">
       <Filter>ring0\Kernel Interface</Filter>
     </ClCompile>
     <ClCompile Include="ring0\DriverLoader.cpp">
       <Filter>ring0\Driver Loader</Filter>
-    </ClCompile>
-    <ClCompile Include="SDK\imgui\imgui.cpp">
-      <Filter>SDK\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="SDK\imgui\imgui_draw.cpp">
-      <Filter>SDK\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="SDK\imgui\imgui_impl_dx9.cpp">
-      <Filter>SDK\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="SDK\imgui\imgui_impl_win32.cpp">
-      <Filter>SDK\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="SDK\imgui\imgui_widgets.cpp">
-      <Filter>SDK\imgui</Filter>
     </ClCompile>
     <ClCompile Include="Menu\Menu.cpp">
       <Filter>Menu</Filter>
@@ -72,9 +48,6 @@
     <ClInclude Include="SDK\local_proto\local_proto.h">
       <Filter>SDK\local_proto</Filter>
     </ClInclude>
-    <ClInclude Include="SDK\http_request\http_request.h">
-      <Filter>SDK\http_request</Filter>
-    </ClInclude>
     <ClInclude Include="SDK\globals.h">
       <Filter>SDK</Filter>
     </ClInclude>
@@ -84,34 +57,28 @@
     <ClInclude Include="ring0\DriverLoader.h">
       <Filter>ring0\Driver Loader</Filter>
     </ClInclude>
-    <ClInclude Include="SDK\imgui\imconfig.h">
-      <Filter>SDK\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="SDK\imgui\imgui.h">
-      <Filter>SDK\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="SDK\imgui\imgui_impl_dx9.h">
-      <Filter>SDK\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="SDK\imgui\imgui_impl_win32.h">
-      <Filter>SDK\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="SDK\imgui\imgui_internal.h">
-      <Filter>SDK\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="SDK\imgui\imstb_rectpack.h">
-      <Filter>SDK\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="SDK\imgui\imstb_textedit.h">
-      <Filter>SDK\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="SDK\imgui\imstb_truetype.h">
-      <Filter>SDK\imgui</Filter>
-    </ClInclude>
     <ClInclude Include="Menu\Menu.h">
       <Filter>Menu</Filter>
     </ClInclude>
     <ClInclude Include="themida_sdk\ThemidaSDK.h">
+      <Filter>themida_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="themida_sdk\SecureEngineCustomVMs.h">
+      <Filter>themida_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="themida_sdk\SecureEngineCustomVMs_BorlandC_inline.h">
+      <Filter>themida_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="themida_sdk\SecureEngineCustomVMs_GNU_inline.h">
+      <Filter>themida_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="themida_sdk\SecureEngineCustomVMs_ICL_inline.h">
+      <Filter>themida_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="themida_sdk\SecureEngineCustomVMs_LCC_inline.h">
+      <Filter>themida_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="themida_sdk\SecureEngineCustomVMs_VC_inline.h">
       <Filter>themida_sdk</Filter>
     </ClInclude>
   </ItemGroup>

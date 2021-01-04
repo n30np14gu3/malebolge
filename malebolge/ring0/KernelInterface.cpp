@@ -4,14 +4,21 @@
 #include <comdef.h>
 #include "KernelInterface.h"
 #include "../SDK/globals.h"
+#include "../themida_sdk/ThemidaSDK.h"
 
-typedef BOOLEAN (_stdcall *pRtlDosPathNameToNtPathName_U)(PCWSTR DosFileName, PUNICODE_STRING NtFileName, PWSTR* FilePart, PVOID RelativeName);
-typedef void(_stdcall* pRtlFreeUnicodeString)(PUNICODE_STRING UnicodeString);
+
+typedef BOOLEAN (WINAPI* pRtlDosPathNameToNtPathName_U)(PCWSTR DosFileName, PUNICODE_STRING NtFileName, PWSTR* FilePart, PVOID RelativeName);
+typedef void(WINAPI* pRtlFreeUnicodeString)(PUNICODE_STRING UnicodeString);
 
 KernelInterface::KernelInterface()
 {
-	m_hDriver = CreateFile(DRIVER_NAME, GENERIC_READ | GENERIC_WRITE,
-		FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, 0);
+	m_hDriver = CreateFile(DRIVER_NAME,
+		GENERIC_READ | GENERIC_WRITE,
+		FILE_SHARE_READ | FILE_SHARE_WRITE,
+		nullptr,
+		OPEN_EXISTING,
+		0,
+		nullptr);
 
 	m_dwErrorCode = 0;
 	m_dwProcessId = 0;
@@ -33,12 +40,14 @@ bool KernelInterface::Inject(const wchar_t* szDll) const
 	INJECT_DLL data = { IT_MMap };
 	UNICODE_STRING ustr = { 0 };
 
-	HMODULE hNtdll = GetModuleHandle("ntdll.dll");
+	StrEncryptStart();
+	HMODULE hNtdll = GetModuleHandle(S_ntdll);
 	if(hNtdll == nullptr)
 		return false;
 
-	pRtlDosPathNameToNtPathName_U pFunc = reinterpret_cast<pRtlDosPathNameToNtPathName_U>(GetProcAddress(hNtdll, "RtlDosPathNameToNtPathName_U"));
-	pRtlFreeUnicodeString pFreeFunc = reinterpret_cast<pRtlFreeUnicodeString>(GetProcAddress(hNtdll, "RtlFreeUnicodeString"));
+	pRtlDosPathNameToNtPathName_U pFunc = reinterpret_cast<pRtlDosPathNameToNtPathName_U>(GetProcAddress(hNtdll, S_RtlDosPathNameToNtPathName_U));
+	pRtlFreeUnicodeString pFreeFunc = reinterpret_cast<pRtlFreeUnicodeString>(GetProcAddress(hNtdll, S_RtlFreeUnicodeString));
+	StrEncryptEnd();
 	
 	if(pFunc == nullptr || pFreeFunc == nullptr)
 		return false;
@@ -67,6 +76,7 @@ bool KernelInterface::Inject(const wchar_t* szDll) const
 
 	memset(&data, 0, sizeof(data));
 
+	
 	return true;
 }
 
@@ -159,12 +169,9 @@ void KernelInterface::EnableBB()
 
 	BOOL result = FALSE;
 	DeviceIoControl(m_hDriver, IO_ENABLE_BB, &result, sizeof(result), &result, sizeof(result), nullptr, nullptr);
-	
 }
 
 void KernelInterface::WaitForProcessClose()
 {
 	WaitForSingleObjectEx(m_hProcess, INFINITE, TRUE);
-	while (!Attach(true)) {}
-	while (!GetModules()) {}
 }

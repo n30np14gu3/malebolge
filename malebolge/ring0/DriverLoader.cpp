@@ -1,8 +1,9 @@
-#include "../SDK/globals.h"
+#include <Windows.h>
 #include <string>
 #include <iostream>
 #include <filesystem>
 #include "DriverLoader.h"
+#include "../SDK/globals.h"
 
 DriverLoader::DriverLoader(const std::string& driverPath, const std::string& driverName)
 {	
