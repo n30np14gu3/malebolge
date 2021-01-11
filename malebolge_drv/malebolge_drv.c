@@ -114,7 +114,7 @@ void EnableBB()
 	if (!NT_SUCCESS(status))
 	{
 		if (status == STATUS_NOT_SUPPORTED)
-			DPRINT("BlackBone: %s: Unsupported OS version. Aborting\n", __FUNCTION__);
+			DPRINT("[MALEBOLGE] %s: Unsupported OS version. Aborting\n", __FUNCTION__);
 
 		return;
 	}
@@ -123,7 +123,7 @@ void EnableBB()
 	status = BBInitLdrData((PKLDR_DATA_TABLE_ENTRY)g_Driver->DriverSection);
 	if (!NT_SUCCESS(status))
 	{
-		DPRINT("BlackBone: %s: Failed to BBInitLdrData with staus 0x%X\n", __FUNCTION__, status);
+		DPRINT("[MALEBOLGE] %s: Failed to BBInitLdrData with staus 0x%X\n", __FUNCTION__, status);
 		return;
 	}
 
@@ -138,7 +138,7 @@ void EnableBB()
 	status = PsSetCreateProcessNotifyRoutine(BBProcessNotify, FALSE);
 	if (!NT_SUCCESS(status))
 	{
-		DPRINT("BlackBone: %s: Failed to setup notify routine with staus 0x%X\n", __FUNCTION__, status);
+		DPRINT("[MALEBOLGE] %s: Failed to setup notify routine with staus 0x%X\n", __FUNCTION__, status);
 		return;
 	}
 	DPRINT("Good luck xD");

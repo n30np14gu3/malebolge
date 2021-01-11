@@ -126,7 +126,7 @@ NTSTATUS BBGetBuildNO(OUT PULONG pBuildNo)
         ZwClose(hKey);
     }
     else
-        DPRINT("BlackBone: %s: ZwOpenKey failed with status 0x%X\n", __FUNCTION__, status);
+        DPRINT("[MALEBOLGE] %s: ZwOpenKey failed with status 0x%X\n", __FUNCTION__, status);
 
     return status;
 
@@ -177,7 +177,7 @@ NTSTATUS BBInitDynamicData(IN OUT PDYNAMIC_DATA pData)
 #endif
 
         DPRINT(
-            "BlackBone: OS version %d.%d.%d.%d.%d - 0x%x\n",
+            "[MALEBOLGE] OS version %d.%d.%d.%d.%d - 0x%x\n",
             verInfo.dwMajorVersion,
             verInfo.dwMinorVersion,
             verInfo.dwBuildNumber,
@@ -421,7 +421,7 @@ NTSTATUS BBInitDynamicData(IN OUT PDYNAMIC_DATA pData)
             pData->correctBuild = TRUE;
 
         DPRINT(
-            "BlackBone: Dynamic search status: SSDT - %s, ExRemoveTable - %s\n",
+            "[MALEBOLGE] Dynamic search status: SSDT - %s, ExRemoveTable - %s\n",
             GetSSDTBase() != NULL ? "SUCCESS" : "FAIL",
             pData->ExRemoveTable != 0 ? "SUCCESS" : "FAIL"
         );
@@ -429,7 +429,7 @@ NTSTATUS BBInitDynamicData(IN OUT PDYNAMIC_DATA pData)
         if (pData->ver >= WINVER_10_RS1)
         {
             DPRINT(
-                "BlackBone: %s: g_KdBlock->KernBase: %p, GetKernelBase() = 0x%p \n",
+                "[MALEBOLGE] %s: g_KdBlock->KernBase: %p, GetKernelBase() = 0x%p \n",
                 __FUNCTION__, g_KdBlock.KernBase, GetKernelBase(NULL)
             );
 
@@ -438,10 +438,10 @@ NTSTATUS BBInitDynamicData(IN OUT PDYNAMIC_DATA pData)
             dynData.DYN_PDE_BASE = (ULONG_PTR)((g_KdBlock.PteBase & ~mask) | ((g_KdBlock.PteBase >> 9) & mask));
         }
 
-        DPRINT("BlackBone: PDE_BASE: %p, PTE_BASE: %p\n", pData->DYN_PDE_BASE, pData->DYN_PTE_BASE);
+        DPRINT("[MALEBOLGE] PDE_BASE: %p, PTE_BASE: %p\n", pData->DYN_PDE_BASE, pData->DYN_PTE_BASE);
         if (pData->DYN_PDE_BASE < MI_SYSTEM_RANGE_START || pData->DYN_PTE_BASE < MI_SYSTEM_RANGE_START)
         {
-            DPRINT("BlackBone: Invalid PDE/PTE base, aborting\n");
+            DPRINT("[MALEBOLGE] Invalid PDE/PTE base, aborting\n");
             return STATUS_UNSUCCESSFUL;
         }
 

@@ -30,6 +30,9 @@ void UnloadDriver(PDRIVER_OBJECT pDriverObject)
 
 void DisableBB()
 {
+	if (!BB_INITED)
+		return;
+	
 	// Unregister notification
 	PsSetCreateProcessNotifyRoutine(BBProcessNotify, TRUE);
 

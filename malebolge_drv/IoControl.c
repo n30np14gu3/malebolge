@@ -31,7 +31,7 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 	PKERNEL_WRITE_REQUEST32 pWriteRequest32;
 	PKERNEL_READ_REQUEST32 pReadRequest32;
 	SIZE_T rwBytes = 0;
-
+	
 	switch(controlCode)
 	{
 	case IO_INIT_CHEAT_DATA:		
@@ -43,7 +43,7 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 		if(BB_INITED)
 			break;
 		EnableBB();
-		BB_INITED = TRUE;
+
 		*(PBOOLEAN)Irp->AssociatedIrp.SystemBuffer = TRUE;
 		break;
 	case IO_READ_PROCESS_MEMORY:
