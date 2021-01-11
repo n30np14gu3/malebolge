@@ -99,8 +99,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Menu\Menu.h" />
-    <ClInclude Include="nuklear\nuklear.h" />
-    <ClInclude Include="nuklear\nuklear_d3d9.h" />
     <ClInclude Include="ring0\DriverLoader.h" />
     <ClInclude Include="ring0\KernelInterface.h" />
     <ClInclude Include="ring0\driver_io.h" />
