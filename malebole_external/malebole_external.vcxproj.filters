@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="malebole_external.cpp" />
+    <ClCompile Include="ring0\KernelInterface.cpp">
+      <Filter>ring0</Filter>
+    </ClCompile>
+    <ClCompile Include="render.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="themida_sdk">
+      <UniqueIdentifier>{929aa34e-0081-4fc9-bbaf-54f2a314eec9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ring0">
+      <UniqueIdentifier>{4d626f37-1b71-48c1-aa9c-8362b3cd999c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SDK">
+      <UniqueIdentifier>{5cb5ac14-5024-41b6-80ef-1c21d6eb62ff}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="themida_sdk\SecureEngineCustomVMs.h">
+      <Filter>themida_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="themida_sdk\SecureEngineCustomVMs_BorlandC_inline.h">
+      <Filter>themida_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="themida_sdk\SecureEngineCustomVMs_GNU_inline.h">
+      <Filter>themida_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="themida_sdk\SecureEngineCustomVMs_ICL_inline.h">
+      <Filter>themida_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="themida_sdk\SecureEngineCustomVMs_LCC_inline.h">
+      <Filter>themida_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="themida_sdk\SecureEngineCustomVMs_VC_inline.h">
+      <Filter>themida_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="themida_sdk\ThemidaSDK.h">
+      <Filter>themida_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="themida_sdk\Themida.h">
+      <Filter>themida_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="ring0\driver_io.h">
+      <Filter>ring0</Filter>
+    </ClInclude>
+    <ClInclude Include="ring0\KernelInterface.h">
+      <Filter>ring0</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\globals.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="render.h" />
+  </ItemGroup>
+</Project>

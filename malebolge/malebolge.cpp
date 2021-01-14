@@ -1,4 +1,9 @@
 #include <Windows.h>
+#include <SubAuth.h>
+#include <comdef.h>
+#include "ring0/KernelInterface.h"
+
+KernelInterface ring0;
 
 int WINAPI wWinMain(
     _In_ HINSTANCE hInstance,

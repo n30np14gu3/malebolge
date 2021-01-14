@@ -41,9 +41,7 @@ void DisplayError(NTSTATUS result)
 
 void EnableCallback()
 {
-#ifndef DEBUG
-	VMProtectBeginUltra("#EnableCallback");
-#endif
+	VM_START("#EnableCallback");
 	NTSTATUS result;
 
 	OB_OPERATION_REGISTRATION OBOperationRegistration[2];
@@ -77,10 +75,7 @@ void EnableCallback()
 			DisplayError(result);
 		}
 	}
-
-#ifndef DEBUG
-	VMProtectEnd();
-#endif
+	VM_END;
 }
 
 void DisableCallback()

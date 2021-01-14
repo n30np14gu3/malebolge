@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "malebolge_drv", "malebolge_
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "malebolge_cheat", "malebolge_cheat\malebolge_cheat.vcxproj", "{959B38AF-2A1F-4BE6-A899-977CA9A368C2}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "malebole_external", "malebole_external\malebole_external.vcxproj", "{70D123B6-A4F9-4294-B491-76911A234F54}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_noGs|x64 = Debug_noGs|x64
@@ -66,6 +68,18 @@ Global
 		{959B38AF-2A1F-4BE6-A899-977CA9A368C2}.Release|x64.Build.0 = Release|Win32
 		{959B38AF-2A1F-4BE6-A899-977CA9A368C2}.Release|x86.ActiveCfg = Release|Win32
 		{959B38AF-2A1F-4BE6-A899-977CA9A368C2}.Release|x86.Build.0 = Release|Win32
+		{70D123B6-A4F9-4294-B491-76911A234F54}.Debug_noGs|x64.ActiveCfg = Debug|x64
+		{70D123B6-A4F9-4294-B491-76911A234F54}.Debug_noGs|x64.Build.0 = Debug|x64
+		{70D123B6-A4F9-4294-B491-76911A234F54}.Debug_noGs|x86.ActiveCfg = Debug|x64
+		{70D123B6-A4F9-4294-B491-76911A234F54}.Debug|x64.ActiveCfg = Debug|x64
+		{70D123B6-A4F9-4294-B491-76911A234F54}.Debug|x64.Build.0 = Debug|x64
+		{70D123B6-A4F9-4294-B491-76911A234F54}.Debug|x86.ActiveCfg = Debug|x64
+		{70D123B6-A4F9-4294-B491-76911A234F54}.Release_noGs|x64.ActiveCfg = Release|x64
+		{70D123B6-A4F9-4294-B491-76911A234F54}.Release_noGs|x64.Build.0 = Release|x64
+		{70D123B6-A4F9-4294-B491-76911A234F54}.Release_noGs|x86.ActiveCfg = Release|x64
+		{70D123B6-A4F9-4294-B491-76911A234F54}.Release|x64.ActiveCfg = Release|x64
+		{70D123B6-A4F9-4294-B491-76911A234F54}.Release|x64.Build.0 = Release|x64
+		{70D123B6-A4F9-4294-B491-76911A234F54}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

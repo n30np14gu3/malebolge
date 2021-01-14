@@ -59,16 +59,22 @@ NTSTATUS UnsupportedDispatch(
 }
 
 
+NTSTATUS theAddDeviceFunction(
+	PDRIVER_OBJECT DriverObject,
+	PDEVICE_OBJECT PhysicalDeviceObject)
+{
+	return STATUS_NO_SUCH_DEVICE;
+}
+
 NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath)
 {
-#ifndef DEBUG
-	VMProtectBeginUltra("#DriverInit");
-#endif
+	VM_START("#DriverEntry");
 	UNREFERENCED_PARAMETER(pRegistryPath);
 	NTSTATUS status;
-
+//#ifndef DEBUG
+//	pDriverObject->DriverExtension->AddDevice = theAddDeviceFunction;
+//#endif
 	g_Driver = pDriverObject;
-
 	RtlSecureZeroMemory(&DeviceName, sizeof(DeviceName));
 	RtlInitUnicodeString(&DeviceName, DRIVER_NAME);
 	RtlSecureZeroMemory(&DosName, sizeof(DosName));
@@ -98,16 +104,18 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath
 
 	PsSetLoadImageNotifyRoutine(ImageLoadCallback);
 	PsSetCreateProcessNotifyRoutine(CreateProcessCallback, FALSE);
-#ifndef DEBUG
-	VMProtectEnd();
+
+	//Remove for FaceIT
+	//spoof();
+	VM_END;
 	EnableCallback();
-	spoof();
-#endif
+	EnableBB();
 	return status;
 }
 
 void EnableBB()
 {
+	VM_START("#EnableBB");
 	// Get OS Dependant offsets
 	InitializeDebuggerBlock();
 	NTSTATUS status = BBInitDynamicData(&dynData);
@@ -143,15 +151,16 @@ void EnableBB()
 	}
 	DPRINT("Good luck xD");
 	BB_INITED = TRUE;
+	VM_END;
 }
 
 
 void BBHook()
 {
-	
+
 }
 
 void BBUnhook()
 {
-	
+
 }

@@ -95,3 +95,11 @@ extern "C" {
 }
 #endif
 #endif
+
+#ifndef DEBUG
+#define VM_START(x)	VMProtectBeginUltra(x)
+#define VM_END		VMProtectEnd()
+#else
+#define VM_START(x)
+#define VM_END
+#endif

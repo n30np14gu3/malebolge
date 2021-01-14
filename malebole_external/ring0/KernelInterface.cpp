@@ -4,13 +4,14 @@
 #include <comdef.h>
 #include "KernelInterface.h"
 #include "../SDK/globals.h"
-
+#include "../themida_sdk/Themida.h"
 
 typedef BOOLEAN (WINAPI* pRtlDosPathNameToNtPathName_U)(PCWSTR DosFileName, PUNICODE_STRING NtFileName, PWSTR* FilePart, PVOID RelativeName);
 typedef void(WINAPI* pRtlFreeUnicodeString)(PUNICODE_STRING UnicodeString);
 
 KernelInterface::KernelInterface()
 {
+	PROTECT_VM_START_HIGH;
 	m_hDriver = CreateFile(DRIVER_NAME,
 		GENERIC_READ | GENERIC_WRITE,
 		FILE_SHARE_READ | FILE_SHARE_WRITE,
@@ -29,51 +30,12 @@ KernelInterface::KernelInterface()
 		return;
 	}
 	NoErrors = true;
+	PROTECT_VM_END_HIGH;
 }
 
 bool KernelInterface::Inject(const wchar_t* szDll) const
 {
-	if(m_hDriver == INVALID_HANDLE_VALUE)
-		return false;
-	
-	DWORD bytes = 0;
-	INJECT_DLL data = { IT_MMap };
-	UNICODE_STRING ustr = { 0 };
-	HMODULE hNtdll = GetModuleHandle(S_ntdll);
-	if(hNtdll == nullptr)
-		return false;
-
-	pRtlDosPathNameToNtPathName_U pFunc = reinterpret_cast<pRtlDosPathNameToNtPathName_U>(GetProcAddress(hNtdll, S_RtlDosPathNameToNtPathName_U));
-	pRtlFreeUnicodeString pFreeFunc = reinterpret_cast<pRtlFreeUnicodeString>(GetProcAddress(hNtdll, S_RtlFreeUnicodeString));
-	
-	if(pFunc == nullptr || pFreeFunc == nullptr)
-		return false;
-
-	pFunc(szDll, &ustr, nullptr, nullptr);
-
-	if(ustr.Buffer == nullptr)
-		return false;
-	
-	wcscpy_s(data.FullDllPath, ustr.Buffer);
-
-	pFreeFunc(&ustr);
-	
-	data.pid = m_dwProcessId;
-	data.initRVA = 0;
-	data.wait = false;
-	data.unlink = true;
-	data.erasePE = false;
-	data.flags = KNoFlags;
-	data.imageBase = 0;
-	data.imageSize = 0;
-	data.asImage = false;
-
-	if(!DeviceIoControl(m_hDriver, IO_INJECT_DLL, &data, sizeof(data), nullptr, 0, &bytes, nullptr))
-		return false;
-
-	memset(&data, 0, sizeof(data));
-
-	
+	//Nope in external soft
 	return true;
 }
 

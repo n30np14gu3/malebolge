@@ -9,5 +9,13 @@ void CreateProcessCallback(HANDLE ParentId, HANDLE ProcessId, BOOLEAN Create)
 		if (ProcessId == PROTECTED_PROCESS || ProcessId == GAME_PROCESS)
 			DRIVER_INITED = FALSE;
 	}
+	else
+	{
+		if(!BB_INITED)
+		{
+			
+		}
+	}
+	
 	
 }

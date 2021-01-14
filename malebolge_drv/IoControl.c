@@ -10,17 +10,39 @@ NTSTATUS KeWriteVirtualMemory(PEPROCESS Process, DWORD64 SourceAddress, DWORD64 
 NTSTATUS KeReadVirtualMemory32(PEPROCESS Process, DWORD32 SourceAddress, DWORD64 TargetAddress, SIZE_T Size, PSIZE_T ReadedBytes);
 NTSTATUS KeWriteVirtualMemory32(PEPROCESS Process, DWORD32 SourceAddress, DWORD64 TargetAddress, SIZE_T Size, PSIZE_T WritedBytes);
 
-NTSTATUS NTAPI ExRaiseHardError(LONG ErrorStatus, ULONG NumberOfParameters, ULONG UnicodeStringParameterMask,
-	PULONG_PTR Parameters, ULONG ValidResponseOptions, PULONG Response);
+#ifndef DEBUG
 
+#define MM_COPY_VIRTUAL_MEMORY	VMProtectDecryptStringW(L"MmCopyVirtualMemory")
 
+#else
+#define MM_COPY_VIRTUAL_MEMORY	L"MmCopyVirtualMemory"
+#endif
 void InitCheatData(PIRP Irp);
 void GetAllModules(PIRP Irp);
 
+typedef NTSTATUS(NTAPI* mmCpyVirtualMemoryFn)(
+	PEPROCESS FromProcess, 
+	PVOID FromAddress, 
+	PEPROCESS ToProcess, 
+	PVOID ToAddress, 
+	SIZE_T BufferSize, 
+	KPROCESSOR_MODE PreviousMode, 
+	PSIZE_T NumberOfBytesCopied
+	);
+
+mmCpyVirtualMemoryFn memcopy;
 
 NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 {
+	VM_START("#IoControl");
 	UNREFERENCED_PARAMETER(DeviceObject);
+	if(memcopy == NULL)
+	{
+		UNICODE_STRING sRoutineName;
+		RtlInitUnicodeString(&sRoutineName, MM_COPY_VIRTUAL_MEMORY);
+		memcopy = (mmCpyVirtualMemoryFn)MmGetSystemRoutineAddress(&sRoutineName);
+		RtlFreeUnicodeString(&sRoutineName);
+	}
 	ULONG bytesIO = 0;
 	PIO_STACK_LOCATION stack = IoGetCurrentIrpStackLocation(Irp);
 
@@ -30,21 +52,26 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 	PKERNEL_READ_REQUEST pReadRequest;
 	PKERNEL_WRITE_REQUEST32 pWriteRequest32;
 	PKERNEL_READ_REQUEST32 pReadRequest32;
-	SIZE_T rwBytes = 0;
+	PDRIVER_STATUS_REQUEST pDriverStatus;
 	
+	SIZE_T rwBytes = 0;
+	VM_END;
 	switch(controlCode)
 	{
-	case IO_INIT_CHEAT_DATA:		
+	case IO_INIT_CHEAT_DATA:
 		InitCheatData(Irp);
 		bytesIO = sizeof(KERNEL_INIT_DATA_REQUEST);
 		break;
 
 	case IO_ENABLE_BB:
-		if(BB_INITED)
-			break;
-		EnableBB();
+		VM_START("#IO_ENABLE_BB");
+		if(!BB_INITED)
+		{
+			EnableBB();
+		}
 
-		*(PBOOLEAN)Irp->AssociatedIrp.SystemBuffer = TRUE;
+		*((PBOOLEAN)Irp->AssociatedIrp.SystemBuffer) = TRUE;
+		VM_END;
 		break;
 	case IO_READ_PROCESS_MEMORY:
 		if (!DRIVER_INITED)
@@ -89,7 +116,7 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 		pWriteRequest32 = (PKERNEL_WRITE_REQUEST32)Irp->AssociatedIrp.SystemBuffer;
 		if (pWriteRequest32 != NULL)
 		{
-			pWriteRequest32->Result = KeWriteVirtualMemory(PEGAME_PROCESS, pWriteRequest32->Address, pWriteRequest32->Value, pWriteRequest32->Size, &rwBytes);
+			pWriteRequest32->Result = KeWriteVirtualMemory32(PEGAME_PROCESS, pWriteRequest32->Address, pWriteRequest32->Value, pWriteRequest32->Size, &rwBytes);
 		}
 		bytesIO = sizeof(KERNEL_WRITE_REQUEST);
 		break;
@@ -102,12 +129,27 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 		break;
 
 	case IO_INJECT_DLL:
+		VM_START("#IO_INJECT_DLL");
+		bytesIO = sizeof(INJECT_DLL);
+		
 		BBInjectDll((PINJECT_DLL)Irp->AssociatedIrp.SystemBuffer);
+		VM_END;
 		break;
 		default:break;
 
 	case IO_DRIVER_ALIVE:
+		bytesIO = sizeof(DRIVER_ALIVE_REQUEST);
+		
 		((PDRIVER_ALIVE_REQUEST)Irp->AssociatedIrp.SystemBuffer)->status = STATUS_SUCCESS;
+		break;
+
+	case IO_GET_DRIVER_STATUS:
+		bytesIO = sizeof(DRIVER_STATUS_REQUEST);
+		
+		pDriverStatus = (PDRIVER_STATUS_REQUEST)Irp->AssociatedIrp.SystemBuffer;
+		pDriverStatus->result = STATUS_SUCCESS;
+		pDriverStatus->driverInited = DRIVER_INITED;
+		pDriverStatus->bbInited = BB_INITED;
 		break;
 	}	
 	Irp->IoStatus.Status = STATUS_SUCCESS;
@@ -118,30 +160,62 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 
 NTSTATUS KeReadVirtualMemory(PEPROCESS Process, DWORD64 SourceAddress, DWORD64 TargetAddress, SIZE_T Size, PSIZE_T ReadedBytes)
 {
-	return MmCopyVirtualMemory(Process, (PVOID64)SourceAddress, PEPROTECTED_PROCESS, (PVOID64)TargetAddress, Size, KernelMode, ReadedBytes);
+	return memcopy(
+		Process, (PVOID64)SourceAddress, 
+		PEPROTECTED_PROCESS, 
+		(PVOID64)TargetAddress, Size, 
+		KernelMode, 
+		ReadedBytes);
+	//memcpy_s((PVOID64)TargetAddress, Size, (PVOID64)SourceAddress, Size);
+	return STATUS_SUCCESS;
 }
 
 NTSTATUS KeWriteVirtualMemory(PEPROCESS Process, DWORD64 SourceAddress, DWORD64 TargetAddress, SIZE_T Size, PSIZE_T WritedBytes)
 {
-	return MmCopyVirtualMemory(PEPROTECTED_PROCESS, (PVOID64)TargetAddress, Process, (PVOID64)SourceAddress, Size, KernelMode, WritedBytes);
+	return memcopy(
+		PEPROTECTED_PROCESS, 
+		(PVOID64)TargetAddress, 
+		Process, 
+		(PVOID64)SourceAddress, 
+		Size, 
+		KernelMode, 
+		WritedBytes);
+	memcpy_s((PVOID64)SourceAddress, Size, (PVOID64)TargetAddress, Size);
+	return STATUS_SUCCESS;
 }
 
 NTSTATUS KeReadVirtualMemory32(PEPROCESS Process, DWORD32 SourceAddress, DWORD64 TargetAddress, SIZE_T Size, PSIZE_T ReadedBytes)
 {
-	return MmCopyVirtualMemory(Process, (PVOID)SourceAddress, PEPROTECTED_PROCESS, (PVOID64)TargetAddress, Size, KernelMode, ReadedBytes);
+	return memcopy(
+		Process,
+		(PVOID)SourceAddress,
+		PEPROTECTED_PROCESS, 
+		(PVOID64)TargetAddress,
+		Size, 
+		KernelMode,
+		ReadedBytes);
+	memcpy_s((PVOID64)TargetAddress, Size, (PVOID)SourceAddress, Size);
+	return STATUS_SUCCESS;
 }
 
 NTSTATUS KeWriteVirtualMemory32(PEPROCESS Process, DWORD32 SourceAddress, DWORD64 TargetAddress, SIZE_T Size, PSIZE_T WritedBytes)
 {
-	return MmCopyVirtualMemory(PEPROTECTED_PROCESS, (PVOID64)TargetAddress, Process, (PVOID)SourceAddress, Size, KernelMode, WritedBytes);
+	return memcopy(
+		PEPROTECTED_PROCESS,
+		(PVOID64)TargetAddress,
+		Process,
+		(PVOID)SourceAddress, 
+		Size, 
+		KernelMode, 
+		WritedBytes);
+	memcpy_s((PVOID)SourceAddress, Size, (PVOID64)TargetAddress, Size);
+	return STATUS_SUCCESS;
 }
 
 
 void InitCheatData(PIRP Irp)
 {
-#ifndef DBG
-	VMProtectBeginUltra("InitCheatData");
-#endif
+	VM_START("#InitCheatData");
 	PKERNEL_INIT_DATA_REQUEST pInitData;
 	pInitData = (PKERNEL_INIT_DATA_REQUEST)Irp->AssociatedIrp.SystemBuffer;
 	if(!DRIVER_INITED)
@@ -151,23 +225,33 @@ void InitCheatData(PIRP Irp)
 
 		pInitData->Result = PsLookupProcessByProcessId(GAME_PROCESS, &PEGAME_PROCESS);
 		pInitData->Result |= PsLookupProcessByProcessId(PROTECTED_PROCESS, &PEPROTECTED_PROCESS);
+		pInitData->Result |= (memcopy == NULL ? 1 : 0);
 		DRIVER_INITED = NT_SUCCESS(pInitData->Result);
+		if(DRIVER_INITED || BB_INITED)
+		{
+#ifndef DEBUG
+			//Protect cheat process
+			SET_PROC_PROTECTION prot;
+			prot.protection = Policy_Enable;
+			prot.dynamicCode = Policy_Enable;
+			prot.signature = Policy_Enable;
+			prot.pid = (ULONG)PROTECTED_PROCESS;
+			BBSetProtection(&prot);
+#endif
+			
+		}
 	}
 	else
 	{
 		pInitData->Result = STATUS_SUCCESS;
 	}
 
-#ifndef DBG
-	VMProtectEnd();
-#endif
+	VM_END;
 }
 
 void GetAllModules(PIRP Irp)
 {
-#ifndef DBG
-	VMProtectBeginUltra("GetAllModules");
-#endif
+	VM_START("#GetAllModules");
 	PKERNEL_GET_CSGO_MODULES pModules = (PKERNEL_GET_CSGO_MODULES)Irp->AssociatedIrp.SystemBuffer;
 	if (pModules != NULL)
 	{
@@ -181,7 +265,5 @@ void GetAllModules(PIRP Irp)
 			pModules->result = STATUS_SUCCESS;
 		}
 	}
-#ifndef DBG
-	VMProtectEnd();
-#endif
+	VM_END;
 }

@@ -2,8 +2,7 @@
 #include "Routines.h"
 #include "Loader.h"
 #include "Utils.h"
-#include <Ntstrsafe.h>
-
+#include <ntstrsafe.h>
 #define CALL_COMPLETE   0xC0371E7E
 
 typedef struct _INJECT_BUFFER

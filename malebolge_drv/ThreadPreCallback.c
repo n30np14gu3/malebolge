@@ -4,9 +4,7 @@
 
 OB_PREOP_CALLBACK_STATUS ThreadPreCallback(PVOID RegistrationContext, POB_PRE_OPERATION_INFORMATION OperationInformation)
 {
-#ifndef DEBUG
-	VMProtectBeginMutation("#ThreadPreCallback");
-#endif
+	VM_START("#ThreadPreCallback");
 	UNREFERENCED_PARAMETER(RegistrationContext);
 	if (OperationInformation->KernelHandle)
 		return OB_PREOP_SUCCESS;
@@ -27,9 +25,6 @@ OB_PREOP_CALLBACK_STATUS ThreadPreCallback(PVOID RegistrationContext, POB_PRE_OP
 			OperationInformation->Parameters->DuplicateHandleInformation.DesiredAccess = (SYNCHRONIZE | THREAD_QUERY_LIMITED_INFORMATION);
 		}
 	}
-
-#ifndef DEBUG
-	VMProtectEnd();
-#endif
+	VM_END;
 	return OB_PREOP_SUCCESS;
 }

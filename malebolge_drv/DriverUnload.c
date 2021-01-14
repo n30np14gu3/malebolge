@@ -8,10 +8,7 @@
 
 void UnloadDriver(PDRIVER_OBJECT pDriverObject)
 {
-#ifndef DEBUG
-	VMProtectBeginUltra("#UnloadDriver");
-#endif
-
+	VM_START("#UnloadDriver");
 	DisableBB();
 	BBUnhook();
 	
@@ -22,10 +19,7 @@ void UnloadDriver(PDRIVER_OBJECT pDriverObject)
 	IoDeleteDevice(pDriverObject->DeviceObject);
 
 	DPRINT("Driver unloaded!");
-	
-#ifndef DEBUG
-	VMProtectEnd();
-#endif
+	VM_END;
 }
 
 void DisableBB()
