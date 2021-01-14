@@ -88,11 +88,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="draw_utils.cpp" />
     <ClCompile Include="malebole_external.cpp" />
     <ClCompile Include="render.cpp" />
     <ClCompile Include="ring0\KernelInterface.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="draw_utils.h" />
     <ClInclude Include="render.h" />
     <ClInclude Include="ring0\driver_io.h" />
     <ClInclude Include="ring0\KernelInterface.h" />

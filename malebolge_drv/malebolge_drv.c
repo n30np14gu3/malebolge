@@ -74,6 +74,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath
 //#ifndef DEBUG
 //	pDriverObject->DriverExtension->AddDevice = theAddDeviceFunction;
 //#endif
+	
 	g_Driver = pDriverObject;
 	RtlSecureZeroMemory(&DeviceName, sizeof(DeviceName));
 	RtlInitUnicodeString(&DeviceName, DRIVER_NAME);

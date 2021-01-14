@@ -20,29 +20,13 @@ NTSTATUS KeWriteVirtualMemory32(PEPROCESS Process, DWORD32 SourceAddress, DWORD6
 void InitCheatData(PIRP Irp);
 void GetAllModules(PIRP Irp);
 
-typedef NTSTATUS(NTAPI* mmCpyVirtualMemoryFn)(
-	PEPROCESS FromProcess, 
-	PVOID FromAddress, 
-	PEPROCESS ToProcess, 
-	PVOID ToAddress, 
-	SIZE_T BufferSize, 
-	KPROCESSOR_MODE PreviousMode, 
-	PSIZE_T NumberOfBytesCopied
-	);
 
-mmCpyVirtualMemoryFn memcopy;
+
 
 NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 {
 	VM_START("#IoControl");
 	UNREFERENCED_PARAMETER(DeviceObject);
-	if(memcopy == NULL)
-	{
-		UNICODE_STRING sRoutineName;
-		RtlInitUnicodeString(&sRoutineName, MM_COPY_VIRTUAL_MEMORY);
-		memcopy = (mmCpyVirtualMemoryFn)MmGetSystemRoutineAddress(&sRoutineName);
-		RtlFreeUnicodeString(&sRoutineName);
-	}
 	ULONG bytesIO = 0;
 	PIO_STACK_LOCATION stack = IoGetCurrentIrpStackLocation(Irp);
 
@@ -160,7 +144,7 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 
 NTSTATUS KeReadVirtualMemory(PEPROCESS Process, DWORD64 SourceAddress, DWORD64 TargetAddress, SIZE_T Size, PSIZE_T ReadedBytes)
 {
-	return memcopy(
+	return MmCopyVirtualMemory(
 		Process, (PVOID64)SourceAddress, 
 		PEPROTECTED_PROCESS, 
 		(PVOID64)TargetAddress, Size, 
@@ -172,7 +156,7 @@ NTSTATUS KeReadVirtualMemory(PEPROCESS Process, DWORD64 SourceAddress, DWORD64 T
 
 NTSTATUS KeWriteVirtualMemory(PEPROCESS Process, DWORD64 SourceAddress, DWORD64 TargetAddress, SIZE_T Size, PSIZE_T WritedBytes)
 {
-	return memcopy(
+	return MmCopyVirtualMemory(
 		PEPROTECTED_PROCESS, 
 		(PVOID64)TargetAddress, 
 		Process, 
@@ -180,13 +164,13 @@ NTSTATUS KeWriteVirtualMemory(PEPROCESS Process, DWORD64 SourceAddress, DWORD64 
 		Size, 
 		KernelMode, 
 		WritedBytes);
-	memcpy_s((PVOID64)SourceAddress, Size, (PVOID64)TargetAddress, Size);
+	//memcpy_s((PVOID64)SourceAddress, Size, (PVOID64)TargetAddress, Size);
 	return STATUS_SUCCESS;
 }
 
 NTSTATUS KeReadVirtualMemory32(PEPROCESS Process, DWORD32 SourceAddress, DWORD64 TargetAddress, SIZE_T Size, PSIZE_T ReadedBytes)
 {
-	return memcopy(
+	return MmCopyVirtualMemory(
 		Process,
 		(PVOID)SourceAddress,
 		PEPROTECTED_PROCESS, 
@@ -194,13 +178,13 @@ NTSTATUS KeReadVirtualMemory32(PEPROCESS Process, DWORD32 SourceAddress, DWORD64
 		Size, 
 		KernelMode,
 		ReadedBytes);
-	memcpy_s((PVOID64)TargetAddress, Size, (PVOID)SourceAddress, Size);
+	//memcpy_s((PVOID64)TargetAddress, Size, (PVOID)SourceAddress, Size);
 	return STATUS_SUCCESS;
 }
 
 NTSTATUS KeWriteVirtualMemory32(PEPROCESS Process, DWORD32 SourceAddress, DWORD64 TargetAddress, SIZE_T Size, PSIZE_T WritedBytes)
 {
-	return memcopy(
+	return MmCopyVirtualMemory(
 		PEPROTECTED_PROCESS,
 		(PVOID64)TargetAddress,
 		Process,
@@ -208,7 +192,7 @@ NTSTATUS KeWriteVirtualMemory32(PEPROCESS Process, DWORD32 SourceAddress, DWORD6
 		Size, 
 		KernelMode, 
 		WritedBytes);
-	memcpy_s((PVOID)SourceAddress, Size, (PVOID64)TargetAddress, Size);
+	//memcpy_s((PVOID)SourceAddress, Size, (PVOID64)TargetAddress, Size);
 	return STATUS_SUCCESS;
 }
 
@@ -225,7 +209,6 @@ void InitCheatData(PIRP Irp)
 
 		pInitData->Result = PsLookupProcessByProcessId(GAME_PROCESS, &PEGAME_PROCESS);
 		pInitData->Result |= PsLookupProcessByProcessId(PROTECTED_PROCESS, &PEPROTECTED_PROCESS);
-		pInitData->Result |= (memcopy == NULL ? 1 : 0);
 		DRIVER_INITED = NT_SUCCESS(pInitData->Result);
 		if(DRIVER_INITED || BB_INITED)
 		{

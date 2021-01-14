@@ -6,6 +6,7 @@
       <Filter>ring0</Filter>
     </ClCompile>
     <ClCompile Include="render.cpp" />
+    <ClCompile Include="draw_utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="themida_sdk">
@@ -53,5 +54,6 @@
       <Filter>SDK</Filter>
     </ClInclude>
     <ClInclude Include="render.h" />
+    <ClInclude Include="draw_utils.h" />
   </ItemGroup>
 </Project>
