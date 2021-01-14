@@ -10,7 +10,6 @@
 
 draw_utils::draw_utils(HWND hWindow, RECT winRect)
 {
-	PROTECT_VM_START_HIGH;
 	m_dxDevice = nullptr;
 	m_dxFont = nullptr;
 
@@ -54,7 +53,6 @@ draw_utils::draw_utils(HWND hWindow, RECT winRect)
 		DEFAULT_PITCH | FF_DONTCARE,
 		"Arial",
 		&m_dxFont);
-	PROTECT_VM_END_HIGH;
 }
 
 bool draw_utils::w2s(const D3DXVECTOR3 world, D3DXVECTOR2& screen, const float flMatrix[4][4]) const
