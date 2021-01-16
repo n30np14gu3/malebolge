@@ -4,7 +4,7 @@
 #include "themida_sdk/Themida.h"
 #include "ring0/KernelInterface.h"
 #include "render.h"
-
+#include <iostream>
 FILE* CON_OUT;
 
 void CloseConsole()
@@ -29,6 +29,8 @@ int WinMain(
 	AllocConsole();
 
 	freopen_s(&CON_OUT, "CONOUT$", "w", stdout);
+
+
 	printf_s("[Malebolge] external Ring0 DLC!\n");
 	printf_s("[Malebolge] created by @shockbyte\n");
 	printf_s("[Malebolge] * DirectX ESP\n");

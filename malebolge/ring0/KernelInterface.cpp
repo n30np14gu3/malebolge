@@ -159,16 +159,6 @@ DWORD KernelInterface::GetErrorCode() const
 	return m_dwErrorCode;
 }
 
-void KernelInterface::EnableBB()
-{
-	if(!m_hDriver)
-		return;
-
-	BOOL result = FALSE;
-	DeviceIoControl(m_hDriver, IO_ENABLE_BB, &result, sizeof(result), &result, sizeof(result), nullptr, nullptr);
-}
-
-
 void KernelInterface::GetDriverStatus(bool& bbIsOn, bool& driverIsInited)
 {
 	if (!m_hDriver)

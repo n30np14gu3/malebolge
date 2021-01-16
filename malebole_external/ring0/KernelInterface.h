@@ -21,7 +21,6 @@ public:
 	bool IsAlive() const;
 	void WaitForProcessClose();
 	DWORD GetErrorCode() const;
-	void EnableBB();
 	void GetDriverStatus(bool& bbIsOn, bool& driverIsInited);
 	~KernelInterface();
 

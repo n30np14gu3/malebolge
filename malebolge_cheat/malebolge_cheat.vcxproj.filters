@@ -2,8 +2,11 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="malebolge_cheat.cpp" />
-    <ClCompile Include="Hooks\Hooks.cpp">
-      <Filter>Hooks</Filter>
+    <ClCompile Include="Hacks\ESP.cpp">
+      <Filter>Hacks</Filter>
+    </ClCompile>
+    <ClCompile Include="SDK\draw_utils.cpp">
+      <Filter>SDK</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -13,16 +16,18 @@
     <Filter Include="Hacks">
       <UniqueIdentifier>{eaf5d495-75be-40b1-874d-47b6d9ce6609}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Hooks">
-      <UniqueIdentifier>{0e0b8743-0021-4223-b2b9-89e1f66a8fc7}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Hooks\Hooks.h">
-      <Filter>Hooks</Filter>
-    </ClInclude>
-    <ClInclude Include="SDK\VMProtectSDK.h" />
     <ClInclude Include="SDK\global_defs.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\ESP.h">
+      <Filter>Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\lazy_importer.hpp">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\draw_utils.h">
       <Filter>SDK</Filter>
     </ClInclude>
   </ItemGroup>

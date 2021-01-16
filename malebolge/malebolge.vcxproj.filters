@@ -25,9 +25,6 @@
     <Filter Include="themida_sdk">
       <UniqueIdentifier>{ed10a574-22f4-47de-9300-327517654cb5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="nuklear">
-      <UniqueIdentifier>{f24403a9-c5a5-4b09-9706-e242252ad92f}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="malebolge.cpp" />

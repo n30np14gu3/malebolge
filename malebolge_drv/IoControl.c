@@ -1,7 +1,6 @@
 #include "globals.h"
 #include "functions.h"
 #include "blackbone/Routines.h"
-#include "DarkTools.h"
 #include "VMProtectDDK.h"
 
 NTSTATUS KeReadVirtualMemory(PEPROCESS Process, DWORD64 SourceAddress, DWORD64 TargetAddress, SIZE_T Size, PSIZE_T ReadedBytes);
@@ -10,22 +9,13 @@ NTSTATUS KeWriteVirtualMemory(PEPROCESS Process, DWORD64 SourceAddress, DWORD64 
 NTSTATUS KeReadVirtualMemory32(PEPROCESS Process, DWORD32 SourceAddress, DWORD64 TargetAddress, SIZE_T Size, PSIZE_T ReadedBytes);
 NTSTATUS KeWriteVirtualMemory32(PEPROCESS Process, DWORD32 SourceAddress, DWORD64 TargetAddress, SIZE_T Size, PSIZE_T WritedBytes);
 
-#ifndef DEBUG
 
-#define MM_COPY_VIRTUAL_MEMORY	VMProtectDecryptStringW(L"MmCopyVirtualMemory")
-
-#else
-#define MM_COPY_VIRTUAL_MEMORY	L"MmCopyVirtualMemory"
-#endif
 void InitCheatData(PIRP Irp);
 void GetAllModules(PIRP Irp);
 
 
-
-
 NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 {
-	VM_START("#IoControl");
 	UNREFERENCED_PARAMETER(DeviceObject);
 	ULONG bytesIO = 0;
 	PIO_STACK_LOCATION stack = IoGetCurrentIrpStackLocation(Irp);
@@ -39,23 +29,11 @@ NTSTATUS IoControl(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 	PDRIVER_STATUS_REQUEST pDriverStatus;
 	
 	SIZE_T rwBytes = 0;
-	VM_END;
 	switch(controlCode)
 	{
 	case IO_INIT_CHEAT_DATA:
 		InitCheatData(Irp);
 		bytesIO = sizeof(KERNEL_INIT_DATA_REQUEST);
-		break;
-
-	case IO_ENABLE_BB:
-		VM_START("#IO_ENABLE_BB");
-		if(!BB_INITED)
-		{
-			EnableBB();
-		}
-
-		*((PBOOLEAN)Irp->AssociatedIrp.SystemBuffer) = TRUE;
-		VM_END;
 		break;
 	case IO_READ_PROCESS_MEMORY:
 		if (!DRIVER_INITED)
@@ -150,8 +128,6 @@ NTSTATUS KeReadVirtualMemory(PEPROCESS Process, DWORD64 SourceAddress, DWORD64 T
 		(PVOID64)TargetAddress, Size, 
 		KernelMode, 
 		ReadedBytes);
-	//memcpy_s((PVOID64)TargetAddress, Size, (PVOID64)SourceAddress, Size);
-	return STATUS_SUCCESS;
 }
 
 NTSTATUS KeWriteVirtualMemory(PEPROCESS Process, DWORD64 SourceAddress, DWORD64 TargetAddress, SIZE_T Size, PSIZE_T WritedBytes)
@@ -164,8 +140,6 @@ NTSTATUS KeWriteVirtualMemory(PEPROCESS Process, DWORD64 SourceAddress, DWORD64 
 		Size, 
 		KernelMode, 
 		WritedBytes);
-	//memcpy_s((PVOID64)SourceAddress, Size, (PVOID64)TargetAddress, Size);
-	return STATUS_SUCCESS;
 }
 
 NTSTATUS KeReadVirtualMemory32(PEPROCESS Process, DWORD32 SourceAddress, DWORD64 TargetAddress, SIZE_T Size, PSIZE_T ReadedBytes)
@@ -178,8 +152,6 @@ NTSTATUS KeReadVirtualMemory32(PEPROCESS Process, DWORD32 SourceAddress, DWORD64
 		Size, 
 		KernelMode,
 		ReadedBytes);
-	//memcpy_s((PVOID64)TargetAddress, Size, (PVOID)SourceAddress, Size);
-	return STATUS_SUCCESS;
 }
 
 NTSTATUS KeWriteVirtualMemory32(PEPROCESS Process, DWORD32 SourceAddress, DWORD64 TargetAddress, SIZE_T Size, PSIZE_T WritedBytes)
@@ -192,8 +164,6 @@ NTSTATUS KeWriteVirtualMemory32(PEPROCESS Process, DWORD32 SourceAddress, DWORD6
 		Size, 
 		KernelMode, 
 		WritedBytes);
-	//memcpy_s((PVOID)SourceAddress, Size, (PVOID64)TargetAddress, Size);
-	return STATUS_SUCCESS;
 }
 
 
