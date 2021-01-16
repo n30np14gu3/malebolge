@@ -81,5 +81,14 @@
     <ClInclude Include="themida_sdk\SecureEngineCustomVMs_VC_inline.h">
       <Filter>themida_sdk</Filter>
     </ClInclude>
+    <ClInclude Include="themida_sdk\Themida.h">
+      <Filter>themida_sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\lazy_importer.hpp">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\XorStr.hpp">
+      <Filter>SDK</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,5 +1,6 @@
 #pragma once
 #include "driver_io.h"
+#include "../themida_sdk/Themida.h"
 
 struct CSGoModules
 {

@@ -4,8 +4,8 @@
 #define DRIVER_NAME_S				L"\\Device\\blm_drv"
 #define SYMBOL_NAME_S				L"\\DosDevices\\blm_drv"
 
-#define CLIENT_DLL_S	L"\\csgo\\bin\\client.dll"
-#define SERVER_DLL_S	L"\\csgo\\bin\\server.dll"
+#define CLIENT_DLL_S	L"\\Counter-Strike Global Offensive\\csgo\\bin\\client.dll"
+#define SERVER_DLL_S	L"\\Counter-Strike Global Offensive\\csgo\\bin\\server.dll"
 #define ENGINE_DLL_S	L"\\Counter-Strike Global Offensive\\bin\\engine.dll"
 
 #ifndef DEBUG
