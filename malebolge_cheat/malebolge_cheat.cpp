@@ -23,6 +23,8 @@ unsigned char CLIENT_DLL_S[] = { 0x63, 0x6D, 0x6B, 0x66, 0x6A, 0x71, 0x28, 0x63,
 
 unsigned char MASK[] = { 0x78, 0x79, 0x3D, 0x3C, 0x3B, 0x3A, 0x7E, 0x7F, 0x70, 0x71, 0x0A };
 
+D3DXCreateLineFn CreateLine;
+
 class SigScan
 {
 public:
@@ -101,6 +103,9 @@ BOOL APIENTRY DllEntryPoint(HMODULE _module, DWORD reason, LPVOID reserved)
     	//Hook present function
 		OriginalPresent = **reinterpret_cast<decltype(OriginalPresent)**>(presentAdr);
 		**reinterpret_cast<decltype(hkPresent)***>(presentAdr) = hkPresent;
+
+    	//Cache createLine function
+		CreateLine = LI_FN(D3DXCreateLine).in(LI_MODULE("d3dx9_43.dll").cached());
     }
 
     return TRUE;

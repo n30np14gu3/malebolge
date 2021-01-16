@@ -86,7 +86,7 @@ void draw_utils::line(const D3DXVECTOR2& from, const D3DXVECTOR2& to, float widt
 		return;
 
 	ID3DXLine* line;
-	LI_FN(D3DXCreateLine)(m_dxDevice, &line);
+	CreateLine(m_dxDevice, &line);
 	D3DXVECTOR2 linePos[] = { from , to };
 	line->SetWidth(width);
 	line->SetAntialias(true);
@@ -102,7 +102,7 @@ void draw_utils::box(FLOAT x, FLOAT y, FLOAT width, FLOAT height, FLOAT px, D3DC
 		return;
 
 	ID3DXLine* p_Line;
-	LI_FN(D3DXCreateLine)(m_dxDevice, &p_Line);
+	CreateLine(m_dxDevice, &p_Line);
 	D3DXVECTOR2 points[5];
 	points[0] = D3DXVECTOR2(x, y);
 	points[1] = D3DXVECTOR2(x + width, y);
@@ -131,7 +131,7 @@ void draw_utils::healthBox(
 	box(x, y, width, height, px, color);
 
 	ID3DXLine* p_LineHealth;
-	LI_FN(D3DXCreateLine)(m_dxDevice, &p_LineHealth);
+	CreateLine(m_dxDevice, &p_LineHealth);
 	const FLOAT healthHeight = height - (health * height / 100);
 	D3DXVECTOR2 linePos[] = { D3DXVECTOR2(x - 2.f, y + height), D3DXVECTOR2(x - 2.f, y + healthHeight) };
 	p_LineHealth->SetWidth(1.f);
