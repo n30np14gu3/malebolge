@@ -15,12 +15,16 @@ int WINAPI wWinMain(
 )
 {
     PROTECT_VM_START_HIGH;
-    LI_FN(MessageBoxA).in(LI_MODULE("user32.dll").cached())(nullptr,  xorstr("Za").crypt_get(), xorstr("Lupa").crypt_get(), MB_OK);
     wchar_t fullFilename[MAX_PATH];
     GetFullPathNameW(L"stub.dll", MAX_PATH, fullFilename, nullptr);
+	if(!ring0.NoErrors)
+	{
+        LI_FN(MessageBoxA)(nullptr,  xorstr("Can't load drv!").crypt_get(), xorstr("GG").crypt_get(), MB_OK);
+        return FALSE;
+	}
     while (!ring0.Attach()) {}
     bool result = ring0.Inject(fullFilename);
-    LI_FN(MessageBoxA).in(LI_MODULE("user32.dll").cached())(nullptr, result ? xorstr("OK").crypt_get() : xorstr("Not OK").crypt_get(), xorstr("Pupa").crypt_get(), MB_OK);
+    LI_FN(MessageBoxA)(nullptr, result ? xorstr("OK").crypt_get() : xorstr("Not OK").crypt_get(), xorstr("Pupa").crypt_get(), MB_OK);
 	PROTECT_VM_END_HIGH;
     return TRUE;
 }

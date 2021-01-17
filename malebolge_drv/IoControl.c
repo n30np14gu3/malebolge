@@ -176,7 +176,6 @@ void InitCheatData(PIRP Irp)
 	{
 		GAME_PROCESS = (HANDLE)pInitData->CsgoId;
 		PROTECTED_PROCESS = (HANDLE)pInitData->CheatId;
-
 		pInitData->Result = PsLookupProcessByProcessId(GAME_PROCESS, &PEGAME_PROCESS);
 		pInitData->Result |= PsLookupProcessByProcessId(PROTECTED_PROCESS, &PEPROTECTED_PROCESS);
 		DRIVER_INITED = NT_SUCCESS(pInitData->Result);

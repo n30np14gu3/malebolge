@@ -46,8 +46,8 @@ bool KernelInterface::Inject(const wchar_t* szDll) const
 	if(hNtdll == nullptr)
 		return false;
 
-	pRtlDosPathNameToNtPathName_U pFunc = reinterpret_cast<pRtlDosPathNameToNtPathName_U>(LI_FN(GetProcAddress).cached()(hNtdll, xorstr(S_RtlDosPathNameToNtPathName_U).crypt_get()));
-	pRtlFreeUnicodeString pFreeFunc = reinterpret_cast<pRtlFreeUnicodeString>(LI_FN(GetProcAddress).cached()(hNtdll, xorstr(S_RtlFreeUnicodeString).crypt_get()));
+	pRtlDosPathNameToNtPathName_U pFunc = reinterpret_cast<pRtlDosPathNameToNtPathName_U>(LI_FN(GetProcAddress)(hNtdll, xorstr(S_RtlDosPathNameToNtPathName_U).crypt_get()));
+	pRtlFreeUnicodeString pFreeFunc = reinterpret_cast<pRtlFreeUnicodeString>(LI_FN(GetProcAddress)(hNtdll, xorstr(S_RtlFreeUnicodeString).crypt_get()));
 	
 	if(pFunc == nullptr || pFreeFunc == nullptr)
 		return false;
@@ -75,15 +75,13 @@ bool KernelInterface::Inject(const wchar_t* szDll) const
 		return false;
 
 	memset(&data, 0, sizeof(data));
-
 	PROTECT_VM_END_HIGH;
 	return true;
 }
 
 bool KernelInterface::Attach(bool update)
 {
-	PROTECT_VM_START_HIGH;
-	HANDLE hSnapshot = LI_FN(CreateToolhelp32Snapshot).cached()(TH32CS_SNAPPROCESS, NULL);
+	HANDLE hSnapshot = LI_FN(CreateToolhelp32Snapshot)(TH32CS_SNAPPROCESS, NULL);
 	PROCESSENTRY32 entry;
 	entry.dwSize = sizeof(entry);
 	do
@@ -91,12 +89,13 @@ bool KernelInterface::Attach(bool update)
 			m_dwProcessId = entry.th32ProcessID;
 			m_hProcess = LI_FN(OpenProcess)(SYNCHRONIZE, false, m_dwProcessId);
 			LI_FN(CloseHandle)(hSnapshot);
+			break;
 		}
 	while (LI_FN(Process32Next)(hSnapshot, &entry));
 	if (m_dwProcessId == 0)
 		return false;
 
-	KERNEL_INIT_DATA_REQUEST req{ m_dwProcessId, LI_FN(GetCurrentProcessId).cached()() -1 };
+	KERNEL_INIT_DATA_REQUEST req{ m_dwProcessId, LI_FN(GetCurrentProcessId).cached()(), -1 };
 
 	if (m_hDriver == INVALID_HANDLE_VALUE)
 		return false;
@@ -115,7 +114,6 @@ bool KernelInterface::Attach(bool update)
 		NoErrors = false;
 		return false;
 	}
-	PROTECT_VM_END_HIGH;
 	return true;
 }
 
