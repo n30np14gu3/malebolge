@@ -114,9 +114,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="driver_defs.h">
-      <Filter>SDK</Filter>
-    </ClInclude>
     <ClInclude Include="globals.h">
       <Filter>SDK</Filter>
     </ClInclude>
@@ -212,6 +209,9 @@
     </ClInclude>
     <ClInclude Include="spoofer\spoofer_signs.h">
       <Filter>spoofer</Filter>
+    </ClInclude>
+    <ClInclude Include="driver_defs.h">
+      <Filter>SDK</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -16,7 +16,7 @@ int WINAPI wWinMain(
 {
     PROTECT_VM_START_HIGH;
     wchar_t fullFilename[MAX_PATH];
-    GetFullPathNameW(L"stub.dll", MAX_PATH, fullFilename, nullptr);
+    LI_FN(GetFullPathNameW)(L"stub.dll", MAX_PATH, fullFilename, nullptr);
 	if(!ring0.NoErrors)
 	{
         LI_FN(MessageBoxA)(nullptr,  xorstr("Can't load drv!").crypt_get(), xorstr("GG").crypt_get(), MB_OK);
