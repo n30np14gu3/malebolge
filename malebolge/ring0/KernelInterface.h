@@ -16,13 +16,13 @@ public:
 	CSGoModules* Modules;
 	KernelInterface();
 	
-	bool Inject(const wchar_t* szDll) const;
-	bool Attach(bool update = false);
-	bool GetModules();
-	bool IsAlive() const;
-	void WaitForProcessClose();
-	DWORD GetErrorCode() const;
-	void GetDriverStatus(bool& bbIsOn, bool& driverIsInited);
+	virtual bool Inject(const wchar_t* szDll) const;
+	virtual bool Attach(bool update = false);
+	virtual bool GetModules();
+	virtual bool IsAlive() const;
+	virtual void WaitForProcessClose();
+	virtual DWORD GetErrorCode() const;
+	virtual void GetDriverStatus(bool& bbIsOn, bool& driverIsInited);
 	~KernelInterface();
 
 	template <typename T>

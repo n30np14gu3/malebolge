@@ -5,7 +5,9 @@
 #include "ring0/KernelInterface.h"
 #include "render.h"
 #include <iostream>
+
 FILE* CON_OUT;
+KernelInterface ring0;
 
 void CloseConsole()
 {
@@ -13,6 +15,12 @@ void CloseConsole()
 	fclose(CON_OUT);
 	FreeConsole();
 	PostMessage(GetConsoleWindow(), WM_CLOSE, 0, 0);
+}
+
+void CsExit()
+{
+	ring0.WaitForProcessClose();
+	ExitProcess(0);
 }
 
 int WinMain(
@@ -24,13 +32,12 @@ int WinMain(
 {
 
 	
-	KernelInterface ring0;
+
 	PROTECT_VM_START_HIGH;
 	AllocConsole();
 
 	freopen_s(&CON_OUT, "CONOUT$", "w", stdout);
-
-
+	
 	printf_s("[Malebolge] external Ring0 DLC!\n");
 	printf_s("[Malebolge] created by @shockbyte\n");
 	printf_s("[Malebolge] * DirectX ESP\n");
@@ -46,6 +53,7 @@ int WinMain(
 	while(!ring0.GetModules()) { }
 	printf_s("[Malebolge] Ez! Let's go to CS:GO!");
 	CloseConsole();
+	CreateThread(nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(CsExit), nullptr, 0, nullptr);
 	PROTECT_VM_END_HIGH;
 	StartRender(&ring0, hInstance, hPrevInstance, lpCmdLine, nShowCmd);
 	return 0;

@@ -6,12 +6,13 @@
 #include "../SDK/globals.h"
 #include "../SDK/lazy_importer.hpp"
 #include "../SDK/XorStr.hpp"
+
 typedef BOOLEAN (WINAPI* pRtlDosPathNameToNtPathName_U)(PCWSTR DosFileName, PUNICODE_STRING NtFileName, PWSTR* FilePart, PVOID RelativeName);
 typedef void(WINAPI* pRtlFreeUnicodeString)(PUNICODE_STRING UnicodeString);
 
 KernelInterface::KernelInterface()
 {
-	PROTECT_VM_START_LOW;
+	PROTECT_VM_START_HIGH;
 	m_hDriver = LI_FN(CreateFileA)(xorstr(DRIVER_NAME).crypt_get(),
 		GENERIC_READ | GENERIC_WRITE,
 		FILE_SHARE_READ | FILE_SHARE_WRITE,
@@ -29,7 +30,7 @@ KernelInterface::KernelInterface()
 		m_dwErrorCode = LI_FN(GetLastError).cached()();
 		return;
 	}
-	PROTECT_VM_END_LOW;
+	PROTECT_VM_END_HIGH;
 	NoErrors = true;
 }
 
@@ -119,7 +120,7 @@ bool KernelInterface::Attach(bool update)
 
 bool KernelInterface::GetModules()
 {
-	PROTECT_VM_START_HIGH;
+	PROTECT_MUTATE_START;
 	NoErrors = false;
 
 	if (m_hDriver == INVALID_HANDLE_VALUE)
@@ -137,7 +138,7 @@ bool KernelInterface::GetModules()
 	Modules->bServer = req.bServer;
 	Modules->bClient = req.bClient;
 	Modules->bEngine = req.bEngine;
-	PROTECT_VM_END_HIGH;
+	PROTECT_MUTATE_END;
 	return true;
 }
 

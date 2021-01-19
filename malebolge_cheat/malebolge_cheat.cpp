@@ -7,6 +7,7 @@
 #include "SDK/draw_utils.h"
 #include "SDK/lazy_importer.hpp"
 #include "SDK/global_defs.h"
+#include "SDK/xorstr.hpp"
 
 #include "Hacks/ESP.h"
 
@@ -16,12 +17,6 @@ presentFn OriginalPresent;
 
 RECT DESKTOP_RECT;
 DWORD CLIENT_DLL;
-
-unsigned char GAMEOVERLAY_DLL[] = { 0x67, 0x60, 0x6F, 0x66, 0x6B, 0x73, 0x63, 0x75, 0x64, 0x68, 0x73, 0x79, 0x69, 0x63, 0x6A, 0x6A, 0x62, 0x74, 0x60, 0x3D, 0x70, 0x79, 0x7A, 0x17 };
-
-unsigned char CLIENT_DLL_S[] = { 0x63, 0x6D, 0x6B, 0x66, 0x6A, 0x71, 0x28, 0x63, 0x64, 0x65, 0x0A };
-
-unsigned char MASK[] = { 0x78, 0x79, 0x3D, 0x3C, 0x3B, 0x3A, 0x7E, 0x7F, 0x70, 0x71, 0x0A };
 
 D3DXCreateLineFn CreateLine;
 
@@ -81,30 +76,23 @@ BOOL APIENTRY DllEntryPoint(HMODULE _module, DWORD reason, LPVOID reserved)
 		SigScan scanner;
 
 		//Get present function
-		decrypt(GAMEOVERLAY_DLL, sizeof(GAMEOVERLAY_DLL));
-		decrypt(CLIENT_DLL_S, sizeof(CLIENT_DLL_S));
-		decrypt(MASK, sizeof(MASK));
-    	DWORD presentAdr = scanner.FindPattern(reinterpret_cast<const char*>(GAMEOVERLAY_DLL), "\xFF\x15\x00\x00\x00\x00\x8B\xF8\x85\xDB", reinterpret_cast<const char*>(MASK));
+    	DWORD presentAdr = scanner.FindPattern(xorstr("gameoverlayrenderer.dll").crypt_get(), "\xFF\x15\x00\x00\x00\x00\x8B\xF8\x85\xDB", xorstr("xx????xxxx").crypt_get());
 		if (!presentAdr)
 			return TRUE;
 		presentAdr += 2;
 
 		//get client.dll
-		CLIENT_DLL = reinterpret_cast<DWORD>(LI_FN(GetModuleHandleA)(reinterpret_cast<const char*>(CLIENT_DLL_S)));
+		CLIENT_DLL = reinterpret_cast<DWORD>(LI_FN(GetModuleHandleA)(xorstr("client.dll").crypt_get()));
 
     	//Get desktop rect!
 		HWND dDesktop = LI_FN(GetDesktopWindow)();
 		LI_FN(GetWindowRect)(dDesktop, &DESKTOP_RECT);
-
-		memset(GAMEOVERLAY_DLL, 0, sizeof(GAMEOVERLAY_DLL));
-		memset(CLIENT_DLL_S, 0, sizeof(CLIENT_DLL_S));
-		memset(MASK, 0, sizeof(MASK));
     	
     	//Hook present function
 		OriginalPresent = **reinterpret_cast<decltype(OriginalPresent)**>(presentAdr);
 		**reinterpret_cast<decltype(hkPresent)***>(presentAdr) = hkPresent;
 
-    	//Cache createLine function
+    	//Cache createLine function (velosiped xD)
 		CreateLine = LI_FN(D3DXCreateLine).in(LI_MODULE("d3dx9_43.dll").cached());
     }
 

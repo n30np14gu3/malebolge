@@ -16,12 +16,6 @@
 extern RECT DESKTOP_RECT;
 extern DWORD CLIENT_DLL;
 
-__forceinline void decrypt(unsigned char* str, size_t str_len)
-{
-	for (size_t i = 0; i < str_len; i++)
-		str[i] = static_cast<unsigned char>(str[i] ^ i);
-}
-
 typedef HRESULT (WINAPI* D3DXCreateLineFn)(LPDIRECT3DDEVICE9   pDevice,LPD3DXLINE* ppLine);
 
 extern D3DXCreateLineFn CreateLine;

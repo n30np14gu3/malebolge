@@ -690,13 +690,4 @@ namespace li {
 
     }
 } // namespace li::detail
-
-
-#ifdef _DEBUG
-#undef  LI_FN
-#define LI_FN
-#endif
-
 #endif // include guard
-
-

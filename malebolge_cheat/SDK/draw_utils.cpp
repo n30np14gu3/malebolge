@@ -8,8 +8,7 @@
 #include "lazy_importer.hpp"
 #include "draw_utils.h"
 #include "global_defs.h"
-
-unsigned char ARIAL_S[] = { 0x41, 0x73, 0x6B, 0x62, 0x68, 0x05 };
+#include "xorstr.hpp"
 
 namespace draw_utils
 {
@@ -31,7 +30,6 @@ void draw_utils::init_draw_utils(IDirect3DDevice9* device, RECT winRect)
 	m_iHeight = m_rDesktop.bottom - m_rDesktop.top;
 	m_iWidth = m_rDesktop.right - m_rDesktop.left;
 
-	decrypt(ARIAL_S, sizeof(ARIAL_S));
 	LI_FN(D3DXCreateFontA)(
 		m_dxDevice,
 		16,
@@ -43,9 +41,8 @@ void draw_utils::init_draw_utils(IDirect3DDevice9* device, RECT winRect)
 		OUT_DEFAULT_PRECIS,
 		DEFAULT_QUALITY,
 		DEFAULT_PITCH | FF_DONTCARE,
-		reinterpret_cast<const char*>(ARIAL_S),
+		xorstr("Arial").crypt_get(),
 		&m_dxFont);
-	memset(ARIAL_S, 0, sizeof(ARIAL_S));
 }
 
 

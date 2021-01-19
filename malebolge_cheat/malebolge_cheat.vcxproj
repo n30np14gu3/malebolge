@@ -120,6 +120,7 @@
     <ClInclude Include="SDK\draw_utils.h" />
     <ClInclude Include="SDK\global_defs.h" />
     <ClInclude Include="SDK\lazy_importer.hpp" />
+    <ClInclude Include="SDK\xorstr.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -30,5 +30,8 @@
     <ClInclude Include="SDK\draw_utils.h">
       <Filter>SDK</Filter>
     </ClInclude>
+    <ClInclude Include="SDK\xorstr.hpp">
+      <Filter>SDK</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
