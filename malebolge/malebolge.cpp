@@ -42,7 +42,7 @@ int WINAPI wWinMain(
 	PROTECT_VM_END_LOW;
 	
 	KernelInterface ring0;
-	
+
 	PROTECT_VM_START_HIGH;
 	printf_s(xorstr("[Malebolge] checking driver...\n").crypt_get());
 	if (!ring0.NoErrors)

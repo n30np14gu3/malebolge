@@ -78,10 +78,10 @@ bool Menu::SetupWindow()
 	};
 	LI_FN(RegisterClassExA)(&wc);
 	m_hWindow = LI_FN(CreateWindowExA)(
-		0,
+		WS_EX_TRANSPARENT,
 		wc.lpszClassName,
 		m_szTitle,
-		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
+		WS_POPUP,
 		100,
 		100,
 		m_iWidth,
@@ -128,8 +128,7 @@ void Menu::Render()
 	MSG msg;
 	ZeroMemory(&msg, sizeof(msg));
 	bool opened = true;
-	DWORD dwFlag =
-		ImGuiWindowFlags_NoTitleBar |
+	DWORD dwFlag = 
 		ImGuiWindowFlags_NoResize |
 		ImGuiWindowFlags_NoSavedSettings |
 		ImGuiWindowFlags_NoMove |
@@ -139,6 +138,9 @@ void Menu::Render()
 
 	char buff[256] = { 0 };
 
+	int offset_x = 0;
+	int offset_y = 0;
+	
 	while (msg.message != WM_QUIT)
 	{
 		if (LI_FN(PeekMessageA).cached()(&msg, nullptr, 0U, 0U, PM_REMOVE))
@@ -152,10 +154,31 @@ void Menu::Render()
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 
-		ImGui::Begin(xorstr("gg").crypt_get(), &opened, dwFlag);
+
+		if (ImGui::IsMouseClicked(0))
 		{
-			ImGui::SetWindowSize(ImVec2(static_cast<float>(m_iWidth), static_cast<float>(m_iHeight)));
-			ImGui::SetWindowPos(ImVec2(0, 0));
+			POINT point;
+			RECT rect;
+
+			GetCursorPos(&point);
+			GetWindowRect(m_hWindow, &rect);
+
+			offset_x = point.x - rect.left;
+			offset_y = point.y - rect.top;
+		}
+		
+		ImGui::SetNextWindowPos(ImVec2{ 0, 0 }, ImGuiCond_Always);
+		ImGui::Begin(m_szTitle, &opened, dwFlag);
+		{
+			if (ImGui::IsMouseDragging(ImGuiMouseButton_Left) && ImGui::IsItemActive())
+			{
+				POINT point;
+
+				GetCursorPos(&point);
+
+				SetWindowPos(m_hWindow, nullptr, point.x - offset_x, point.y - offset_y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+			}
+			
 			ImGui::InputText(xorstr("Secret path xD").crypt_get(), &buff[0], 256);
 			if (ImGui::Button(xorstr("SUCK DICKS").crypt_get(), ImVec2((FLOAT)m_iWidth - 30, 50)))
 			{
