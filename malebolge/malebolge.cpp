@@ -59,7 +59,8 @@ int WINAPI wWinMain(
 	CloseConsole();
 	PROTECT_VM_END_HIGH;
 
-	window_title = std::string(xorstr("[Malebolge project]").crypt_get());
+	//window_title = std::string(xorstr("[Malebolge project]").crypt_get());
+	window_title = std::string(xorstr(__TIME__).crypt_get());
 	Menu menu(window_title.c_str(), &ring0);
 	
 	PROTECT_VM_START_HIGH;
