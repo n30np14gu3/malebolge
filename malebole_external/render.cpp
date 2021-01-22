@@ -19,20 +19,15 @@
 #include <iostream>
 #include <random>
 
+#include "SDK/lazy_importer.hpp"
+#include "SDK/XorStr.hpp"
+
 #include "themida_sdk/Themida.h"
 #include "ring0/KernelInterface.h"
 #include "render.h"
 #include "draw_utils.h"
+#include "SDK/globals.h"
 
-#define dwLocalPlayer	0xD8B2AC
-#define dwEntityList	0x4DA2E74
-#define mViewMatrix		0x4D94774
-#define m_vecOrigin		0x138
-#define m_iHealth		0x100
-#define m_bDormant		0xED
-#define m_iTeamNum		0xF4
-#define	m_BoneMatrix	0x26A8
-#define m_aimPunchAngle 0x302C
 
 using namespace std;
 
@@ -174,15 +169,15 @@ void StartRender(
 )
 {
 	PROTECT_VM_START_HIGH;
-	HWND desktop = GetDesktopWindow();
+	HWND desktop = LI_FN(GetDesktopWindow)();
 	if (desktop != nullptr)
 	{
-		GetWindowRect(desktop, &DESKTOP_RECT);
+		LI_FN(GetWindowRect)(desktop, &DESKTOP_RECT);
 		SCREEN_WIDTH = DESKTOP_RECT.right - DESKTOP_RECT.left;
 		SCREEN_HEIGHT = DESKTOP_RECT.bottom - DESKTOP_RECT.top;
 	}
 	else
-		ExitProcess(0);
+		LI_FN(ExitProcess)(0);
 
 	WNDCLASSEX wc;
 	ZeroMemory(&wc, sizeof(WNDCLASSEX));
@@ -197,26 +192,23 @@ void StartRender(
 
 	RegisterClassEx(&wc);
 
-	OVERLAY_WINDOW = CreateWindowEx(0, " ", "", WS_EX_TOPMOST | WS_POPUP, DESKTOP_RECT.left, DESKTOP_RECT.top, SCREEN_WIDTH, SCREEN_HEIGHT, nullptr, nullptr, hInstance, nullptr);
+	OVERLAY_WINDOW = LI_FN(CreateWindowExA)(0, " ", "", WS_EX_TOPMOST | WS_POPUP, DESKTOP_RECT.left, DESKTOP_RECT.top, SCREEN_WIDTH, SCREEN_HEIGHT, nullptr, nullptr, hInstance, nullptr);
 	SetWindowLong(OVERLAY_WINDOW, GWL_EXSTYLE, GetWindowLong(OVERLAY_WINDOW, GWL_EXSTYLE) | WS_EX_LAYERED | WS_EX_TRANSPARENT);
-	SetLayeredWindowAttributes(OVERLAY_WINDOW, RGB(0, 0, 0), 0, ULW_COLORKEY);
-	SetLayeredWindowAttributes(OVERLAY_WINDOW, 0, 255, LWA_ALPHA);
-	ShowWindow(OVERLAY_WINDOW, nShowCmd);
-	SetWindowDisplayAffinity(OVERLAY_WINDOW, WDA_MONITOR);
-	SetWindowPos(OVERLAY_WINDOW, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+	LI_FN(SetLayeredWindowAttributes)(OVERLAY_WINDOW, RGB(0, 0, 0), 0, ULW_COLORKEY);
+	LI_FN(SetLayeredWindowAttributes)(OVERLAY_WINDOW, 0, 255, LWA_ALPHA);
+	LI_FN(ShowWindow)(OVERLAY_WINDOW, nShowCmd);
+	LI_FN(SetWindowDisplayAffinity)(OVERLAY_WINDOW, WDA_MONITOR);
+	LI_FN(SetWindowPos)(OVERLAY_WINDOW, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+	PROTECT_VM_END_HIGH;
 	MSG msg;
 	draw_utils render(OVERLAY_WINDOW, DESKTOP_RECT);
-	PROTECT_VM_END_HIGH;
 	while (TRUE)
 	{
-
-
-		render.render((void*)ring0);
-
-		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+		while (LI_FN(PeekMessageA).cached()(&msg, nullptr, 0, 0, PM_REMOVE))
 		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			LI_FN(TranslateMessage).cached()(&msg);
+			LI_FN(DispatchMessageA).cached()(&msg);
 		}
+		render.render(static_cast<void*>(ring0));
 	}
 }

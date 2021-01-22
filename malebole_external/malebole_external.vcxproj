@@ -47,7 +47,7 @@
     <LinkIncremental>true</LinkIncremental>
     <LibraryPath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x64;$(SolutionDir)themida_sdk;$(LibraryPath)</LibraryPath>
     <IncludePath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;$(IncludePath)</IncludePath>
-    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\external</OutDir>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -103,6 +103,8 @@
     <ClInclude Include="ring0\driver_io.h" />
     <ClInclude Include="ring0\KernelInterface.h" />
     <ClInclude Include="SDK\globals.h" />
+    <ClInclude Include="SDK\lazy_importer.hpp" />
+    <ClInclude Include="SDK\XorStr.hpp" />
     <ClInclude Include="themida_sdk\SecureEngineCustomVMs.h" />
     <ClInclude Include="themida_sdk\SecureEngineCustomVMs_BorlandC_inline.h" />
     <ClInclude Include="themida_sdk\SecureEngineCustomVMs_GNU_inline.h" />

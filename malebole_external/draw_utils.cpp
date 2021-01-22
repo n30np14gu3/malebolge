@@ -7,9 +7,20 @@
 #include <string>
 #include "draw_utils.h"
 #include "themida_sdk/Themida.h"
+#include "SDK/lazy_importer.hpp"
+#include "SDK/XorStr.hpp"
+
+
+typedef HRESULT (WINAPI* D3DXCreateLineFn)(LPDIRECT3DDEVICE9   pDevice, LPD3DXLINE* ppLine);
+D3DXCreateLineFn createLine;
+D3DPRESENT_PARAMETERS d3dpp;
 
 draw_utils::draw_utils(HWND hWindow, RECT winRect)
 {
+	LI_FN(LoadLibraryA)(xorstr("d3d9.dll").crypt_get());
+	LI_FN(LoadLibraryA)(xorstr("d3dx9_43.dll").crypt_get());
+	createLine = LI_FN(D3DXCreateLine).get();
+	
 	m_dxDevice = nullptr;
 	m_dxFont = nullptr;
 
@@ -19,9 +30,7 @@ draw_utils::draw_utils(HWND hWindow, RECT winRect)
 	m_iHeight = m_rDesktop.bottom - m_rDesktop.top;
 	m_iWidth = m_rDesktop.right - m_rDesktop.left;
 
-	LPDIRECT3D9 d3d = Direct3DCreate9(D3D_SDK_VERSION);
-	D3DPRESENT_PARAMETERS d3dpp;
-
+	LPDIRECT3D9 d3d = LI_FN(Direct3DCreate9)(D3D_SDK_VERSION);
 	ZeroMemory(&d3dpp, sizeof(D3DPRESENT_PARAMETERS));
 	d3dpp.Windowed = TRUE;
 	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
@@ -40,7 +49,7 @@ draw_utils::draw_utils(HWND hWindow, RECT winRect)
 		&d3dpp,
 		&m_dxDevice);
 
-	D3DXCreateFont(
+	LI_FN(D3DXCreateFontA)(
 		m_dxDevice,
 		16,
 		0,
@@ -51,7 +60,7 @@ draw_utils::draw_utils(HWND hWindow, RECT winRect)
 		OUT_DEFAULT_PRECIS,
 		DEFAULT_QUALITY,
 		DEFAULT_PITCH | FF_DONTCARE,
-		"Arial",
+		xorstr("Arial").crypt_get(),
 		&m_dxFont);
 }
 
@@ -91,7 +100,7 @@ void draw_utils::line(const D3DXVECTOR2& from, const D3DXVECTOR2& to, float widt
 		return;
 
 	ID3DXLine* line;
-	D3DXCreateLine(m_dxDevice, &line);
+	createLine(m_dxDevice, &line);
 	D3DXVECTOR2 linePos[] = { from , to };
 	line->SetWidth(width);
 	line->SetAntialias(true);
@@ -107,7 +116,7 @@ void draw_utils::box(FLOAT x, FLOAT y, FLOAT width, FLOAT height, FLOAT px, D3DC
 		return;
 
 	ID3DXLine* p_Line;
-	D3DXCreateLine(m_dxDevice, &p_Line);
+	createLine(m_dxDevice, &p_Line);
 	D3DXVECTOR2 points[5];
 	points[0] = D3DXVECTOR2(x, y);
 	points[1] = D3DXVECTOR2(x + width, y);
@@ -136,7 +145,7 @@ void draw_utils::healthBox(
 	box(x, y, width, height, px, color);
 
 	ID3DXLine* p_LineHealth;
-	D3DXCreateLine(m_dxDevice, &p_LineHealth);
+	createLine(m_dxDevice, &p_LineHealth);
 	const FLOAT healthHeight = height - (health * height / 100);
 	D3DXVECTOR2 linePos[] = { D3DXVECTOR2(x - 2.f, y + height), D3DXVECTOR2(x - 2.f, y + healthHeight) };
 	p_LineHealth->SetWidth(1.f);
@@ -170,11 +179,16 @@ void draw_utils::crosshair(DWORD size, D3DXVECTOR2 position, D3DCOLOR color) con
 
 void draw_utils::render(void* ptr)
 {
-	m_dxDevice->Clear(0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB(0, 0, 0, 0), 1, 0);
+	m_dxDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
+	m_dxDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+	m_dxDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
+	m_dxDevice->Clear(0, nullptr, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_ARGB(0, 0, 0, 0), 1, 0);
 	m_dxDevice->BeginScene();
 
 	hackProc(ptr);
 
 	m_dxDevice->EndScene();
-	m_dxDevice->Present(nullptr, nullptr, nullptr, nullptr);
+	HRESULT result = m_dxDevice->Present(nullptr, nullptr, nullptr, nullptr);
+	if (result == D3DERR_DEVICELOST && m_dxDevice->TestCooperativeLevel() == D3DERR_DEVICENOTRESET)
+		m_dxDevice->Reset(&d3dpp);
 }

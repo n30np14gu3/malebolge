@@ -55,5 +55,11 @@
     </ClInclude>
     <ClInclude Include="render.h" />
     <ClInclude Include="draw_utils.h" />
+    <ClInclude Include="SDK\lazy_importer.hpp">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\XorStr.hpp">
+      <Filter>SDK</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -4,29 +4,23 @@
 /**
  * \brief Driver device Name
  */
-#define DRIVER_NAME						"\\\\.\\fjaivnj"
+#define DRIVER_NAME						"\\\\.\\Nduu"
 
 /**
 * \brief Game for hacking
 */
 #define GAME_NAME						"csgo.exe"
 
-//------------------------------------------------------------------//
-//------------------------------------------------------------------//
 
 
-//Dll's & functions
-/**
-* \brief RtlDosPathNameToNtPathName_U
-*/
-#define S_RtlDosPathNameToNtPathName_U	"RtlDosPathNameToNtPathName_U"
+//Offsets
+extern DWORD32 dwLocalPlayer;
+extern DWORD32 dwEntityList;
+extern DWORD32 mViewMatrix;
 
-/**
-* \brief RtlFreeUnicodeString
-*/
-#define S_RtlFreeUnicodeString			"RtlFreeUnicodeString"
-
-/**
- * \brief ntdll.dll
- */
-#define S_ntdll							"ntdll.dll" 
+extern DWORD32 m_vecOrigin;
+extern DWORD32 m_iHealth;
+extern DWORD32 m_bDormant;
+extern DWORD32 m_iTeamNum;
+extern DWORD32 m_BoneMatrix;
+extern DWORD32 m_aimPunchAngle;

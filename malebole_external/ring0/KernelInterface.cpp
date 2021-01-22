@@ -2,9 +2,10 @@
 #include <SubAuth.h>
 #include <TlHelp32.h>
 #include <comdef.h>
-#include "KernelInterface.h"
 #include "../SDK/globals.h"
+#include "../SDK/XorStr.hpp"
 #include "../themida_sdk/Themida.h"
+#include "KernelInterface.h"
 
 typedef BOOLEAN (WINAPI* pRtlDosPathNameToNtPathName_U)(PCWSTR DosFileName, PUNICODE_STRING NtFileName, PWSTR* FilePart, PVOID RelativeName);
 typedef void(WINAPI* pRtlFreeUnicodeString)(PUNICODE_STRING UnicodeString);
@@ -12,7 +13,7 @@ typedef void(WINAPI* pRtlFreeUnicodeString)(PUNICODE_STRING UnicodeString);
 KernelInterface::KernelInterface()
 {
 	PROTECT_VM_START_HIGH;
-	m_hDriver = CreateFile(DRIVER_NAME,
+	m_hDriver = LI_FN(CreateFileA)(xorstr(DRIVER_NAME).crypt_get(),
 		GENERIC_READ | GENERIC_WRITE,
 		FILE_SHARE_READ | FILE_SHARE_WRITE,
 		nullptr,
@@ -26,43 +27,38 @@ KernelInterface::KernelInterface()
 	Modules = new CSGoModules();
 	if (m_hDriver == INVALID_HANDLE_VALUE)
 	{
-		m_dwErrorCode = GetLastError();
+		m_dwErrorCode = LI_FN(GetLastError)();
 		return;
 	}
 	NoErrors = true;
 	PROTECT_VM_END_HIGH;
 }
 
-bool KernelInterface::Inject(const wchar_t* szDll) const
-{
-	//Nope in external soft
-	return true;
-}
 
 bool KernelInterface::Attach(bool update)
 {
-	HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
+	HANDLE hSnapshot = LI_FN(CreateToolhelp32Snapshot).cached()(TH32CS_SNAPPROCESS, NULL);
 	PROCESSENTRY32 entry;
 	entry.dwSize = sizeof(entry);
 	do
-		if (!strcmp(_bstr_t(entry.szExeFile), GAME_NAME)) {
+		if (!strcmp(_bstr_t(entry.szExeFile), xorstr(GAME_NAME).crypt_get())) {
 			m_dwProcessId = entry.th32ProcessID;
-			m_hProcess = OpenProcess(SYNCHRONIZE, false, m_dwProcessId);
-			CloseHandle(hSnapshot);
+			m_hProcess = LI_FN(OpenProcess).cached()(SYNCHRONIZE, false, m_dwProcessId);
+			LI_FN(CloseHandle).cached()(hSnapshot);
 		}
-	while (Process32Next(hSnapshot, &entry));
+	while (LI_FN(Process32Next).cached()(hSnapshot, &entry));
 	if (m_dwProcessId == 0)
 		return false;
 
-	KERNEL_INIT_DATA_REQUEST req{ m_dwProcessId, GetCurrentProcessId(), -1 };
+	KERNEL_INIT_DATA_REQUEST req{ m_dwProcessId, LI_FN(GetCurrentProcessId).cached()(), -1 };
 
 	if (m_hDriver == INVALID_HANDLE_VALUE)
 		return false;
 
-	const BOOL result = DeviceIoControl(m_hDriver, IO_INIT_CHEAT_DATA, &req, sizeof(req), &req, sizeof(req), nullptr, nullptr);
+	const BOOL result = LI_FN(DeviceIoControl).cached()(m_hDriver, IO_INIT_CHEAT_DATA, &req, sizeof(req), &req, sizeof(req), nullptr, nullptr);
 	if (!result)
 	{
-		m_dwErrorCode = GetLastError();
+		m_dwErrorCode = LI_FN(GetLastError).cached()();
 		NoErrors = false;
 		return false;
 	}
@@ -86,7 +82,7 @@ bool KernelInterface::GetModules()
 
 
 	KERNEL_GET_CSGO_MODULES req{ 0, 0, 0, -1 };
-	BOOL result = DeviceIoControl(m_hDriver, IO_GET_ALL_MODULES, &req, sizeof(req), &req, sizeof(req), nullptr, nullptr);
+	BOOL result = LI_FN(DeviceIoControl).cached()(m_hDriver, IO_GET_ALL_MODULES, &req, sizeof(req), &req, sizeof(req), nullptr, nullptr);
 	if (!result)
 		return false;
 
@@ -105,14 +101,14 @@ bool KernelInterface::IsAlive() const
 		return false;
 
 	DRIVER_ALIVE_REQUEST req{ -1 };
-	DeviceIoControl(m_hDriver, IO_DRIVER_ALIVE, &req, sizeof(req), &req, sizeof(req), nullptr, nullptr);
+	LI_FN(DeviceIoControl).cached()(m_hDriver, IO_DRIVER_ALIVE, &req, sizeof(req), &req, sizeof(req), nullptr, nullptr);
 	return !req.status;
 }
 
 KernelInterface::~KernelInterface()
 {
-	CloseHandle(m_hDriver);
-	CloseHandle(m_hProcess);
+	LI_FN(CloseHandle).cached()(m_hDriver);
+	LI_FN(CloseHandle).cached()(m_hProcess);
 	delete Modules;
 }
 
@@ -126,7 +122,7 @@ void KernelInterface::GetDriverStatus(bool& bbIsOn, bool& driverIsInited)
 	if (!m_hDriver)
 		return;
 	DRIVER_STATUS_REQUEST req{ -1 };
-	if(!DeviceIoControl(m_hDriver, IO_GET_DRIVER_STATUS, &req, sizeof(req), &req, sizeof(req), nullptr, nullptr))
+	if(!LI_FN(DeviceIoControl).cached()(m_hDriver, IO_GET_DRIVER_STATUS, &req, sizeof(req), &req, sizeof(req), nullptr, nullptr))
 		return;
 
 	bbIsOn = req.bbInited;
@@ -136,5 +132,5 @@ void KernelInterface::GetDriverStatus(bool& bbIsOn, bool& driverIsInited)
 
 void KernelInterface::WaitForProcessClose()
 {
-	WaitForSingleObjectEx(m_hProcess, INFINITE, TRUE);
+	LI_FN(WaitForSingleObjectEx).cached()(m_hProcess, INFINITE, TRUE);
 }

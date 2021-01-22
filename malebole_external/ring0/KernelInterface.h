@@ -1,4 +1,5 @@
 #pragma once
+#include "../SDK/lazy_importer.hpp"
 #include "driver_io.h"
 
 struct CSGoModules
@@ -14,15 +15,13 @@ public:
 	BOOLEAN NoErrors;
 	CSGoModules* Modules;
 	KernelInterface();
-	
-	bool Inject(const wchar_t* szDll) const;
-	bool Attach(bool update = false);
-	bool GetModules();
-	bool IsAlive() const;
-	void WaitForProcessClose();
-	DWORD GetErrorCode() const;
-	void GetDriverStatus(bool& bbIsOn, bool& driverIsInited);
-	~KernelInterface();
+	virtual bool Attach(bool update = false);
+	virtual bool GetModules();
+	virtual bool IsAlive() const;
+	virtual void WaitForProcessClose();
+	virtual DWORD GetErrorCode() const;
+	virtual void GetDriverStatus(bool& bbIsOn, bool& driverIsInited);
+	virtual ~KernelInterface();
 
 	template <typename T>
 	_inline void Read(DWORD64 address, T* result)
@@ -38,10 +37,10 @@ public:
 		req.Response = (DWORD64)result;
 		req.Result = -1;
 
-		BOOL rsp = DeviceIoControl(m_hDriver, IO_READ_PROCESS_MEMORY, &req, sizeof(req), &req, sizeof(req), nullptr, nullptr);
+		BOOL rsp = LI_FN(DeviceIoControl).cached()(m_hDriver, IO_READ_PROCESS_MEMORY, &req, sizeof(req), &req, sizeof(req), nullptr, nullptr);
 		if (!rsp)
 		{
-			m_dwErrorCode = GetLastError();
+			m_dwErrorCode = LI_FN(GetLastError).cached()();
 		}
 		else
 		{
@@ -68,10 +67,10 @@ public:
 		req.Response = (DWORD64)result;
 		req.Result = -1;
 
-		BOOL rsp = DeviceIoControl(m_hDriver, IO_READ_PROCESS_MEMORY_32, &req, sizeof(req), &req, sizeof(req), nullptr, nullptr);
+		BOOL rsp = LI_FN(DeviceIoControl).cached()(m_hDriver, IO_READ_PROCESS_MEMORY_32, &req, sizeof(req), &req, sizeof(req), nullptr, nullptr);
 		if (!rsp)
 		{
-			m_dwErrorCode = GetLastError();
+			m_dwErrorCode = LI_FN(GetLastError).cached()();
 		}
 		else
 		{
@@ -99,10 +98,10 @@ public:
 		req.Value = (DWORD64)val;
 		req.Result = -1;
 
-		BOOL rsp = DeviceIoControl(m_hDriver, IO_WRITE_PROCESS_MEMORY, &req, sizeof(req), &req, sizeof(req), nullptr, nullptr);
+		BOOL rsp = LI_FN(DeviceIoControl).cached()(m_hDriver, IO_WRITE_PROCESS_MEMORY, &req, sizeof(req), &req, sizeof(req), nullptr, nullptr);
 		if (!rsp)
 		{
-			m_dwErrorCode = GetLastError();
+			m_dwErrorCode = LI_FN(GetLastError).cached()();
 		}
 		else
 		{
@@ -129,10 +128,10 @@ public:
 		req.Value = (DWORD64)val;
 		req.Result = -1;
 
-		BOOL rsp = DeviceIoControl(m_hDriver, IO_WRITE_PROCESS_MEMORY_32, &req, sizeof(req), &req, sizeof(req), nullptr, nullptr);
+		BOOL rsp = LI_FN(DeviceIoControl).cached()(m_hDriver, IO_WRITE_PROCESS_MEMORY_32, &req, sizeof(req), &req, sizeof(req), nullptr, nullptr);
 		if (!rsp)
 		{
-			m_dwErrorCode = GetLastError();
+			m_dwErrorCode = LI_FN(GetLastError).cached()();
 		}
 		else
 		{
