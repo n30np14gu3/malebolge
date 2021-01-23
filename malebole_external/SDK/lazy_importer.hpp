@@ -698,5 +698,3 @@ namespace li {
 //#endif
 
 #endif // include guard
-
-

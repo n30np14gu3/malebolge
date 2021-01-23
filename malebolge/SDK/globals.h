@@ -29,4 +29,4 @@
 /**
  * \brief ntdll.dll
  */
-#define S_ntdll							"ntdll.dll" 
+#define S_ntdll							"ntdll.dll"
