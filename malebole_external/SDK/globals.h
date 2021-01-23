@@ -4,7 +4,7 @@
 /**
  * \brief Driver device Name
  */
-#define DRIVER_NAME						"\\\\.\\f4574fvd56"
+#define DRIVER_NAME						"\\\\.\\rr290vjxp"
 
 /**
 * \brief Game for hacking

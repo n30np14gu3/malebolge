@@ -99,6 +99,8 @@ float viewMatrix[4][4];
 
 void draw_utils::hackProc(void* ptr)
 {
+	draw_utils::line(D3DXVECTOR2(0, 0), D3DXVECTOR2(150, 150), 1, D3DCOLOR_ARGB(255, 255, 0, 0));
+	return;
 	KernelInterface* ring0 = static_cast<KernelInterface*>(ptr);
 
 	ring0->Read32(ring0->Modules->bClient + dwLocalPlayer, &pLocal);
@@ -158,17 +160,14 @@ void draw_utils::hackProc(void* ptr)
 void StartRender(
 	const char* windowName,
 	KernelInterface* ring0,
-	HINSTANCE hInstance,
-	HINSTANCE hPrevInstance,
-	LPSTR     lpCmdLine,
-	int       nShowCmd
+	HINSTANCE hInstance
 )
 {
 	VM_START("StartRender");
-	HWND desktop = LI_FN(GetDesktopWindow)();
+	HWND desktop = GetDesktopWindow();
 	if (desktop != nullptr)
 	{
-		LI_FN(GetWindowRect)(desktop, &DESKTOP_RECT);
+		GetWindowRect(desktop, &DESKTOP_RECT);
 		SCREEN_WIDTH = DESKTOP_RECT.right - DESKTOP_RECT.left;
 		SCREEN_HEIGHT = DESKTOP_RECT.bottom - DESKTOP_RECT.top;
 	}
@@ -191,23 +190,24 @@ void StartRender(
 
 	RegisterClassEx(&wc);
 
-	OVERLAY_WINDOW = LI_FN(CreateWindowExA)(0, windowName, windowName, WS_EX_TOPMOST | WS_POPUP, DESKTOP_RECT.left, DESKTOP_RECT.top, SCREEN_WIDTH, SCREEN_HEIGHT, nullptr, nullptr, hInstance, nullptr);
-	LI_FN(SetWindowLong)(OVERLAY_WINDOW, GWL_EXSTYLE, GetWindowLong(OVERLAY_WINDOW, GWL_EXSTYLE) | WS_EX_LAYERED | WS_EX_TRANSPARENT);
-	LI_FN(SetLayeredWindowAttributes)(OVERLAY_WINDOW, RGB(0, 0, 0), 0, ULW_COLORKEY);
-	LI_FN(SetLayeredWindowAttributes)(OVERLAY_WINDOW, 0, 255, LWA_ALPHA);
-	LI_FN(ShowWindow)(OVERLAY_WINDOW, nShowCmd);
-	LI_FN(SetWindowDisplayAffinity)(OVERLAY_WINDOW, WDA_MONITOR);
-	LI_FN(SetWindowPos)(OVERLAY_WINDOW, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+	OVERLAY_WINDOW = CreateWindowExA(0, windowName, windowName, WS_EX_TOPMOST | WS_POPUP, DESKTOP_RECT.left, DESKTOP_RECT.top, SCREEN_WIDTH, SCREEN_HEIGHT, nullptr, nullptr, hInstance, nullptr);
+	SetWindowLong(OVERLAY_WINDOW, GWL_EXSTYLE, GetWindowLong(OVERLAY_WINDOW, GWL_EXSTYLE) | WS_EX_LAYERED | WS_EX_TRANSPARENT);
+	SetLayeredWindowAttributes(OVERLAY_WINDOW, RGB(0, 0, 0), 0, ULW_COLORKEY);
+	SetLayeredWindowAttributes(OVERLAY_WINDOW, 0, 255, LWA_ALPHA);
+	ShowWindow(OVERLAY_WINDOW, SW_SHOWDEFAULT);
+	SetWindowDisplayAffinity(OVERLAY_WINDOW, WDA_MONITOR);
+	LI_FN(SetWindowPos).cached()(OVERLAY_WINDOW, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 	VM_END;
 	MSG msg;
-	draw_utils render(OVERLAY_WINDOW, DESKTOP_RECT);
+	draw_utils::init_utils(OVERLAY_WINDOW, DESKTOP_RECT);
+
 	while (TRUE)
 	{
+		draw_utils::render(static_cast<void*>(ring0));
 		while (LI_FN(PeekMessageA).cached()(&msg, nullptr, 0, 0, 1))
 		{
 			LI_FN(TranslateMessage).cached()(&msg);
 			LI_FN(DispatchMessageA).cached()(&msg);
 		}
-		render.render(static_cast<void*>(ring0));
 	}
 }

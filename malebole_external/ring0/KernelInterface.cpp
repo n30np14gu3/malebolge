@@ -13,7 +13,7 @@ typedef void(WINAPI* pRtlFreeUnicodeString)(PUNICODE_STRING UnicodeString);
 KernelInterface::KernelInterface()
 {
 	VM_START("KernelInterface::KernelInterface");
-	m_hDriver = LI_FN(CreateFileA)(xorstr(DRIVER_NAME).crypt_get(),
+	m_hDriver = CreateFileA(xorstr(DRIVER_NAME).crypt_get(),
 		GENERIC_READ | GENERIC_WRITE,
 		FILE_SHARE_READ | FILE_SHARE_WRITE,
 		nullptr,
@@ -27,7 +27,7 @@ KernelInterface::KernelInterface()
 	Modules = new CSGoModules();
 	if (m_hDriver == INVALID_HANDLE_VALUE)
 	{
-		m_dwErrorCode = LI_FN(GetLastError)();
+		m_dwErrorCode = GetLastError();
 		return;
 	}
 	NoErrors = true;
