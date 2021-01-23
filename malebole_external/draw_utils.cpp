@@ -6,12 +6,11 @@
 #include <d3dx9.h>
 #include <string>
 #include "draw_utils.h"
-#include "themida_sdk/Themida.h"
 #include "SDK/lazy_importer.hpp"
 #include "SDK/XorStr.hpp"
 
 
-typedef HRESULT (WINAPI* D3DXCreateLineFn)(LPDIRECT3DDEVICE9   pDevice, LPD3DXLINE* ppLine);
+typedef HRESULT(WINAPI* D3DXCreateLineFn)(LPDIRECT3DDEVICE9   pDevice, LPD3DXLINE* ppLine);
 D3DXCreateLineFn createLine;
 D3DPRESENT_PARAMETERS d3dpp;
 
@@ -20,7 +19,7 @@ draw_utils::draw_utils(HWND hWindow, RECT winRect)
 	LI_FN(LoadLibraryA)(xorstr("d3d9.dll").crypt_get());
 	LI_FN(LoadLibraryA)(xorstr("d3dx9_43.dll").crypt_get());
 	createLine = LI_FN(D3DXCreateLine).get();
-	
+
 	m_dxDevice = nullptr;
 	m_dxFont = nullptr;
 

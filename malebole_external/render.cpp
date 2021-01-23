@@ -22,7 +22,7 @@
 #include "SDK/lazy_importer.hpp"
 #include "SDK/XorStr.hpp"
 
-#include "themida_sdk/Themida.h"
+#include "SDK/VmpSdk.h"
 #include "ring0/KernelInterface.h"
 #include "render.h"
 #include "draw_utils.h"
@@ -66,14 +66,9 @@ LRESULT CALLBACK WinProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case WM_DESTROY:
-		PostQuitMessage(0);
-		TerminateProcess(GetCurrentProcess(), 0);
-		return 0;
-
 	case WM_CLOSE:
 		PostQuitMessage(0);
-		TerminateProcess(GetCurrentProcess(), 0);
-		return 0;
+		ExitProcess(0);
 
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
@@ -161,6 +156,7 @@ void draw_utils::hackProc(void* ptr)
 }
 
 void StartRender(
+	const char* windowName,
 	KernelInterface* ring0,
 	HINSTANCE hInstance,
 	HINSTANCE hPrevInstance,
@@ -168,7 +164,7 @@ void StartRender(
 	int       nShowCmd
 )
 {
-	PROTECT_VM_START_HIGH;
+	VM_START("StartRender");
 	HWND desktop = LI_FN(GetDesktopWindow)();
 	if (desktop != nullptr)
 	{
@@ -177,7 +173,10 @@ void StartRender(
 		SCREEN_HEIGHT = DESKTOP_RECT.bottom - DESKTOP_RECT.top;
 	}
 	else
+	{
+		LI_FN(MessageBoxA)(nullptr, xorstr("Can't find desktop!").crypt_get(), xorstr("ERROR").crypt_get(), MB_OK);
 		LI_FN(ExitProcess)(0);
+	}
 
 	WNDCLASSEX wc;
 	ZeroMemory(&wc, sizeof(WNDCLASSEX));
@@ -188,23 +187,23 @@ void StartRender(
 	wc.hInstance = hInstance;
 	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
 	wc.hbrBackground = HBRUSH(RGB(0, 0, 0));
-	wc.lpszClassName = " ";
+	wc.lpszClassName = windowName;
 
 	RegisterClassEx(&wc);
 
-	OVERLAY_WINDOW = LI_FN(CreateWindowExA)(0, " ", "", WS_EX_TOPMOST | WS_POPUP, DESKTOP_RECT.left, DESKTOP_RECT.top, SCREEN_WIDTH, SCREEN_HEIGHT, nullptr, nullptr, hInstance, nullptr);
-	SetWindowLong(OVERLAY_WINDOW, GWL_EXSTYLE, GetWindowLong(OVERLAY_WINDOW, GWL_EXSTYLE) | WS_EX_LAYERED | WS_EX_TRANSPARENT);
+	OVERLAY_WINDOW = LI_FN(CreateWindowExA)(0, windowName, windowName, WS_EX_TOPMOST | WS_POPUP, DESKTOP_RECT.left, DESKTOP_RECT.top, SCREEN_WIDTH, SCREEN_HEIGHT, nullptr, nullptr, hInstance, nullptr);
+	LI_FN(SetWindowLong)(OVERLAY_WINDOW, GWL_EXSTYLE, GetWindowLong(OVERLAY_WINDOW, GWL_EXSTYLE) | WS_EX_LAYERED | WS_EX_TRANSPARENT);
 	LI_FN(SetLayeredWindowAttributes)(OVERLAY_WINDOW, RGB(0, 0, 0), 0, ULW_COLORKEY);
 	LI_FN(SetLayeredWindowAttributes)(OVERLAY_WINDOW, 0, 255, LWA_ALPHA);
 	LI_FN(ShowWindow)(OVERLAY_WINDOW, nShowCmd);
 	LI_FN(SetWindowDisplayAffinity)(OVERLAY_WINDOW, WDA_MONITOR);
 	LI_FN(SetWindowPos)(OVERLAY_WINDOW, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-	PROTECT_VM_END_HIGH;
+	VM_END;
 	MSG msg;
 	draw_utils render(OVERLAY_WINDOW, DESKTOP_RECT);
 	while (TRUE)
 	{
-		while (LI_FN(PeekMessageA).cached()(&msg, nullptr, 0, 0, PM_REMOVE))
+		while (LI_FN(PeekMessageA).cached()(&msg, nullptr, 0, 0, 1))
 		{
 			LI_FN(TranslateMessage).cached()(&msg);
 			LI_FN(DispatchMessageA).cached()(&msg);

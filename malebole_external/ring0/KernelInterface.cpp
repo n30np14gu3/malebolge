@@ -4,7 +4,7 @@
 #include <comdef.h>
 #include "../SDK/globals.h"
 #include "../SDK/XorStr.hpp"
-#include "../themida_sdk/Themida.h"
+#include "../SDK/VmpSdk.h"
 #include "KernelInterface.h"
 
 typedef BOOLEAN (WINAPI* pRtlDosPathNameToNtPathName_U)(PCWSTR DosFileName, PUNICODE_STRING NtFileName, PWSTR* FilePart, PVOID RelativeName);
@@ -12,7 +12,7 @@ typedef void(WINAPI* pRtlFreeUnicodeString)(PUNICODE_STRING UnicodeString);
 
 KernelInterface::KernelInterface()
 {
-	PROTECT_VM_START_HIGH;
+	VM_START("KernelInterface::KernelInterface");
 	m_hDriver = LI_FN(CreateFileA)(xorstr(DRIVER_NAME).crypt_get(),
 		GENERIC_READ | GENERIC_WRITE,
 		FILE_SHARE_READ | FILE_SHARE_WRITE,
@@ -31,7 +31,7 @@ KernelInterface::KernelInterface()
 		return;
 	}
 	NoErrors = true;
-	PROTECT_VM_END_HIGH;
+	VM_END;
 }
 
 

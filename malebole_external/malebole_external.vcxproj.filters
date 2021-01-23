@@ -9,9 +9,6 @@
     <ClCompile Include="draw_utils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="themida_sdk">
-      <UniqueIdentifier>{929aa34e-0081-4fc9-bbaf-54f2a314eec9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ring0">
       <UniqueIdentifier>{4d626f37-1b71-48c1-aa9c-8362b3cd999c}</UniqueIdentifier>
     </Filter>
@@ -20,30 +17,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="themida_sdk\SecureEngineCustomVMs.h">
-      <Filter>themida_sdk</Filter>
-    </ClInclude>
-    <ClInclude Include="themida_sdk\SecureEngineCustomVMs_BorlandC_inline.h">
-      <Filter>themida_sdk</Filter>
-    </ClInclude>
-    <ClInclude Include="themida_sdk\SecureEngineCustomVMs_GNU_inline.h">
-      <Filter>themida_sdk</Filter>
-    </ClInclude>
-    <ClInclude Include="themida_sdk\SecureEngineCustomVMs_ICL_inline.h">
-      <Filter>themida_sdk</Filter>
-    </ClInclude>
-    <ClInclude Include="themida_sdk\SecureEngineCustomVMs_LCC_inline.h">
-      <Filter>themida_sdk</Filter>
-    </ClInclude>
-    <ClInclude Include="themida_sdk\SecureEngineCustomVMs_VC_inline.h">
-      <Filter>themida_sdk</Filter>
-    </ClInclude>
-    <ClInclude Include="themida_sdk\ThemidaSDK.h">
-      <Filter>themida_sdk</Filter>
-    </ClInclude>
-    <ClInclude Include="themida_sdk\Themida.h">
-      <Filter>themida_sdk</Filter>
-    </ClInclude>
     <ClInclude Include="ring0\driver_io.h">
       <Filter>ring0</Filter>
     </ClInclude>
@@ -59,6 +32,9 @@
       <Filter>SDK</Filter>
     </ClInclude>
     <ClInclude Include="SDK\XorStr.hpp">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="SDK\VmpSdk.h">
       <Filter>SDK</Filter>
     </ClInclude>
   </ItemGroup>
