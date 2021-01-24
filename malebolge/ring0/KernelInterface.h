@@ -23,7 +23,7 @@ public:
 	virtual void WaitForProcessClose();
 	virtual DWORD GetErrorCode() const;
 	virtual void GetDriverStatus(bool& bbIsOn, bool& driverIsInited);
-	~KernelInterface();
+	virtual ~KernelInterface();
 
 	template <typename T>
 	_inline void Read(DWORD64 address, T* result)

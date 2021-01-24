@@ -208,7 +208,6 @@ void Menu::Render()
 
 		HRESULT result = g_pd3dDevice->Present(nullptr, nullptr, nullptr, nullptr);
 
-		// Handle loss of D3D9 device
 		if (result == D3DERR_DEVICELOST && g_pd3dDevice->TestCooperativeLevel() == D3DERR_DEVICENOTRESET)
 			ResetDevice();
 	}
@@ -222,6 +221,11 @@ void Menu::Render()
 	LI_FN(UnregisterClassA)(wc.lpszClassName, wc.hInstance);
 	LI_FN(DeleteFileA)(xorstr("imgui.ini").crypt_get());
 	PROTECT_VM_END_LOW;
+}
+
+Menu::~Menu()
+{
+	CleanupDeviceD3D();
 }
 
 bool Menu::CreateD3D()
@@ -291,8 +295,16 @@ void ResetDevice()
 
 void CleanupDeviceD3D()
 {
-	if (g_pd3dDevice) { g_pd3dDevice->Release(); g_pd3dDevice = nullptr; }
-	if (g_pD3D) { g_pD3D->Release(); g_pD3D = nullptr; }
+	if (g_pd3dDevice)
+	{
+		g_pd3dDevice->Release();
+		g_pd3dDevice = nullptr;
+	}
+	if (g_pD3D)
+	{
+		g_pD3D->Release();
+		g_pD3D = nullptr;
+	}
 }
 
 #pragma endregion 

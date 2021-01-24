@@ -1,8 +1,8 @@
 #pragma once
 #define PROCESS_QUERY_LIMITED_INFORMATION      0x1000
 
-#define DRIVER_NAME_S				L"\\Device\\rr290vjxp"
-#define SYMBOL_NAME_S				L"\\DosDevices\\rr290vjxp"
+#define DRIVER_NAME_S				L"\\Device\\fgjvmeo24"
+#define SYMBOL_NAME_S				L"\\DosDevices\\fgjvmeo24"
 
 #define CLIENT_DLL_S	L"\\Counter-Strike Global Offensive\\csgo\\bin\\client.dll"
 #define SERVER_DLL_S	L"\\Counter-Strike Global Offensive\\csgo\\bin\\server.dll"

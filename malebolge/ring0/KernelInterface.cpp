@@ -43,7 +43,7 @@ bool KernelInterface::Inject(const wchar_t* szDll) const
 	DWORD bytes = 0;
 	INJECT_DLL data = { IT_MMap };
 	UNICODE_STRING ustr = { 0 };
-	HMODULE hNtdll = GetModuleHandle(xorstr(S_ntdll).crypt_get());
+	HMODULE hNtdll = LI_FN(GetModuleHandleA)(xorstr(S_ntdll).crypt_get());
 	if(hNtdll == nullptr)
 		return false;
 
@@ -88,11 +88,11 @@ bool KernelInterface::Attach(bool update)
 	do
 		if (!strcmp(_bstr_t(entry.szExeFile), xorstr(GAME_NAME).crypt_get())) {
 			m_dwProcessId = entry.th32ProcessID;
-			m_hProcess = LI_FN(OpenProcess)(SYNCHRONIZE, false, m_dwProcessId);
-			LI_FN(CloseHandle)(hSnapshot);
+			m_hProcess = LI_FN(OpenProcess).cached()(SYNCHRONIZE, false, m_dwProcessId);
+			LI_FN(CloseHandle).cached()(hSnapshot);
 			break;
 		}
-	while (LI_FN(Process32Next)(hSnapshot, &entry));
+	while (LI_FN(Process32Next).cached()(hSnapshot, &entry));
 	if (m_dwProcessId == 0)
 		return false;
 
@@ -154,8 +154,8 @@ bool KernelInterface::IsAlive() const
 
 KernelInterface::~KernelInterface()
 {
-	LI_FN(CloseHandle).cached()(m_hDriver);
-	LI_FN(CloseHandle).cached()(m_hProcess);
+	LI_FN(CloseHandle)(m_hDriver);
+	LI_FN(CloseHandle)(m_hProcess);
 	delete Modules;
 }
 

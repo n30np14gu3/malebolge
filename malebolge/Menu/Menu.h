@@ -6,6 +6,7 @@ public:
 	Menu(const char* title, void* ptr);
 	virtual bool SetupWindow();
 	virtual void Render();
+	virtual ~Menu();
 private:
 	virtual bool CreateD3D();
 	HWND m_hWindow;

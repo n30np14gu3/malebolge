@@ -13,7 +13,7 @@ namespace draw_utils
 	void render(void* ptr);
 	void hackProc(void* ptr);
 
-	extern LPDIRECT3DDEVICE9 m_dxDevice;
+	extern IDirect3DDevice9Ex* m_dxDevice;
 	extern LPD3DXFONT m_dxFont;
 	extern D3DPRESENT_PARAMETERS m_d3Params;
 	extern HWND m_hWindow;

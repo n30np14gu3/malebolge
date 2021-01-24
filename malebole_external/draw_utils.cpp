@@ -4,6 +4,8 @@
 
 #include <d3d9.h>
 #include <d3dx9.h>
+#include <d3dx9core.h>
+#include <d3dx9math.h>
 #include <string>
 #include "draw_utils.h"
 #include "SDK/lazy_importer.hpp"
@@ -15,7 +17,7 @@ typedef HRESULT(WINAPI* D3DXCreateLineFn)(LPDIRECT3DDEVICE9   pDevice, LPD3DXLIN
 
 namespace draw_utils
 {
-	LPDIRECT3DDEVICE9 m_dxDevice;
+	IDirect3DDevice9Ex* m_dxDevice;
 	LPD3DXFONT m_dxFont;
 	D3DPRESENT_PARAMETERS m_d3Params;
 	HWND m_hWindow;
@@ -38,30 +40,17 @@ void draw_utils::init_utils(HWND hWindow, RECT winRect)
 
 	m_d3Params = {};
 
-	LPDIRECT3D9 d3d = Direct3DCreate9(D3D_SDK_VERSION);
+	IDirect3D9Ex* d3d = nullptr;
+	Direct3DCreate9Ex(D3D_SDK_VERSION, &d3d);
 	ZeroMemory(&m_d3Params, sizeof(D3DPRESENT_PARAMETERS));
-	//m_d3Params.Windowed = TRUE;
-	//m_d3Params.SwapEffect = D3DSWAPEFFECT_DISCARD;
-	//m_d3Params.hDeviceWindow = m_hWindow;
-	//m_d3Params.BackBufferFormat = D3DFMT_A8R8G8B8;
-	//m_d3Params.BackBufferWidth = m_iWidth;
-	//m_d3Params.BackBufferHeight = m_iHeight;
-	//m_d3Params.EnableAutoDepthStencil = TRUE;
-	//m_d3Params.AutoDepthStencilFormat = D3DFMT_D16;
-	m_d3Params.BackBufferWidth = m_iWidth;
-	m_d3Params.BackBufferHeight = m_iHeight;
-	m_d3Params.BackBufferFormat = D3DFMT_A8R8G8B8; //32 bit format
-	m_d3Params.Windowed = true; //start windowed
-	m_d3Params.BackBufferCount = 1; //Double buffered. 
-	m_d3Params.MultiSampleType = D3DMULTISAMPLE_NONE; //No multisampling (way too intensive)
-	m_d3Params.MultiSampleQuality = 0;
+	
+	m_d3Params.Windowed = TRUE;
 	m_d3Params.SwapEffect = D3DSWAPEFFECT_DISCARD;
-	m_d3Params.hDeviceWindow = m_hWindow;
-	m_d3Params.Flags = 0;
-	m_d3Params.EnableAutoDepthStencil = true;
-	m_d3Params.AutoDepthStencilFormat = D3DFMT_D24S8;
-	m_d3Params.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
-	m_d3Params.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+	m_d3Params.BackBufferFormat = D3DFMT_A8R8G8B8;
+	m_d3Params.EnableAutoDepthStencil = TRUE;
+	m_d3Params.AutoDepthStencilFormat = D3DFMT_D16;
+	m_d3Params.PresentationInterval = 1;
+
 
 	int vp;
 	D3DCAPS9 devCaps;
@@ -71,12 +60,13 @@ void draw_utils::init_utils(HWND hWindow, RECT winRect)
 	else
 		vp = D3DCREATE_SOFTWARE_VERTEXPROCESSING;
 
-	d3d->CreateDevice(
+	d3d->CreateDeviceEx(
 		D3DADAPTER_DEFAULT,
 		D3DDEVTYPE_HAL,
 		m_hWindow,
 		vp,
 		&m_d3Params,
+		nullptr,
 		&m_dxDevice);
 
 	D3DXCreateFontA(
@@ -210,11 +200,18 @@ void draw_utils::crosshair(DWORD size, D3DXVECTOR2 position, D3DCOLOR color)
 
 void draw_utils::render(void* ptr)
 {
-	m_dxDevice->Clear(0, nullptr, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_ARGB(0, 0, 0, 0), 1, 0);
-	m_dxDevice->BeginScene();
+	m_dxDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
+	m_dxDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+	m_dxDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
+	m_dxDevice->Clear(0, nullptr, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_ARGB(0, 0, 0, 0), 1.0f, 0);
 
-	hackProc(ptr);
-
-	m_dxDevice->EndScene();
-	m_dxDevice->Present(nullptr, nullptr, nullptr, nullptr);
+	if (m_dxDevice->BeginScene() >= 0)
+	{
+		hackProc(ptr);
+		m_dxDevice->EndScene();
+	}
+	
+	HRESULT result  = m_dxDevice->Present(0, 0, 0, 0);
+	if (result == D3DERR_DEVICELOST && m_dxDevice->TestCooperativeLevel() == D3DERR_DEVICENOTRESET)
+		m_dxDevice->Reset(&m_d3Params);
 }

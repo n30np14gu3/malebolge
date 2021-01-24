@@ -74,42 +74,42 @@ int WinMain(
 	int       nShowCmd
 )
 {
-	goto menff;
-	//srand(GetTickCount());
-	//AllocConsole();
-	//std::string s = "";
-	//for (size_t i = 0; i < 15; i++)
-	//	s += ALPHABET[rand() % (sizeof(ALPHABET) - 1)];
-	//SetConsoleTitleA(s.c_str());
-	//freopen_s(&CON_OUT, xorstr("CONOUT$").crypt_get(), "w", stdout);
-	//printf_s(xorstr("PROJECT R3P [XooX]\n").crypt_get());
-	//printf_s(xorstr("[R3P] loading settings...\n").crypt_get());
-	//if (!load_offsets())
-	//{
-	//	printf_s(xorstr("[R3P] can't load settings check file!\nExit!\n").crypt_get());
-	//	CloseConsole();
-	//	return 0;
-	//}
+	VM_START("WinMain_1");
+	srand(GetTickCount());
+	AllocConsole();
+	std::string s = "";
+	for (size_t i = 0; i < 15; i++)
+		s += ALPHABET[rand() % (sizeof(ALPHABET) - 1)];
+	SetConsoleTitleA(s.c_str());
+	freopen_s(&CON_OUT, xorstr("CONOUT$").crypt_get(), "w", stdout);
+	printf_s(xorstr("PROJECT R3P [XooX]\n").crypt_get());
+	printf_s(xorstr("[R3P] loading settings...\n").crypt_get());
+	if (!load_offsets())
+	{
+		printf_s(xorstr("[R3P] can't load settings check file!\nExit!\n").crypt_get());
+		CloseConsole();
+		return 0;
+	}
 
-	//printf_s(xorstr("[R3P] loading driver...\n").crypt_get());
-
-	//printf_s(xorstr("[R3P] checking driver...\n").crypt_get());
-	//if (!ring0.NoErrors)
-	//{
-	//	printf_s(xorstr("[R3P] driver not loaded [%d]!\nExit!\n").crypt_get(), ring0.GetErrorCode());
-	//	CloseConsole();
-	//	return 0;
-	//}
-	//printf_s(xorstr("[R3P] Getting info...\n").crypt_get());
-	//while (!ring0.Attach()) {}
-	//while (!ring0.GetModules()) {}
-	//printf_s(xorstr("[R3P] Completed! Starting...").crypt_get());
-	//CloseConsole();
-menff:
-	//LI_FN(CreateThread)(nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(CsExit), nullptr, 0, nullptr);
+	printf_s(xorstr("[R3P] loading driver...\n").crypt_get());
+	VM_END;
+	
 	KernelInterface ring0;
 
-	//StartRender(s.c_str(), &ring0, hInstance);
-	StartRender("1337", &ring0, hInstance);
+	VM_START("WinMain_2");
+	printf_s(xorstr("[R3P] checking driver...\n").crypt_get());
+	if (!ring0.NoErrors)
+	{
+		printf_s(xorstr("[R3P] driver not loaded [%d]!\nExit!\n").crypt_get(), ring0.GetErrorCode());
+		CloseConsole();
+		return 0;
+	}
+	printf_s(xorstr("[R3P] Getting info...\n").crypt_get());
+	while (!ring0.Attach()) {}
+	while (!ring0.GetModules()) {}
+	printf_s(xorstr("[R3P] Completed! Starting...").crypt_get());
+	CloseConsole();
+	VM_END;
+	StartRender(s.c_str(), &ring0, hInstance);
 	return 0;
 }
