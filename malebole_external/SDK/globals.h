@@ -4,7 +4,7 @@
 /**
  * \brief Driver device Name
  */
-#define DRIVER_NAME						"\\\\.\\fgjvmeo24"
+#define DRIVER_NAME						"\\\\.\\pdcc"
 
 /**
 * \brief Game for hacking

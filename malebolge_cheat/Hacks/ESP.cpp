@@ -109,7 +109,7 @@ void render()
 
 	vecPunch = *reinterpret_cast<D3DXVECTOR3*>(pLocal + m_vecPunch);
 
-	draw_utils::crosshair(10,
+	draw_utils::crosshair(7,
 		D3DXVECTOR2(
 			static_cast<float>(draw_utils::m_iWidth) / 2.f - (static_cast<float>(draw_utils::m_iWidth) / 90 * vecPunch.y),
 			static_cast<float>(draw_utils::m_iHeight) / 2.f + (static_cast<float>(draw_utils::m_iHeight) / 90 * vecPunch.x)

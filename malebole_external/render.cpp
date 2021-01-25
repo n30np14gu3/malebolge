@@ -20,7 +20,6 @@
 #include <random>
 
 #include "SDK/lazy_importer.hpp"
-#include "SDK/XorStr.hpp"
 
 #include "SDK/VmpSdk.h"
 #include "ring0/KernelInterface.h"
@@ -110,7 +109,7 @@ void draw_utils::hackProc(void* ptr)
 		return;
 
 	ring0->Read32(pLocal + m_aimPunchAngle, &vecPunch);
-	crosshair(10,
+	crosshair(7,
 		D3DXVECTOR2(
 			static_cast<float>(m_iWidth) / 2.f - (static_cast<float>(m_iWidth) / 90 * vecPunch.y),
 			static_cast<float>(m_iHeight / 2.f) + (static_cast<float>(m_iHeight) / 90 * vecPunch.x)
@@ -170,7 +169,7 @@ void StartRender(
 	}
 	else
 	{
-		LI_FN(MessageBoxA)(nullptr, xorstr("Can't find desktop!").crypt_get(), xorstr("ERROR").crypt_get(), MB_OK);
+		LI_FN(MessageBoxA)(nullptr, ENCRYPT_STR("Can't find desktop!"), ENCRYPT_STR("ERROR"), MB_OK);
 		LI_FN(ExitProcess)(0);
 	}
 
@@ -186,7 +185,7 @@ void StartRender(
 
 	RegisterClassA(&wc);
 	
-	OVERLAY_WINDOW = LI_FN(CreateWindowExA)(0, windowName, windowName, WS_EX_TOPMOST | WS_POPUP, DESKTOP_RECT.left, DESKTOP_RECT.top, SCREEN_WIDTH, SCREEN_HEIGHT, nullptr, nullptr, hInstance, nullptr);
+	OVERLAY_WINDOW = LI_FN(CreateWindowExA).cached()(0, windowName, windowName, WS_EX_TOPMOST | WS_POPUP, DESKTOP_RECT.left, DESKTOP_RECT.top, SCREEN_WIDTH, SCREEN_HEIGHT, nullptr, nullptr, hInstance, nullptr);
 	LI_FN(SetWindowLongA)(OVERLAY_WINDOW, GWL_EXSTYLE, (int)GetWindowLong(OVERLAY_WINDOW, GWL_EXSTYLE) | WS_EX_LAYERED | WS_EX_TRANSPARENT);
 	LI_FN(SetLayeredWindowAttributes)(OVERLAY_WINDOW, RGB(0, 0, 0), 255, ULW_COLORKEY | LWA_ALPHA);
 	LI_FN(SetWindowDisplayAffinity)(OVERLAY_WINDOW, WDA_MONITOR);

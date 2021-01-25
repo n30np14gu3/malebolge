@@ -101,9 +101,11 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-#define VM_START(x)	VMProtectBeginUltra(x)
-#define VM_END		VMProtectEnd()
+#define VM_START(x)		VMProtectBeginUltra(x)
+#define VM_END			VMProtectEnd()
+#define ENCRYPT_STR(x)	VMProtectDecryptStringA(x)
 #else
 #define VM_START(x)
 #define VM_END
+#define ENCRYPT_STR(x)	x
 #endif

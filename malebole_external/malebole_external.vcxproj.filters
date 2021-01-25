@@ -31,9 +31,6 @@
     <ClInclude Include="SDK\lazy_importer.hpp">
       <Filter>SDK</Filter>
     </ClInclude>
-    <ClInclude Include="SDK\XorStr.hpp">
-      <Filter>SDK</Filter>
-    </ClInclude>
     <ClInclude Include="SDK\VmpSdk.h">
       <Filter>SDK</Filter>
     </ClInclude>

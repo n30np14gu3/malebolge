@@ -3,7 +3,6 @@
 #include <TlHelp32.h>
 #include <comdef.h>
 #include "../SDK/globals.h"
-#include "../SDK/XorStr.hpp"
 #include "../SDK/VmpSdk.h"
 #include "KernelInterface.h"
 
@@ -13,7 +12,7 @@ typedef void(WINAPI* pRtlFreeUnicodeString)(PUNICODE_STRING UnicodeString);
 KernelInterface::KernelInterface()
 {
 	VM_START("KernelInterface::KernelInterface");
-	m_hDriver = CreateFileA(xorstr(DRIVER_NAME).crypt_get(),
+	m_hDriver = LI_FN(CreateFileA)(ENCRYPT_STR(DRIVER_NAME),
 		GENERIC_READ | GENERIC_WRITE,
 		FILE_SHARE_READ | FILE_SHARE_WRITE,
 		nullptr,
@@ -27,7 +26,7 @@ KernelInterface::KernelInterface()
 	Modules = new CSGoModules();
 	if (m_hDriver == INVALID_HANDLE_VALUE)
 	{
-		m_dwErrorCode = GetLastError();
+		m_dwErrorCode = LI_FN(GetLastError)();
 		return;
 	}
 	NoErrors = true;
@@ -41,7 +40,7 @@ bool KernelInterface::Attach(bool update)
 	PROCESSENTRY32 entry;
 	entry.dwSize = sizeof(entry);
 	do
-		if (!strcmp(_bstr_t(entry.szExeFile), xorstr(GAME_NAME).crypt_get())) {
+		if (!strcmp(_bstr_t(entry.szExeFile), ENCRYPT_STR(GAME_NAME))) {
 			m_dwProcessId = entry.th32ProcessID;
 			m_hProcess = LI_FN(OpenProcess).cached()(SYNCHRONIZE, false, m_dwProcessId);
 			LI_FN(CloseHandle).cached()(hSnapshot);

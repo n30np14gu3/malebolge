@@ -9,7 +9,6 @@
 #include <string>
 #include "draw_utils.h"
 #include "SDK/lazy_importer.hpp"
-#include "SDK/XorStr.hpp"
 #include "SDK/VmpSdk.h"
 
 
@@ -80,7 +79,7 @@ void draw_utils::init_utils(HWND hWindow, RECT winRect)
 		OUT_DEFAULT_PRECIS,
 		DEFAULT_QUALITY,
 		DEFAULT_PITCH | FF_DONTCARE,
-		xorstr("Arial").crypt_get(),
+		ENCRYPT_STR("Arial"),
 		&m_dxFont);
 	VM_END;
 }

@@ -8,7 +8,6 @@
 
 #include "SDK/globals.h"
 #include "SDK/lazy_importer.hpp"
-#include "SDK/XorStr.hpp"
 #include "SDK/VmpSdk.h"
 #include "ring0/KernelInterface.h"
 #include "render.h"
@@ -50,19 +49,23 @@ bool FileExists(const char* file)
 
 bool load_offsets()
 {
-	if (!FileExists(xorstr(".\\settings.ini").crypt_get()))
+	const char* file_name = ENCRYPT_STR(".\\settings.ini");
+	const char* section_name = ENCRYPT_STR("base_settings");
+	
+	if (!FileExists(file_name))
 		return false;
 
-	dwLocalPlayer = LI_FN(GetPrivateProfileIntA)(xorstr("base_settings").crypt_get(), xorstr("dwLocalPlayer").crypt_get(), 0, xorstr(".\\settings.ini").crypt_get());
-	dwEntityList = LI_FN(GetPrivateProfileIntA)(xorstr("base_settings").crypt_get(), xorstr("dwEntityList").crypt_get(), 0, xorstr(".\\settings.ini").crypt_get());
-	mViewMatrix = LI_FN(GetPrivateProfileIntA)(xorstr("base_settings").crypt_get(), xorstr("mViewMatrix").crypt_get(), 0, xorstr(".\\settings.ini").crypt_get());
 
-	m_vecOrigin = LI_FN(GetPrivateProfileIntA)(xorstr("base_settings").crypt_get(), xorstr("m_vecOrigin").crypt_get(), 0, xorstr(".\\settings.ini").crypt_get());
-	m_iHealth = LI_FN(GetPrivateProfileIntA)(xorstr("base_settings").crypt_get(), xorstr("m_iHealth").crypt_get(), 0, xorstr(".\\settings.ini").crypt_get());
-	m_bDormant = LI_FN(GetPrivateProfileIntA)(xorstr("base_settings").crypt_get(), xorstr("m_bDormant").crypt_get(), 0, xorstr(".\\settings.ini").crypt_get());
-	m_iTeamNum = LI_FN(GetPrivateProfileIntA)(xorstr("base_settings").crypt_get(), xorstr("m_iTeamNum").crypt_get(), 0, xorstr(".\\settings.ini").crypt_get());
-	m_BoneMatrix = LI_FN(GetPrivateProfileIntA)(xorstr("base_settings").crypt_get(), xorstr("m_BoneMatrix").crypt_get(), 0, xorstr(".\\settings.ini").crypt_get());
-	m_aimPunchAngle = LI_FN(GetPrivateProfileIntA)(xorstr("base_settings").crypt_get(), xorstr("m_aimPunchAngle").crypt_get(), 0, xorstr(".\\settings.ini").crypt_get());
+	dwLocalPlayer = LI_FN(GetPrivateProfileIntA)(section_name, "dwLocalPlayer", 0, file_name);
+	dwEntityList = LI_FN(GetPrivateProfileIntA)(section_name, "dwEntityList", 0, file_name);
+	mViewMatrix = LI_FN(GetPrivateProfileIntA)(section_name, "mViewMatrix", 0, file_name);
+
+	m_vecOrigin = LI_FN(GetPrivateProfileIntA)(section_name, "m_vecOrigin", 0, file_name);
+	m_iHealth = LI_FN(GetPrivateProfileIntA)(section_name, "m_iHealth", 0, file_name);
+	m_bDormant = LI_FN(GetPrivateProfileIntA)(section_name, "m_bDormant", 0, file_name);
+	m_iTeamNum = LI_FN(GetPrivateProfileIntA)(section_name, "m_iTeamNum", 0, file_name);
+	m_BoneMatrix = LI_FN(GetPrivateProfileIntA)(section_name, "m_BoneMatrix", 0, file_name);
+	m_aimPunchAngle = LI_FN(GetPrivateProfileIntA)(section_name, "m_aimPunchAngle", 0, file_name);
 
 	return true;
 }
@@ -75,39 +78,40 @@ int WinMain(
 )
 {
 	VM_START("WinMain_1");
-	srand(GetTickCount());
+	srand(static_cast<unsigned>(GetTickCount64()));
 	AllocConsole();
 	std::string s = "";
 	for (size_t i = 0; i < 15; i++)
 		s += ALPHABET[rand() % (sizeof(ALPHABET) - 1)];
 	SetConsoleTitleA(s.c_str());
-	freopen_s(&CON_OUT, xorstr("CONOUT$").crypt_get(), "w", stdout);
-	printf_s(xorstr("PROJECT R3P [XooX]\n").crypt_get());
-	printf_s(xorstr("[R3P] loading settings...\n").crypt_get());
+	freopen_s(&CON_OUT, ("CONOUT$"), "w", stdout);
+	printf_s(("PROJECT DUDKA [FxxF]\n"));
+	printf_s(("[DUDKA] loading settings...\n"));
 	if (!load_offsets())
 	{
-		printf_s(xorstr("[R3P] can't load settings check file!\nExit!\n").crypt_get());
+		printf_s("[DUDKA] can't load settings check file!\nExit!\n");
 		CloseConsole();
 		return 0;
 	}
 
-	printf_s(xorstr("[R3P] loading driver...\n").crypt_get());
+	printf_s("[DUDKA] loading driver...\n");
 	VM_END;
-	
+
 	KernelInterface ring0;
 
 	VM_START("WinMain_2");
-	printf_s(xorstr("[R3P] checking driver...\n").crypt_get());
+	printf_s("[DUDKA] checking driver...\n");
+
 	if (!ring0.NoErrors)
 	{
-		printf_s(xorstr("[R3P] driver not loaded [%d]!\nExit!\n").crypt_get(), ring0.GetErrorCode());
+		printf_s("[DUDKA] driver not loaded [%d]!\nExit!\n", ring0.GetErrorCode());
 		CloseConsole();
 		return 0;
 	}
-	printf_s(xorstr("[R3P] Getting info...\n").crypt_get());
+	printf_s("[DUDKA] Getting info...\n");
 	while (!ring0.Attach()) {}
 	while (!ring0.GetModules()) {}
-	printf_s(xorstr("[R3P] Completed! Starting...").crypt_get());
+	printf_s("[DUDKA] Completed! Starting...");
 	CloseConsole();
 	VM_END;
 	StartRender(s.c_str(), &ring0, hInstance);
