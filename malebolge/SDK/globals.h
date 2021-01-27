@@ -4,7 +4,7 @@
 /**
  * \brief Driver device Name
  */
-#define DRIVER_NAME						"\\\\.\\pdcl"
+#define DRIVER_NAME						"\\\\.\\touchpad_extended"
 
 /**
 * \brief Game for hacking
