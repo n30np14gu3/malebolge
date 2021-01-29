@@ -4,7 +4,7 @@
 /**
  * \brief Driver device Name
  */
-#define DRIVER_NAME						"\\\\.\\touchpad_extended"
+#define DRIVER_NAME						"\\\\.\\srv3"
 
 /**
 * \brief Game for hacking

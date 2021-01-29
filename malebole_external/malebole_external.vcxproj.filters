@@ -7,6 +7,9 @@
     </ClCompile>
     <ClCompile Include="render.cpp" />
     <ClCompile Include="draw_utils.cpp" />
+    <ClCompile Include="ring0\DriverLoader.cpp">
+      <Filter>ring0</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="ring0">
@@ -33,6 +36,9 @@
     </ClInclude>
     <ClInclude Include="SDK\VmpSdk.h">
       <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="ring0\DriverLoader.h">
+      <Filter>ring0</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

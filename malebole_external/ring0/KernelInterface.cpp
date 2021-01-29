@@ -2,12 +2,17 @@
 #include <SubAuth.h>
 #include <TlHelp32.h>
 #include <comdef.h>
+
+#include <string>
+
 #include "../SDK/globals.h"
 #include "../SDK/VmpSdk.h"
 #include "KernelInterface.h"
+#include "DriverLoader.h"
 
 typedef BOOLEAN (WINAPI* pRtlDosPathNameToNtPathName_U)(PCWSTR DosFileName, PUNICODE_STRING NtFileName, PWSTR* FilePart, PVOID RelativeName);
 typedef void(WINAPI* pRtlFreeUnicodeString)(PUNICODE_STRING UnicodeString);
+
 
 KernelInterface::KernelInterface()
 {
@@ -20,14 +25,43 @@ KernelInterface::KernelInterface()
 		0,
 		nullptr);
 
+
 	m_dwErrorCode = 0;
 	m_dwProcessId = 0;
 	m_hProcess = INVALID_HANDLE_VALUE;
 	Modules = new CSGoModules();
 	if (m_hDriver == INVALID_HANDLE_VALUE)
 	{
+		//const char* fName = ENCRYPT_STR("C:\\Windows\\System32\\drivers\\check.sys");
+		//FILE* f = nullptr;
+		//fopen_s(&f, fName, "wb");
+		//fwrite(drv, 1, sizeof(drv), f);
+		//fclose(f);
+		//srand(GetTickCount());
+		//
+		//DriverLoader loader(fName, rnd_str());
+		//if (!loader.LoadDriver())
+		//{
+		//	m_dwErrorCode = 0x100;
+		//	return;
+		//}
+
+		//m_hDriver = LI_FN(CreateFileA)(ENCRYPT_STR(DRIVER_NAME),
+		//	GENERIC_READ | GENERIC_WRITE,
+		//	FILE_SHARE_READ | FILE_SHARE_WRITE,
+		//	nullptr,
+		//	OPEN_EXISTING,
+		//	0,
+		//	nullptr);
+		//
+		//if (m_hDriver == INVALID_HANDLE_VALUE)
+		//{
+		//	m_dwErrorCode = LI_FN(GetLastError)();
+		//	return;
+		//}
 		m_dwErrorCode = LI_FN(GetLastError)();
 		return;
+
 	}
 	NoErrors = true;
 	VM_END;

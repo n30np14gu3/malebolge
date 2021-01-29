@@ -78,6 +78,10 @@ int WinMain(
 )
 {
 	VM_START("WinMain_1");
+	//HANDLE hMutexHandle = CreateMutexA(nullptr, TRUE, "whN5fKXhAWzpVRpF9rdpmTv9aZH9td");
+	//if (GetLastError() != ERROR_ALREADY_EXISTS)
+	//	return 0;
+	
 	srand(static_cast<unsigned>(GetTickCount64()));
 	AllocConsole();
 	std::string s = "";
@@ -85,33 +89,33 @@ int WinMain(
 		s += ALPHABET[rand() % (sizeof(ALPHABET) - 1)];
 	SetConsoleTitleA(s.c_str());
 	freopen_s(&CON_OUT, ("CONOUT$"), "w", stdout);
-	printf_s(("PROJECT DUDKA [FxxF]\n"));
-	printf_s(("[DUDKA] loading settings...\n"));
+	printf_s(("PROJECT Zer0 [FxxF]\n"));
+	printf_s(("[Zer0] loading settings...\n"));
 	if (!load_offsets())
 	{
-		printf_s("[DUDKA] can't load settings check file!\nExit!\n");
+		printf_s("[Zer0] can't load settings check file!\nExit!\n");
 		CloseConsole();
 		return 0;
 	}
 
-	printf_s("[DUDKA] loading driver...\n");
+	printf_s("[Zer0] loading driver...\n");
 	VM_END;
 
 	KernelInterface ring0;
 
 	VM_START("WinMain_2");
-	printf_s("[DUDKA] checking driver...\n");
+	printf_s("[Zer0] checking driver...\n");
 
 	if (!ring0.NoErrors)
 	{
-		printf_s("[DUDKA] driver not loaded [%d]!\nExit!\n", ring0.GetErrorCode());
+		printf_s("[Zer0] driver not loaded [0x%X]!\nExit!\n", ring0.GetErrorCode());
 		CloseConsole();
 		return 0;
 	}
-	printf_s("[DUDKA] Getting info...\n");
+	printf_s("[Zer0] Getting info...\n");
 	while (!ring0.Attach()) {}
 	while (!ring0.GetModules()) {}
-	printf_s("[DUDKA] Completed! Starting...");
+	printf_s("[Zer0] Completed! Starting...");
 	CloseConsole();
 	VM_END;
 	StartRender(s.c_str(), &ring0, hInstance);
