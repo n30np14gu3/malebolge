@@ -4,12 +4,12 @@
 /**
  * \brief Driver device Name
  */
-#define DRIVER_NAME						"\\\\.\\fkjlk"
+#define DRIVER_NAME						"\\\\.\\ssdf"
 
 /**
 * \brief Game for hacking
 */
-#define GAME_NAME						"r5apex.exe"
+#define GAME_NAME						"csgo.exe"
 
 //------------------------------------------------------------------//
 //------------------------------------------------------------------//
