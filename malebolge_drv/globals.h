@@ -2,6 +2,8 @@
 #include <ntdef.h>
 #include <ntifs.h>
 #include <ntddk.h>
+#include <fltKernel.h>
+#include <fltUserStructures.h>
 #include "driver_io.h"
 #include "VMProtectDDK.h"
 

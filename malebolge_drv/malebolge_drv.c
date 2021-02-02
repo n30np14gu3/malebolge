@@ -18,6 +18,8 @@
 #include "DarkTools.h"
 
 
+
+
 PDEVICE_OBJECT pDeviceObj;
 
 UNICODE_STRING DeviceName;

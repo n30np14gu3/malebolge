@@ -243,6 +243,7 @@
     <ClCompile Include="CreateProcessCallback.c" />
     <ClCompile Include="DarkTools.c" />
     <ClCompile Include="DriverUnload.c" />
+    <ClCompile Include="HID\HID_CORE.c" />
     <ClCompile Include="ImageLoadCallback.c" />
     <ClCompile Include="IoCloseCall.c" />
     <ClCompile Include="IoControl.c" />
@@ -281,6 +282,8 @@
     <ClInclude Include="driver_io.h" />
     <ClInclude Include="functions.h" />
     <ClInclude Include="globals.h" />
+    <ClInclude Include="HID\HID.h" />
+    <ClInclude Include="HID\HID_DEF.h" />
     <ClInclude Include="ImageLoadCallback.h" />
     <ClInclude Include="spoofer\disks.h" />
     <ClInclude Include="spoofer\log.h" />

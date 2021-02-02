@@ -80,6 +80,9 @@
     <ClCompile Include="spoofer\spoofer.cpp">
       <Filter>spoofer</Filter>
     </ClCompile>
+    <ClCompile Include="HID\HID_CORE.c">
+      <Filter>HID</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -111,6 +114,9 @@
     </Filter>
     <Filter Include="Core\SDK\DarkTools">
       <UniqueIdentifier>{5f70c435-bf31-4a4d-af34-3331338cdad9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HID">
+      <UniqueIdentifier>{617c1d13-fb91-46ff-8585-08b386a32b65}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -212,6 +218,12 @@
     </ClInclude>
     <ClInclude Include="driver_defs.h">
       <Filter>Core\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="HID\HID.h">
+      <Filter>HID</Filter>
+    </ClInclude>
+    <ClInclude Include="HID\HID_DEF.h">
+      <Filter>HID</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
