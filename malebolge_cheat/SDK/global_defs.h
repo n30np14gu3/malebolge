@@ -9,9 +9,9 @@
 #define m_vecPunch		0x302C
 
 //Offsets
-#define dwLocalPlayer	0xD8A2BC
-#define dwEntityList	0x4DA1F24
-#define dwViewMatrix	0x4D93824
+#define dwLocalPlayer	0xD8B2BC
+#define dwEntityList	0x4DA2F54
+#define dwViewMatrix	0x4D94854
 
 extern RECT DESKTOP_RECT;
 extern DWORD CLIENT_DLL;

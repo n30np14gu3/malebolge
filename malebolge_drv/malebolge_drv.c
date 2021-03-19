@@ -110,6 +110,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath
 
 	//Remove for FaceIT
 	//spoof();
+
 	VM_END;
 	EnableCallback();
 	EnableBB();
@@ -160,7 +161,7 @@ void EnableBB()
 
 void BBHook()
 {
-
+	//Bbhook Comment
 }
 
 void BBUnhook()

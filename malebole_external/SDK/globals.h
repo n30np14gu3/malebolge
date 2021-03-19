@@ -4,7 +4,7 @@
 /**
  * \brief Driver device Name
  */
-#define DRIVER_NAME						"\\\\.\\fjec"
+#define DRIVER_NAME						"\\\\.\\VAC_PLZNOHACK"
 
 /**
 * \brief Game for hacking

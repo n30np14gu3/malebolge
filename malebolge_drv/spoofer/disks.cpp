@@ -1,5 +1,8 @@
 #include <ntifs.h>
 #include <ntstrsafe.h>
+#include <ntdddisk.h>
+#include <scsi.h>
+#include <intrin.h>
 #include "spoof_utils.h"
 #include "shared.h"
 #include "log.h"
@@ -127,6 +130,7 @@ NTSTATUS Disks::ChangeDiskSerials()
 		if (!device)
 			continue;
 
+		DPRINT("Hooked xD %wZ", device->DriverObject->DriverName.Buffer);
 		const auto loopStatus = DiskLoop(device, registerInterfaces);
 		if (NT_SUCCESS(loopStatus))
 			status = loopStatus;

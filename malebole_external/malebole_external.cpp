@@ -89,33 +89,33 @@ int WinMain(
 		s += ALPHABET[rand() % (sizeof(ALPHABET) - 1)];
 	SetConsoleTitleA(s.c_str());
 	freopen_s(&CON_OUT, ("CONOUT$"), "w", stdout);
-	printf_s(("PROJECT Zer0 [FxxF]\n"));
-	printf_s(("[Zer0] loading settings...\n"));
+	printf_s(("Status A [XXX]\n"));
+	printf_s(("[XXX] loading settings...\n"));
 	if (!load_offsets())
 	{
-		printf_s("[Zer0] can't load settings check file!\nExit!\n");
+		printf_s("[XXX] can't load settings check file!\nExit!\n");
 		CloseConsole();
 		return 0;
 	}
 
-	printf_s("[Zer0] loading driver...\n");
+	printf_s("[XXX] loading driver...\n");
 	VM_END;
 
 	KernelInterface ring0;
 
 	VM_START("WinMain_2");
-	printf_s("[Zer0] checking driver...\n");
+	printf_s("[XXX] checking driver...\n");
 
 	if (!ring0.NoErrors)
 	{
-		printf_s("[Zer0] driver not loaded [0x%X]!\nExit!\n", ring0.GetErrorCode());
+		printf_s("[XXX] driver not loaded [0x%X]!\nExit!\n", ring0.GetErrorCode());
 		CloseConsole();
 		return 0;
 	}
-	printf_s("[Zer0] Getting info...\n");
+	printf_s("[XXX] Getting info...\n");
 	while (!ring0.Attach()) {}
 	while (!ring0.GetModules()) {}
-	printf_s("[Zer0] Completed! Starting...");
+	printf_s("[XXX] Completed! Starting...");
 	CloseConsole();
 	VM_END;
 	StartRender(s.c_str(), &ring0, hInstance);
